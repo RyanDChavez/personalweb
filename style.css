@@ -1,9 +1,29 @@
 body {
   font-family: sans-serif;
   text-align: center;
+  background-color: #282c34;
+  color: white;
 }
 
 a {
   color: #1DA1F2;
   text-decoration: none;
 }
+
+.button {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: white;
+  color: #1DA1F2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #1DA1F2;
+  color: white;
+}
+
+header, footer {
+  padding:
