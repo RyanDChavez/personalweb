@@ -1,6 +1,34 @@
-<!doctype html>
-<head> <title> Ryan D. Chavez  </title>  </head> 
-<body style="background-color:black;text-align:center">
-<h1 style="text-align: center; color: green;"> This is Ryan's Website!</h1>
-<p style="text-align: center; color: green;">Just go look at my socials.</p>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Personal Website</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script>
+      function addHoverEffect(element) {
+        element.style.backgroundColor = "#1DA1F2";
+        element.style.color = "white";
+        element.style.cursor = "pointer";
+      }
+
+      function removeHoverEffect(element) {
+        element.style.backgroundColor = "white";
+        element.style.color = "#1DA1F2";
+        element.style.cursor = "auto";
+      }
+    </script>
+  </head>
+  <body>
+    <h1>My Personal Website</h1>
+    <p>Welcome to my personal website!</p>
+
+    <h2>About Me</h2>
+    <p>I am a professional with a passion for social media and networking. Connect with me on LinkedIn, Instagram, and Twitter to learn more about me and what I do.</p>
+
+    <h2>Connect with Me</h2>
+    <ul>
+      <li><a href="https://www.linkedin.com/in/ryan-d-chavez" onmouseover="addHoverEffect(this)" onmouseout="removeHoverEffect(this)">LinkedIn</a></li>
+      <li><a href="https://www.instagram.com/ry_and_chavez" onmouseover="addHoverEffect(this)" onmouseout="removeHoverEffect(this)">Instagram</a></li>
+      <li><a href="https://www.twitter.com/ry_and_chavez" onmouseover="addHoverEffect(this)" onmouseout="removeHoverEffect(this)">Twitter</a></li>
+    </ul>
+  </body>
 </html>
