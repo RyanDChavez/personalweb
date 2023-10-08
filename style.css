@@ -1,7 +1,8 @@
 body {
   font-family: sans-serif;
   text-align: center;
-  background-color: radial-gradient(white, #d0bcb8 , black);
+  background-color:#d0bcb8;
+  background-image: radial-gradient(white, #d0bcb8 , black);
   color: black;
 }
 
