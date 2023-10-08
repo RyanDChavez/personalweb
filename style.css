@@ -1,7 +1,7 @@
 body {
   font-family: sans-serif;
   text-align: center;
-  background-color: #d0bcb8; 
+  background-color: radial-gradient(white, #d0bcb8 , black);
   color: black;
 }
 
@@ -15,7 +15,7 @@ a {
   padding: 8px;
   border-radius: 4px;
   background-color: white;
-  color: #1DA1F2;
+  color: #1da1f2;
   text-decoration: none;
   cursor: pointer;
   overflow: hidden;
@@ -30,5 +30,5 @@ ul {
   list-style-type: none;
 }
 
-header, footer {
+
  
