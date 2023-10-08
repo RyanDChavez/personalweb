@@ -16,14 +16,14 @@ a {
   padding: 8px;
   border-radius: 4px;
   background-color: white;
-  color: #1da1f2;
+  color: #d0bcb8;
   text-decoration: none;
   cursor: pointer;
   overflow: hidden;
 }
 
 .button:hover {
-  background-color: #1DA1F2;
+  background-color: #d0bcb8;
   color: white;
 }
 
