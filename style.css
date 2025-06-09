@@ -2,7 +2,7 @@ body {
   font-family: sans-serif;
   text-align: center;
   background-color:#9BBAE8;
-  background-image: radial-gradient(white 10%, #d0bcb8 90%);
+  background-image: radial-gradient(white 10%, ##9BBAE8 90%);
   color: black;
 }
 
