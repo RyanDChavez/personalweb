@@ -1,37 +1,122 @@
+/* 
+Swiss Poster Style Redesign
+Colors:
+- Dark Green: #334232
+- Light Cream: #FAF9F6
+- Pale Sky Blue: #A8D8F0
+*/
+
 body {
-  font-family: sans-serif;
-  text-align: center;
-  background-color:#9BBAE8;
-  background-image: radial-gradient(white 10%, #9BBAE8 90%);
-  color: black;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: #FAF9F6; /* off-white */
+  color: #334232; /* dark green */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
-a {
-  color: #1DA1F2;
-  text-decoration: none;
+.container {
+  width: 80%;
+  max-width: 900px;
+  margin: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 2rem;
+  align-items: start;
 }
 
-.button {
-  display: inline-block;
-  padding: 8px;
-  border-radius: 4px;
-  background-color: white;
-  color: #d0bcb8;
-  text-decoration: none;
-  cursor: pointer;
-  overflow: hidden;
+header {
+  grid-column: 1 / -1;
+  padding: 1rem 0;
 }
 
-.button:hover {
-  background-color: #d0bcb8;
-  color: white;
+h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+  color: #334232;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
-ul {
-  list-style-type: none;
+main {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
 }
+
+.intro {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.image-container {
+    grid-column: 2 / 3;
+    grid-row: 2 / 4;
+    display: flex;
+    justify-content: center; /* Center the image horizontally */
+    align-items: flex-start; /* Align to the top of the grid area */
+}
+
 .circular-image {
-  border-radius: 50%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 50%; /* Restore circular shape */
+  border: 10px solid #334232; /* dark green border */
+  transition: border-color 0.3s ease;
 }
 
- 
+.circular-image:hover {
+  border-color: #A8D8F0; /* pale sky blue */
+}
+
+.hidden {
+  opacity: 0;
+  transition: opacity 1s ease-out;
+}
+
+.show {
+  opacity: 1;
+}
+
+
+.connect {
+  grid-column: 1 / 2;
+  grid-row: 3 / 4;
+}
+
+h3 {
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #334232;
+  margin-top: 2rem;
+  border-bottom: 3px solid #A8D8F0; /* pale sky blue */
+  padding-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.social-links a {
+  display: inline-block;
+  padding: 10px;
+  background-color: #334232; /* dark green */
+  transition: background-color 0.3s ease;
+}
+
+.social-links a:hover {
+  background-color: #A8D8F0; /* pale sky blue */
+}
+
+.social-links img {
+  display: block;
+  filter: invert(1); /* make svgs white */
+}

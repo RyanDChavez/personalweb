@@ -4,38 +4,32 @@
     <title>Ryan D. Chavez</title>
     <link rel="icon" type="image/x-icon" href="rdc.ico">
     <link rel="stylesheet" type="text/css" href="style.css" />
-    <script>
-      function addHoverEffect(element) {
-        element.style.backgroundColor = "#1DA1F2";
-        element.style.color = "white";
-        element.style.cursor = "pointer";
-      }
-
-      function removeHoverEffect(element) {
-        element.style.backgroundColor = "white";
-        element.style.color = "#1DA1F2";
-        element.style.cursor = "auto";
-      }
-    </script>
   </head>
   <body>
-    <header>
-      <h1>Ryan D. Chavez</h1>
-    </header>
-    <main>
-      <p>Hi There!</p>
-      <p class="bounce-up"> I'm Ryan, product and ops person with a background in Fintech. </p>
-      <img src="ryan.png" alt = "picture of Ryan" height="640" width="640" class="circular-image" />
-      <h3 class="bounce-up">Connect with Me</h3>
-           </main>
-<div>
-      <a href="https://www.linkedin.com/in/ryan-d-chavez" onmouseover="addHoverEffect(this)" onmouseout="removeHoverEffect(this)" class="button" target="_blank">
-          <img src="linked.svg" alt="LinkedIn" width="32" height="32"></a>
-      <a href="https://www.twitter.com/ry_and_chavez" onmouseover="addHoverEffect(this)" onmouseout="removeHoverEffect(this)" class="button" target="_blank">
-          <img src="twit.svg" alt="Twitter" width="32" height="32"></a> 
-      <a href="https://www.instagram.com/ry_and_chavez" onmouseover="addHoverEffect(this)" onmouseout="removeHoverEffect(this)" class="button" target="_blank">
-          <img src="insta.svg" alt="Instagram" width="32" height="32"></a>
-  </div>
+    <div class="container">
+      <header>
+        <h1>Ryan Chavez</h1>
+      </header>
+      
+      <main>
+        <p class="intro"> I'm Ryan, a product person with a background in Fintech.</p>
+      </main>
+
+      <div class="image-container">
+        <img src="ryan.png" alt="picture of Ryan" class="circular-image" />
+      </div>
+      
+      <div class="connect">
+        <h4>Connect with Me</h4>
+        <div class="social-links">
+          <a href="https://www.linkedin.com/in/ryan-d-chavez" class="button" target="_blank">
+              <img src="linked.svg" alt="LinkedIn" width="32" height="32"></a>
+          <a href="https://www.twitter.com/ry_and_chavez" class="button" target="_blank">
+              <img src="twit.svg" alt="Twitter" width="32" height="32"></a> 
+          <a href="https://www.instagram.com/ry_and_chavez" class="button" target="_blank">
+              <img src="insta.svg" alt="Instagram" width="32" height="32"></a>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
-
