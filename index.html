@@ -1,35 +1,88 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Ryan D. Chavez</title>
-    <link rel="icon" type="image/x-icon" href="rdc.ico">
-    <link rel="stylesheet" type="text/css" href="style.css" />
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>Ryan Chavez</h1>
-      </header>
-      
-      <main>
-        <p class="intro"> I'm Ryan, a product person with a background in Fintech.</p>
-      </main>
 
-      <div class="image-container">
-        <img src="ryan.png" alt="picture of Ryan" class="circular-image" />
-      </div>
-      
-      <div class="connect">
-        <h4>Connect with Me</h4>
-        <div class="social-links">
-          <a href="https://www.linkedin.com/in/ryan-d-chavez" class="button" target="_blank">
-              <img src="linked.svg" alt="LinkedIn" width="32" height="32"></a>
-          <a href="https://www.twitter.com/ry_and_chavez" class="button" target="_blank">
-              <img src="twit.svg" alt="Twitter" width="32" height="32"></a> 
-          <a href="https://www.instagram.com/ry_and_chavez" class="button" target="_blank">
-              <img src="insta.svg" alt="Instagram" width="32" height="32"></a>
-        </div>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ryan D. Chavez</title>
+  <link rel="icon" type="image/x-icon" href="rdc.ico">
+  <link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </button>
+
+  <div class="container">
+    <header>
+      <h1 class="reveal">Ryan Chavez</h1>
+    </header>
+
+    <main>
+      <p class="intro reveal">I'm Ryan, a product person with a background in Fintech.</p>
+    </main>
+
+    <div class="image-container reveal">
+      <img src="ryan.png" alt="picture of Ryan" class="circular-image" />
+    </div>
+
+    <div class="connect reveal">
+      <h4>Connect with Me</h4>
+      <div class="social-links">
+        <a href="https://www.linkedin.com/in/ryan-d-chavez" class="button" target="_blank">
+          <img src="linked.svg" alt="LinkedIn"></a>
+        <a href="https://www.twitter.com/ry_and_chavez" class="button" target="_blank">
+          <img src="twit.svg" alt="Twitter"></a>
+        <a href="https://www.instagram.com/ry_and_chavez" class="button" target="_blank">
+          <img src="insta.svg" alt="Instagram"></a>
       </div>
     </div>
-  </body>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Theme Toggle Logic
+      const themeToggle = document.getElementById('theme-toggle');
+      const root = document.documentElement;
+
+      // Check for saved theme or default to system preference
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        root.setAttribute('data-theme', savedTheme);
+      }
+
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = root.getAttribute('data-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+      });
+
+      // Reveal Animations
+      const reveals = document.querySelectorAll('.reveal');
+      reveals.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1)';
+        setTimeout(() => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, 200 + (index * 150));
+      });
+    });
+  </script>
+</body>
+
 </html>
