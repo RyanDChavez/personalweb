@@ -38,6 +38,7 @@
     </svg>
   </button>
 
+  <div class="page-wrapper">
   <div class="container">
     <header>
       <h1 class="reveal">Ryan Chavez</h1>
@@ -62,7 +63,97 @@
           <img src="insta.svg" alt="Instagram"></a>
       </div>
     </div>
-  </div>
+  </div><!-- end .container -->
+
+    <div class="scroll-hint" aria-hidden="true">↓</div>
+
+    <!-- ABOUT SECTION -->
+    <section class="section about-section" id="about">
+      <div class="section-inner">
+        <div class="section-label reveal-scroll">About</div>
+        <div class="about-grid">
+          <div class="about-text reveal-scroll">
+            <h2 class="section-heading">I turn complexity<br>into clarity.</h2>
+            <p>A few years in fintech will do that to you. I've spent my career at the intersection of money, technology, and the humans trying to use both — building products that actually make sense to people.</p>
+            <p>When I'm not thinking about user flows, I'm probably reading about <strong>behavioral economics</strong>, arguing about typography, or over-researching my next coffee setup.</p>
+          </div>
+          <div class="about-aside reveal-scroll">
+            <div class="fun-fact-card">
+              <span class="fun-fact-emoji">⚡</span>
+              <p>Fastest I've shipped a product idea to prototype: <strong>48 hours</strong></p>
+            </div>
+            <div class="fun-fact-card">
+              <span class="fun-fact-emoji">🧠</span>
+              <p>I read <strong>behavioral economics</strong> for fun. Yes, really.</p>
+            </div>
+            <div class="fun-fact-card">
+              <span class="fun-fact-emoji">☕</span>
+              <p>Powered by <strong>good coffee</strong> and strong opinions about product strategy.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORK SECTION -->
+    <section class="section work-section" id="work">
+      <div class="section-inner">
+        <div class="section-label reveal-scroll">Work</div>
+        <h2 class="section-heading reveal-scroll">Things I've built<br>(and a few I'm building).</h2>
+        <div class="projects-grid">
+          <div class="project-card reveal-scroll">
+            <div class="project-card-top">
+              <span class="project-tag">Fintech</span>
+              <span class="project-status status-shipped">Shipped</span>
+            </div>
+            <h3 class="project-title">Project Alpha</h3>
+            <p class="project-desc">A placeholder for something meaningful. Details coming soon — think user-facing fintech tooling, real constraints, real outcomes.</p>
+            <div class="project-footer">
+              <span class="project-stack">Product Strategy · UX · Roadmapping</span>
+            </div>
+          </div>
+          <div class="project-card reveal-scroll">
+            <div class="project-card-top">
+              <span class="project-tag">Product</span>
+              <span class="project-status status-shipped">Shipped</span>
+            </div>
+            <h3 class="project-title">Project Beta</h3>
+            <p class="project-desc">Another placeholder. You know the drill. This one involved cross-functional wrangling, some gnarly edge cases, and a very satisfying launch.</p>
+            <div class="project-footer">
+              <span class="project-stack">Discovery · Stakeholder Alignment · Metrics</span>
+            </div>
+          </div>
+          <div class="project-card reveal-scroll">
+            <div class="project-card-top">
+              <span class="project-tag">Exploration</span>
+              <span class="project-status status-wip">In Progress</span>
+            </div>
+            <h3 class="project-title">Something New</h3>
+            <p class="project-desc">Working on this one now. Not ready to talk about it yet — but it involves fintech, some opinionated design decisions, and a lot of sticky notes.</p>
+            <div class="project-footer">
+              <span class="project-stack">TBD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section class="section contact-section" id="contact">
+      <div class="section-inner contact-inner">
+        <div class="section-label reveal-scroll">Contact</div>
+        <h2 class="section-heading contact-heading reveal-scroll">Let's talk.</h2>
+        <p class="contact-sub reveal-scroll">Have an idea, an opportunity, or just want to argue about product decisions? My inbox is open.</p>
+        <a href="mailto:ryan@ryandchavez.com" class="contact-cta reveal-scroll">Say hello →</a>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p>Ryan D. Chavez · <a href="mailto:ryan@ryandchavez.com">ryan@ryandchavez.com</a></p>
+    </footer>
+
+  </div><!-- end .page-wrapper -->
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       // Theme Toggle Logic
@@ -94,7 +185,7 @@
         updateToggleIcon(newTheme);
       });
 
-      // Reveal Animations
+      // Reveal Animations (hero — fires on load)
       const reveals = document.querySelectorAll('.reveal');
       reveals.forEach((el, index) => {
         el.style.opacity = '0';
@@ -105,6 +196,29 @@
           el.style.transform = 'translateY(0)';
         }, 200 + (index * 150));
       });
+
+      // Scroll Reveal (below-fold sections — fires on scroll)
+      const scrollReveals = document.querySelectorAll('.reveal-scroll');
+      scrollReveals.forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'all 0.7s cubic-bezier(0.165, 0.84, 0.44, 1)';
+      });
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      scrollReveals.forEach(el => observer.observe(el));
     });
   </script>
 </body>
