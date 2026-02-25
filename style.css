@@ -306,3 +306,17 @@ h4 {
 .show {
   opacity: 1;
 }
+
+/* Theme toggle icon visibility */
+/* Light mode: show moon (to indicate clicking switches to dark) */
+.icon-sun { display: none; }
+.icon-moon { display: block; }
+
+/* Dark mode: show sun (to indicate clicking switches to light) */
+[data-theme='dark'] .icon-sun { display: block; }
+[data-theme='dark'] .icon-moon { display: none; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .icon-sun { display: block; }
+  :root:not([data-theme='light']) .icon-moon { display: none; }
+}
