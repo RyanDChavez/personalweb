@@ -78,14 +78,31 @@ body {
   width: 90%;
   max-width: 1000px;
   margin: 4rem auto;
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  grid-template-rows: auto auto auto;
-  gap: 3rem;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
   opacity: 0;
   transform: translateY(20px);
   animation: fadeIn 0.8s forwards ease-out;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-rows: auto auto;
+  gap: 3rem;
+  align-items: center;
+}
+
+.section {
+  max-width: 720px;
+}
+
+.section p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  font-weight: 300;
+  color: var(--text-dim);
 }
 
 @keyframes fadeIn {
@@ -125,7 +142,7 @@ main {
 
 .image-container {
   grid-column: 2 / 3;
-  grid-row: 2 / 4;
+  grid-row: 2 / 3;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -192,11 +209,6 @@ main {
   }
 }
 
-.connect {
-  grid-column: 1 / 2;
-  grid-row: 3 / 4;
-}
-
 h4 {
   font-size: 1.1rem;
   text-transform: uppercase;
@@ -255,17 +267,20 @@ h4 {
   }
 
   .container {
+    gap: 2.5rem;
+    margin: 2rem auto;
+  }
+
+  .hero {
     grid-template-columns: 1fr;
     grid-template-rows: auto;
     text-align: center;
     gap: 2rem;
-    margin: 2rem auto;
   }
 
-  header,
-  main,
-  .image-container,
-  .connect {
+  .hero header,
+  .hero main,
+  .image-container {
     grid-column: 1 / -1;
     grid-row: auto;
   }
