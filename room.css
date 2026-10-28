@@ -46,12 +46,24 @@ body { margin: 0; background: #1C251B; }
 @keyframes panelIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
 @media (max-width: 759px) { .panel { left: 12px; right: 12px; width: auto; top: 37%; bottom: calc(var(--hud-h, 236px) + 12px); } }
 
-.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: var(--hud); color: var(--hudInk); }
+.panel-head { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: var(--hud); color: var(--hudInk); }
 .panel-head h2 { margin: 0; font-family: Silkscreen, monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.05em; }
 .back-btn { min-height: 44px; padding: 0 12px; background: var(--gold); color: #1D251C; border: 0; font-family: Silkscreen, monospace; font-size: 12px; }
-.panel-body { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.panel-body { flex: 1 0 auto; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
 .panel-body p { margin: 0; }
 .say-big { font-family: 'Pixelify Sans', monospace; font-size: 19px; line-height: 1.35; }
+
+/* scroll hint: a fade and a chip pinned to the panel's bottom edge while there's more below */
+.more {
+  position: sticky; bottom: 0; flex: none; height: 64px; margin-top: -64px;
+  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px;
+  background: linear-gradient(180deg, transparent, var(--panel) 75%);
+  pointer-events: none; opacity: 0; transition: opacity 0.2s steps(3);
+}
+.more span { padding: 4px 10px; background: var(--hud); color: var(--hudInk); font-family: Silkscreen, monospace; font-size: 11px; letter-spacing: 0.05em; }
+.panel.can-scroll .more { opacity: 1; }
+.panel.can-scroll .more span { animation: nudge 1.2s steps(2) infinite; }
+@keyframes nudge { 50% { transform: translateY(3px); } }
 
 /* bookshelf */
 .books { display: flex; align-items: flex-end; gap: 4px; padding: 0 10px; overflow-x: auto; }
@@ -117,6 +129,7 @@ body { margin: 0; background: #1C251B; }
   .ready .cam { transition: none; }
   .panel { animation: none; }
   .needle { transition: none; }
+  .more, .more span { transition: none; animation: none; }
 }
 
 /* ---- text version: the whole page without JS (and for crawlers); the room replaces it when JS runs ---- */

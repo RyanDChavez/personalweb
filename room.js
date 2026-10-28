@@ -637,6 +637,8 @@ function Room(root) {
   });
 
   root.querySelectorAll("[data-back]").forEach(function (b) { b.addEventListener("click", self.back); });
+  // Panels that overflow show a "More" hint at the bottom until scrolled to the end.
+  Object.keys(this.dom.panels).forEach(function (k) { self.dom.panels[k].addEventListener("scroll", function () { self.checkMore(); }, { passive: true }); });
 
   // Rug brushing.
   var downAt = null;
@@ -661,6 +663,7 @@ function Room(root) {
     if (b.width && (Math.abs(b.width - self.state.vw) > 1 || Math.abs(b.height - self.state.vh) > 1 || Math.abs(hud - self.state.hud) > 1)) self.setState({ vw: b.width, vh: b.height, hud: hud });
   };
   measure();
+  window.addEventListener("resize", function () { self.checkMore(); });
   if (typeof ResizeObserver !== "undefined") { var ro = new ResizeObserver(measure); ro.observe(root); ro.observe(hudEl); }
   else window.addEventListener("resize", measure);
 
@@ -672,6 +675,15 @@ function Room(root) {
 }
 
 Room.prototype.mode = function () { return this.state.mode; };
+
+Room.prototype.checkMore = function () {
+  var self = this;
+  cancelAnimationFrame(this.moreRaf);
+  this.moreRaf = requestAnimationFrame(function () {
+    var p = self.state.open && self.dom.panels[self.state.open];
+    if (p) p.classList.toggle("can-scroll", p.scrollHeight - p.clientHeight - p.scrollTop > 8);
+  });
+};
 
 Room.prototype.setState = function (patch) {
   if (typeof patch === "function") patch = patch(this.state);
@@ -903,6 +915,7 @@ Room.prototype.render = function () {
 
   for (var p in d.panels) d.panels[p].hidden = open !== p;
   this.stage.classList.toggle("panel-open", !!open);
+  if (open) this.checkMore();
 
   this.bookEls.forEach(function (b, i) {
     setAttr(b, "aria-pressed", s.book === i ? "true" : "false");
