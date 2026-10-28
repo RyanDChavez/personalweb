@@ -117,6 +117,22 @@ function makeScene(mode) {
   }
   rect(41, Y0, 2, Y1 - Y0, C.teak); rect(68, Y0, 2, Y1 - Y0, C.teak);
   rect(9, 88, 92, 3, C.teakL);
+  // three cacti in small pots on the sill, clear of the mullions
+  var CG = [74, 124, 76], CGL = [110, 160, 98], CGD = [46, 84, 54], SPINE = [236, 232, 204];
+  rect(21, 84, 7, 4, [176, 92, 56]); rect(21, 84, 7, 1, [204, 118, 76]); rect(22, 87, 5, 1, [140, 70, 42]);
+  rect(23, 72, 3, 12, CG); rect(23, 72, 1, 12, CGL); rect(25, 73, 1, 11, CGD); rect(24, 71, 1, 1, CG);
+  rect(20, 77, 3, 2, CG); rect(20, 74, 2, 3, CG); put(20, 74, CGL); put(20, 75, CGL);
+  rect(26, 79, 2, 2, CG); rect(27, 75, 2, 4, CG); put(28, 75, CGD); put(28, 77, CGD);
+  [[24, 74], [24, 78], [24, 82], [21, 75], [28, 76]].forEach(function (p) { put(p[0], p[1], SPINE); });
+  rect(52, 84, 8, 4, [238, 234, 222]); rect(52, 84, 8, 1, [250, 248, 240]); rect(53, 87, 6, 1, [196, 190, 176]);
+  for (y = -3; y <= 3; y++) for (x = -4; x <= 4; x++) if (x * x / 16 + y * y / 9 <= 1) put(56 + x, 80 + y, x < -1 ? CGL : (x > 1 ? CGD : (x % 2 === 0 ? CG : CGD)));
+  put(55, 76, [232, 108, 140]); put(56, 76, [246, 150, 176]); put(57, 76, [232, 108, 140]); put(56, 75, [232, 108, 140]);
+  [[54, 79], [58, 79], [56, 82]].forEach(function (p) { put(p[0], p[1], SPINE); });
+  rect(80, 84, 7, 4, [196, 152, 60]); rect(80, 84, 7, 1, [222, 182, 90]); rect(81, 87, 5, 1, [150, 112, 40]);
+  [[83, 79, 3, 4], [80, 75, 2, 3], [86, 74, 2, 3]].forEach(function (pd) {
+    for (y = -pd[3]; y <= pd[3]; y++) for (x = -pd[2]; x <= pd[2]; x++) if (x * x / (pd[2] * pd[2]) + y * y / (pd[3] * pd[3]) <= 1) put(pd[0] + x, pd[1] + y, x < 0 ? CGL : CG);
+    put(pd[0], pd[1], SPINE);
+  });
 
   // ---- bookshelf: walnut ladder shelves with a drawer cabinet, open back ----
   cur = OBJ.shelf;
