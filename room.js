@@ -619,7 +619,14 @@ function Room(root) {
   root.querySelectorAll("[data-back]").forEach(function (b) { b.addEventListener("click", self.back); });
 
   // Rug brushing.
-  this.canvas.addEventListener("pointerdown", function (e) { self.last = null; self.brush(e); });
+  var downAt = null;
+  this.canvas.addEventListener("pointerdown", function (e) { downAt = { x: e.clientX, y: e.clientY }; self.last = null; self.brush(e); });
+  // While zoomed in, a tap or click on anything that isn't an object steps back to the full room (but not the end of a rug stroke).
+  root.addEventListener("click", function (e) {
+    if (!self.state.zone || (e.target !== self.canvas && e.target !== root)) return;
+    if (e.target === self.canvas && downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 8) return;
+    self.back();
+  });
   this.canvas.addEventListener("pointermove", function (e) { self.brush(e); });
   this.canvas.addEventListener("pointerleave", function () { self.last = null; });
   this.canvas.addEventListener("pointerup", function () { self.last = null; });
