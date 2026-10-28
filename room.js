@@ -624,7 +624,7 @@ var BOOKS = [
 var STATIONS = {
   before: { label: "Before", needle: 10, kicker: "Before", title: "Teaching, an NGO, a band", text: "I've taught, worked at an NGO and toured with a band." },
   startups: { label: "Startups", needle: 48, kicker: "Startups", title: "Series A–B fintech", text: "Product and operations roles at several venture-backed fintech startups." },
-  now: { label: "Now", needle: 88, kicker: "Now", title: "Senior Product Manager, Conduit Financial", text: "I'm in New York, building an AI-native, multi-bank and stablecoin USD money-movement API for cross-border payments. Small team, shipping quickly." }
+  now: { label: "Now", needle: 88, kicker: "Now", title: "Product Manager, Conduit Financial", text: "I'm in New York, building an AI-native, multi-bank and stablecoin USD money-movement API for cross-border payments. Small team, shipping quickly." }
 };
 
 var CARD_ROWS = [
