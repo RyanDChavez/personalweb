@@ -423,13 +423,20 @@ function drawFront(put, setCur) {
   setCur(OBJ.lamp);
   rect(306, 146, 14, 3, C.black); rect(308, 145, 10, 1, C.metal);
   setCur(OBJ.plant);
-  rect(2, 146, 20, 24, C.pot); rect(1, 144, 22, 3, C.sage); rect(4, 170, 2, 6, C.black); rect(18, 170, 2, 6, C.black);
-  [[5, 30, -3], [8, 40, -1], [11, 46, 0], [14, 38, 2], [17, 28, 4], [10, 24, 3], [13, 34, -2]].forEach(function (bl, n) {
+  // cream ceramic planter on black legs, so it reads against the green shag
+  var POT = [226, 216, 190], POTL = [244, 238, 220], POTD = [176, 162, 132];
+  for (y = 147; y < 170; y++) {
+    var pin = Math.round((y - 147) * 0.12);
+    for (x = 2 + pin; x <= 21 - pin; x++) put(x, y, x <= 3 + pin ? POTL : (x >= 19 - pin ? POTD : POT));
+  }
+  rect(1, 144, 22, 2, POTL); rect(1, 146, 22, 1, POTD);
+  rect(4, 170, 2, 6, C.black); rect(18, 170, 2, 6, C.black);
+  // sword leaves: dark green with lighter cross-bands and a yellow edge, tapering to a point
+  var LEAF = [40, 74, 48], BAND = [86, 124, 78], EDGE = [214, 198, 92];
+  [[6, 30, -4], [17, 28, 4], [9, 40, -2], [14, 36, 2], [12, 46, 0]].forEach(function (bl, n) {
     for (var j = 0; j < bl[1]; j++) {
-      var lx = bl[0] + Math.round(bl[2] * j / bl[1]);
-      put(lx, 143 - j, n % 2 ? C.leafB : C.leafA);
-      if (j < bl[1] * 0.6) put(lx + 1, 143 - j, C.leafA);
-      if (j % 7 === 3) put(lx, 143 - j, [196, 190, 110]);
+      var lx = bl[0] + Math.round(bl[2] * j / bl[1]), w = j < bl[1] * 0.7 ? 3 : (j < bl[1] * 0.9 ? 2 : 1);
+      for (var k = 0; k < w; k++) put(lx + k - 1, 143 - j, w > 1 && k === w - 1 ? EDGE : ((j + n * 2) % 6 < 2 ? BAND : LEAF));
     }
   });
   setCur(0);
@@ -539,7 +546,7 @@ function Room(root) {
   };
 
   this.back = function () { self.setState({ open: null, zone: null }); self.say("You step back."); };
-  this.fluff = function () { self.fluffing = true; self.kick(); self.say("You fluff the rug."); };
+  this.fluff = function () { self.fluffing = true; self.kick(); self.say("You fluff the shag rug."); };
 
   // Hotspots: real buttons over each object, positioned in scene percentages.
   this.hotEls = {};
@@ -551,8 +558,11 @@ function Room(root) {
     var enter = function () { self.setState({ hover: h.id }); };
     var leave = function () { self.setState(function (s) { return s.hover === h.id ? { hover: null } : null; }); };
     b.addEventListener("click", function () { self.act(h.id); });
-    b.addEventListener("mouseenter", enter); b.addEventListener("focus", enter);
-    b.addEventListener("mouseleave", leave); b.addEventListener("blur", leave);
+    // Hover highlight for a real mouse or keyboard focus only; taps would leave it stuck on.
+    b.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") enter(); });
+    b.addEventListener("pointerleave", leave);
+    b.addEventListener("focus", function () { if (b.matches(":focus-visible")) enter(); });
+    b.addEventListener("blur", leave);
     self.cam.appendChild(b);
     self.hotEls[h.id] = b;
   });
@@ -609,19 +619,29 @@ function Room(root) {
   root.querySelectorAll("[data-back]").forEach(function (b) { b.addEventListener("click", self.back); });
 
   // Rug brushing.
-  this.canvas.addEventListener("pointerdown", function (e) { self.last = null; self.brush(e); });
+  var downAt = null;
+  this.canvas.addEventListener("pointerdown", function (e) { downAt = { x: e.clientX, y: e.clientY }; self.last = null; self.brush(e); });
+  // While zoomed in, a tap or click on anything that isn't an object steps back to the full room (but not the end of a rug stroke).
+  root.addEventListener("click", function (e) {
+    if (!self.state.zone || (e.target !== self.canvas && e.target !== root)) return;
+    if (e.target === self.canvas && downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 8) return;
+    self.back();
+  });
   this.canvas.addEventListener("pointermove", function (e) { self.brush(e); });
   this.canvas.addEventListener("pointerleave", function () { self.last = null; });
   this.canvas.addEventListener("pointerup", function () { self.last = null; });
 
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && self.state.zone) self.back(); });
 
+  // Stage size, plus how much of the bottom the HUD takes up (phones sit the room right on top of it).
+  var hudEl = root.querySelector(".hud");
   var measure = function () {
-    var b = root.getBoundingClientRect();
-    if (b.width && (Math.abs(b.width - self.state.vw) > 1 || Math.abs(b.height - self.state.vh) > 1)) self.setState({ vw: b.width, vh: b.height });
+    var b = root.getBoundingClientRect(), hb = hudEl.getBoundingClientRect();
+    var hud = hb.height ? Math.round(b.bottom - hb.top) : self.state.hud;
+    if (b.width && (Math.abs(b.width - self.state.vw) > 1 || Math.abs(b.height - self.state.vh) > 1 || Math.abs(hud - self.state.hud) > 1)) self.setState({ vw: b.width, vh: b.height, hud: hud });
   };
   measure();
-  if (typeof ResizeObserver !== "undefined") new ResizeObserver(measure).observe(root);
+  if (typeof ResizeObserver !== "undefined") { var ro = new ResizeObserver(measure); ro.observe(root); ro.observe(hudEl); }
   else window.addEventListener("resize", measure);
 
   this.render();
@@ -704,7 +724,7 @@ Room.prototype.brush = function (e) {
   if (sp < 0.3) return;
   this.last = { x: lx, y: ly };
   this.fluffing = false;
-  if (!this.brushed) { this.brushed = true; this.say("You brush the rug. The lines stay."); }
+  if (!this.brushed) { this.brushed = true; this.say("You brush the shag rug. The lines stay."); }
   var maxB = 5, tgx = dx / sp * maxB, tgy = dy / sp * maxB * 0.75;
   var rc = 6 / CELL, steps = Math.max(1, Math.ceil(sp / CELL)), GW = this.GW, GH = this.GH;
   for (var s = 1; s <= steps; s++) {
@@ -773,14 +793,17 @@ Room.prototype.paint = function () {
 
 Room.prototype.camera = function () {
   var s = this.state, vw = s.vw || 1440, vh = s.vh || 900, narrow = vw < 760;
-  var hud = narrow ? 236 : 150;
+  var hud = narrow ? (s.hud || 236) : 150;
   var S0, tx, ty;
   if (narrow) {
-    S0 = Math.min(vw / 240, (vh - hud) / 180);
-    tx = vw / 2 - 160 * S0; ty = Math.max(0, (vh - hud - 180 * S0) / 2);
+    // The whole room, full width, resting on the HUD: wall fills the space above, rug the space around the HUD.
+    S0 = vw / SW;
+    tx = 0; ty = vh - hud - SH * S0;
+    this.split = Math.round(ty + FLOOR * S0);
   } else {
     S0 = Math.max(vw / SW, vh / SH);
     tx = (vw - SW * S0) / 2; ty = (vh - SH * S0) / 2;
+    this.split = null;
   }
   var z = s.zone ? ZONES[s.zone] : null;
   if (!z) return "translate(" + tx.toFixed(1) + "px, " + ty.toFixed(1) + "px) scale(" + S0.toFixed(4) + ")";
@@ -805,7 +828,11 @@ Room.prototype.render = function () {
   }
 
   var cam = this.camera();
-  if (cam !== this.renderedCam) { this.cam.style.transform = cam; this.renderedCam = cam; }
+  if (cam !== this.renderedCam) {
+    this.cam.style.transform = cam; this.renderedCam = cam;
+    this.stage.style.setProperty("--split", this.split == null ? "55%" : this.split + "px");
+    this.stage.style.setProperty("--hud-h", (s.hud || 236) + "px");
+  }
 
   var lampVerb = mode === "dark" ? "Turn off" : "Turn on";
   HOTS.forEach(function (h) { setAttr(this.hotEls[h.id], "aria-label", (h.id === "lamp" ? lampVerb : h.verb) + " " + h.name); }, this);
@@ -825,6 +852,7 @@ Room.prototype.render = function () {
   });
 
   for (var p in d.panels) d.panels[p].hidden = open !== p;
+  this.stage.classList.toggle("panel-open", !!open);
 
   this.bookEls.forEach(function (b, i) {
     setAttr(b, "aria-pressed", s.book === i ? "true" : "false");
