@@ -423,13 +423,20 @@ function drawFront(put, setCur) {
   setCur(OBJ.lamp);
   rect(306, 146, 14, 3, C.black); rect(308, 145, 10, 1, C.metal);
   setCur(OBJ.plant);
-  rect(2, 146, 20, 24, C.pot); rect(1, 144, 22, 3, C.sage); rect(4, 170, 2, 6, C.black); rect(18, 170, 2, 6, C.black);
-  [[5, 30, -3], [8, 40, -1], [11, 46, 0], [14, 38, 2], [17, 28, 4], [10, 24, 3], [13, 34, -2]].forEach(function (bl, n) {
+  // cream ceramic planter on black legs, so it reads against the green shag
+  var POT = [226, 216, 190], POTL = [244, 238, 220], POTD = [176, 162, 132];
+  for (y = 147; y < 170; y++) {
+    var pin = Math.round((y - 147) * 0.12);
+    for (x = 2 + pin; x <= 21 - pin; x++) put(x, y, x <= 3 + pin ? POTL : (x >= 19 - pin ? POTD : POT));
+  }
+  rect(1, 144, 22, 2, POTL); rect(1, 146, 22, 1, POTD);
+  rect(4, 170, 2, 6, C.black); rect(18, 170, 2, 6, C.black);
+  // sword leaves: dark green with lighter cross-bands and a yellow edge, tapering to a point
+  var LEAF = [40, 74, 48], BAND = [86, 124, 78], EDGE = [214, 198, 92];
+  [[6, 30, -4], [17, 28, 4], [9, 40, -2], [14, 36, 2], [12, 46, 0]].forEach(function (bl, n) {
     for (var j = 0; j < bl[1]; j++) {
-      var lx = bl[0] + Math.round(bl[2] * j / bl[1]);
-      put(lx, 143 - j, n % 2 ? C.leafB : C.leafA);
-      if (j < bl[1] * 0.6) put(lx + 1, 143 - j, C.leafA);
-      if (j % 7 === 3) put(lx, 143 - j, [196, 190, 110]);
+      var lx = bl[0] + Math.round(bl[2] * j / bl[1]), w = j < bl[1] * 0.7 ? 3 : (j < bl[1] * 0.9 ? 2 : 1);
+      for (var k = 0; k < w; k++) put(lx + k - 1, 143 - j, w > 1 && k === w - 1 ? EDGE : ((j + n * 2) % 6 < 2 ? BAND : LEAF));
     }
   });
   setCur(0);
@@ -539,7 +546,7 @@ function Room(root) {
   };
 
   this.back = function () { self.setState({ open: null, zone: null }); self.say("You step back."); };
-  this.fluff = function () { self.fluffing = true; self.kick(); self.say("You fluff the rug."); };
+  this.fluff = function () { self.fluffing = true; self.kick(); self.say("You fluff the shag rug."); };
 
   // Hotspots: real buttons over each object, positioned in scene percentages.
   this.hotEls = {};
@@ -710,7 +717,7 @@ Room.prototype.brush = function (e) {
   if (sp < 0.3) return;
   this.last = { x: lx, y: ly };
   this.fluffing = false;
-  if (!this.brushed) { this.brushed = true; this.say("You brush the rug. The lines stay."); }
+  if (!this.brushed) { this.brushed = true; this.say("You brush the shag rug. The lines stay."); }
   var maxB = 5, tgx = dx / sp * maxB, tgy = dy / sp * maxB * 0.75;
   var rc = 6 / CELL, steps = Math.max(1, Math.ceil(sp / CELL)), GW = this.GW, GH = this.GH;
   for (var s = 1; s <= steps; s++) {
