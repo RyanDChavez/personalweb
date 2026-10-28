@@ -640,11 +640,12 @@ var CARD_ROWS = [
 
 var THEME_KEY = "theme";
 
-// Afternoon or evening follows the visitor's clock (evening 6pm-6am). Flipping the lamp sticks for this
-// visit only, so the next visit goes by the clock again.
+// Evening if the browser is in dark mode; otherwise follow the visitor's clock (evening 6pm-6am).
+// Flipping the lamp sticks for this visit only, so the next visit starts from these defaults again.
 function storedMode() {
   try { localStorage.removeItem(THEME_KEY); } catch (e) {} // the old site kept this for good
   try { var m = sessionStorage.getItem(THEME_KEY); if (m === "light" || m === "dark") return m; } catch (e) {}
+  if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
   var h = new Date().getHours();
   return h >= 18 || h < 6 ? "dark" : "light";
 }
