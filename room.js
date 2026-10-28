@@ -4,8 +4,8 @@
 var SW = 320, SH = 180, FLOOR = 128, CELL = 3;
 
 var TOKENS = {
-  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", dial: "#E9DDB8", invBg: "#2A3829", invOn: "#E2BF5E" },
-  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", dial: "#F2C46B", invBg: "#141A14", invOn: "#E2BF5E" }
+  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", dial: "#E9DDB8", invBg: "#2A3829", invOn: "#E2BF5E", hallWall: "#D6CDB4", hallFloor: "#BDBBB3" },
+  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", dial: "#F2C46B", invBg: "#141A14", invOn: "#E2BF5E", hallWall: "#5E594F", hallFloor: "#3A3936" }
 };
 
 var C = {
@@ -23,7 +23,7 @@ var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122,
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
 // Object ids painted into the scene, used for in-scene highlights.
-var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11 };
+var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13 };
 
 function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
@@ -462,6 +462,104 @@ function drawPlane(px, night, col, emis, obj) {
   });
 }
 
+// ---- the hallway outside: navy front door with a brass peephole, and a push-button doorbell with RDC on the nameplate ----
+var HALL = { DX: 128, DY: 30, DW: 64, DH: 120, FLOOR: 150 };
+var BRASS = [200, 160, 70], BRASSL = [240, 210, 124], BRASSD = [132, 98, 40];
+var GLYPHS = { R: ["110", "101", "110", "101", "101"], D: ["110", "101", "101", "101", "110"], C: ["011", "100", "100", "100", "011"] };
+
+function makeHall(mode) {
+  var col = new Uint8ClampedArray(SW * SH * 3), emis = new Uint8Array(SW * SH), obj = new Uint8Array(SW * SH), cur = 0;
+  function put(x, y, c) { if (x < 0 || y < 0 || x >= SW || y >= SH) return; var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; obj[i] = cur; }
+  function rect(x, y, w, h, c) { for (var j = y; j < y + h; j++) for (var i = x; i < x + w; i++) put(i, j, c); }
+  var x, y, DX = HALL.DX, DY = HALL.DY, DW = HALL.DW, DH = HALL.DH;
+  var PLASTER = [222, 214, 192], FLECK = [210, 202, 180], TRIM = [236, 230, 212], TRIMD = [184, 176, 154];
+  var WAIN = [66, 84, 64], WAINL = [84, 104, 80], WAIND = [46, 60, 44];
+
+  // plaster above a painted beadboard wainscot, chair rail, crown and baseboard
+  for (y = 0; y < 100; y++) for (x = 0; x < SW; x++) put(x, y, (x * 5 + y * 3) % 13 === 0 ? FLECK : PLASTER);
+  rect(0, 0, SW, 3, TRIM); rect(0, 3, SW, 1, TRIMD);
+  for (y = 104; y < 146; y++) for (x = 0; x < SW; x++) { var k = x % 8; put(x, y, k === 0 ? WAIND : (k === 1 ? WAINL : WAIN)); }
+  rect(0, 100, SW, 3, TRIM); rect(0, 103, SW, 1, TRIMD);
+  rect(0, 146, SW, 4, [46, 38, 30]); rect(0, 146, SW, 1, [70, 58, 44]);
+  // prewar penny-ish mosaic floor: white tiles, grey grout, a scatter of black
+  for (y = HALL.FLOOR; y < SH; y++) for (x = 0; x < SW; x++) {
+    var tx = (x / 3) | 0, ty = ((y - HALL.FLOOR) / 3) | 0, grout = x % 3 === 2 || (y - HALL.FLOOR) % 3 === 2;
+    put(x, y, grout ? [150, 150, 146] : ((tx * 3 + ty * 5) % 11 === 0 ? [44, 44, 46] : [226, 224, 216]));
+  }
+  // coir doormat
+  rect(132, 152, 56, 9, [112, 82, 46]); rect(133, 153, 54, 7, [164, 124, 70]);
+  for (x = 134; x < 186; x += 2) put(x, 155 + (x % 3), [138, 102, 56]);
+
+  // door casing, jamb reveal
+  rect(DX - 6, DY - 6, DW + 12, DH + 6, TRIM);
+  rect(DX - 6, DY - 6, DW + 12, 1, TRIMD);
+  for (y = DY - 6; y < DY + DH; y++) { put(DX - 6, y, TRIMD); put(DX + DW + 5, y, TRIMD); }
+  rect(DX - 2, DY - 2, DW + 4, 2, TRIMD); rect(DX - 2, DY - 2, 2, DH + 2, TRIMD); rect(DX + DW, DY - 2, 2, DH + 2, [204, 196, 174]);
+
+  // doorbell: brass plate, RDC nameplate card, round pearl push button
+  cur = OBJ.bell;
+  rect(205, 76, 17, 26, BRASSD); rect(206, 77, 15, 24, BRASS); rect(206, 77, 15, 1, BRASSL); rect(206, 77, 1, 24, BRASSL);
+  rect(207, 79, 13, 9, [238, 232, 212]); rect(207, 87, 13, 1, [196, 188, 164]);
+  "RDC".split("").forEach(function (ch, n) {
+    GLYPHS[ch].forEach(function (row, gy) { for (var gx = 0; gx < 3; gx++) if (row[gx] === "1") put(208 + n * 4 + gx, 81 + gy, [44, 32, 22]); });
+  });
+  for (y = -3; y <= 3; y++) for (x = -3; x <= 3; x++) {
+    var d2 = x * x + y * y;
+    if (d2 <= 10) put(213 + x, 94 + y, d2 >= 5 ? BRASSD : (x + y < 0 ? [252, 250, 240] : (x + y > 1 ? [196, 190, 176] : [240, 236, 224])));
+  }
+  cur = 0;
+
+  // door slab texture (64x120): navy with four recessed panels, brass peephole, knob, deadbolt and kick plate
+  var tex = new Uint8ClampedArray(DW * DH * 3);
+  function tput(x, y, c) { if (x < 0 || y < 0 || x >= DW || y >= DH) return; var i = (y * DW + x) * 3; tex[i] = c[0]; tex[i + 1] = c[1]; tex[i + 2] = c[2]; }
+  function trect(x, y, w, h, c) { for (var j = y; j < y + h; j++) for (var i = x; i < x + w; i++) tput(i, j, c); }
+  var NAVY = [30, 46, 92], NAVYL = [52, 74, 130], NAVYD = [16, 26, 58], FIELD = [36, 55, 106];
+  trect(0, 0, DW, DH, NAVY);
+  trect(0, 0, 1, DH, NAVYL); trect(0, 0, DW, 1, NAVYL); trect(DW - 1, 0, 1, DH, NAVYD);
+  [[6, 8, 22, 48], [36, 8, 22, 48], [6, 64, 22, 48], [36, 64, 22, 48]].forEach(function (pn) {
+    trect(pn[0], pn[1], pn[2], pn[3], FIELD);
+    trect(pn[0], pn[1], pn[2], 1, NAVYD); trect(pn[0], pn[1], 1, pn[3], NAVYD);
+    trect(pn[0], pn[1] + pn[3] - 1, pn[2], 1, NAVYL); trect(pn[0] + pn[2] - 1, pn[1], 1, pn[3], NAVYL);
+    trect(pn[0] + 3, pn[1] + 3, pn[2] - 6, pn[3] - 6, NAVY);
+  });
+  trect(30, 29, 3, 3, BRASS); tput(30, 29, BRASSL); tput(32, 31, BRASSD); tput(31, 30, [14, 12, 10]);
+  trect(58, 49, 3, 3, BRASS); tput(59, 50, BRASSD);
+  trect(58, 56, 3, 11, BRASSD); trect(57, 60, 5, 3, BRASS); tput(57, 60, BRASSL); tput(58, 60, BRASSL); tput(61, 62, BRASSD);
+  trect(2, 112, 60, 6, BRASS); trect(2, 112, 60, 1, BRASSL); trect(2, 117, 60, 1, BRASSD);
+  return { col: col, emis: emis, obj: obj, tex: tex };
+}
+
+function makeHallLight(mode) {
+  var A = new Float32Array(SW * SH), G = new Float32Array(SW * SH), dark = mode === "dark";
+  for (var y = 0; y < SH; y++) for (var x = 0; x < SW; x++) {
+    var i = y * SW + x, b = BAYER[(y & 3) * 4 + (x & 3)];
+    var dx = x - 160, dy = (y - 4) * 1.3, pool = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / 190);
+    A[i] = Math.floor((dark ? 0.42 + 0.62 * pool * pool : 0.8 + 0.26 * pool) * 10 + b) / 10;
+  }
+  return dark ? { A: A, G: G, at: [1.06, 0.96, 0.82], gt: [0, 0, 0] } : { A: A, G: G, at: [1, 0.99, 0.96], gt: [0, 0, 0] };
+}
+
+// The slab swings in on its left hinge (p 0..1), showing the living room through the doorway.
+function drawDoor(h, col, emis, obj, p, peek) {
+  var DX = HALL.DX, DY = HALL.DY, DW = HALL.DW, DH = HALL.DH, x, y, i;
+  if (p > 0) for (y = DY; y < DY + DH; y++) for (x = DX; x < DX + DW; x++) {
+    i = y * SW + x;
+    var r = ((((y - DY) * 1.5) | 0) * SW + 112 + (((x - DX) * 1.5) | 0)) * 4;
+    col[i * 3] = peek ? peek[r] : 20; col[i * 3 + 1] = peek ? peek[r + 1] : 18; col[i * 3 + 2] = peek ? peek[r + 2] : 16;
+    emis[i] = 1; obj[i] = 0;
+  }
+  var ws = Math.max(3, Math.round(DW * (1 - p))), shade = 1 - p * 0.45;
+  for (var c = 0; c < ws; c++) {
+    var inset = Math.round(c / ws * p * 10), tc = Math.min(DW - 1, (c / ws * DW) | 0), hh = DH - 2 * inset;
+    for (y = DY + inset; y < DY + DH - inset; y++) {
+      var tr = Math.min(DH - 1, (((y - DY - inset) / hh) * DH) | 0), t = (tr * DW + tc) * 3;
+      i = y * SW + DX + c;
+      col[i * 3] = h.tex[t] * shade; col[i * 3 + 1] = h.tex[t + 1] * shade; col[i * 3 + 2] = h.tex[t + 2] * shade;
+      emis[i] = 0; obj[i] = OBJ.door;
+    }
+  }
+}
+
 var HOTS = [
   { id: "window", name: "the window", verb: "Look out", x: 12, y: 14, w: 86, h: 77 },
   { id: "shelf", name: "the bookshelf", verb: "Browse", x: 100, y: 16, w: 57, h: 112 },
@@ -472,7 +570,9 @@ var HOTS = [
   { id: "lamp", name: "the lamp", verb: "Pull the chain on", x: 224, y: 36, w: 30, h: 18 },
   { id: "chair", name: "the swivel chair", verb: "Sit in", x: 214, y: 98, w: 48, h: 58 },
   { id: "contact", name: "the phone and Rolodex", verb: "Pick up", x: 263, y: 102, w: 41, h: 20 },
-  { id: "plant", name: "the snake plant", verb: "Water", x: 0, y: 96, w: 24, h: 80 }
+  { id: "plant", name: "the snake plant", verb: "Water", x: 0, y: 96, w: 24, h: 80 },
+  { id: "door", scene: "hall", name: "the door", verb: "Open", x: 128, y: 30, w: 64, h: 120 },
+  { id: "bell", scene: "hall", name: "the doorbell", verb: "Ring", x: 203, y: 74, w: 21, h: 30 }
 ];
 
 // Camera zones: the part of the room each object zooms to.
@@ -484,7 +584,11 @@ var ZONES = {
   portrait: { x: 238, y: 18, w: 70, h: 72 },
   table: { x: 252, y: 96, w: 60, h: 36 },
   chair: { x: 200, y: 84, w: 116, h: 70 },
-  plant: { x: 0, y: 92, w: 60, h: 88 }
+  plant: { x: 0, y: 92, w: 60, h: 88 },
+  // walking in: the doorway in the hall and the part of the room it frames fill the screen identically
+  // (framed just past the hinge, so the swung-open slab is off screen when the scenes swap)
+  doorway: { x: HALL.DX + 3, y: HALL.DY, w: HALL.DW - 3, h: HALL.DH, cover: true },
+  entry: { x: 116.5, y: 0, w: 91.5, h: 180, cover: true }
 };
 var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant" };
 var PANELS = { shelf: 1, radio: 1, contact: 1 };
@@ -525,6 +629,9 @@ function storedMode() {
 }
 function storeMode(m) { try { localStorage.setItem(THEME_KEY, m); } catch (e) {} }
 
+var HALL_INTRO = "You're at Ryan's front door.";
+function entered() { try { return sessionStorage.getItem("entered") === "1"; } catch (e) { return false; } }
+
 function introFor(m) {
   return m === "dark"
     ? "Evening in Ryan's living room. Have a look around."
@@ -538,8 +645,9 @@ function setAttr(e, k, v) { if (e.getAttribute(k) !== v) e.setAttribute(k, v); }
 function Room(root) {
   var self = this;
   var $ = function (id) { return root.querySelector("#" + id); };
-  var mode = storedMode(), intro = introFor(mode);
-  this.state = { mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, book: -1, station: "now", vw: 1440, vh: 900 };
+  // Start at the front door once per visit; later loads in the same tab go straight in.
+  var mode = storedMode(), scene = entered() ? "room" : "hall", intro = scene === "hall" ? HALL_INTRO : introFor(mode);
+  this.state = { scene: scene, mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, book: -1, station: "now", vw: 1440, vh: 900 };
   this.raf = 0; this.tw = 0; this.last = null;
   this.fluffing = false; this.builtFor = null; this.brushed = false; this.paintedHover = null;
   this.renderedMode = null; this.renderedCam = null;
@@ -577,7 +685,7 @@ function Room(root) {
     b.style.width = (h.w / SW * 100).toFixed(2) + "%"; b.style.height = (h.h / SH * 100).toFixed(2) + "%";
     var enter = function () { self.setState({ hover: h.id }); };
     var leave = function () { self.setState(function (s) { return s.hover === h.id ? { hover: null } : null; }); };
-    b.addEventListener("click", function () { self.act(h.id); });
+    b.addEventListener("click", function () { if (h.scene === "hall") self.enter(h.id === "bell"); else self.act(h.id); });
     // Hover highlight for a real mouse or keyboard focus only; taps would leave it stuck on.
     b.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") enter(); });
     b.addEventListener("pointerleave", leave);
@@ -596,6 +704,13 @@ function Room(root) {
     b.addEventListener("click", d[0] === "fluff" ? self.fluff : (d[0] === "room" ? self.back : function () { self.act(d[0]); }));
     inv.appendChild(b);
     self.invEls.push({ id: d[0], el: b });
+  });
+  [["bell", "Ring the bell"], ["door", "Open the door"]].forEach(function (d) {
+    var b = el("button", "pbtn inv-btn inv-hall", d[1]);
+    b.type = "button";
+    b.addEventListener("click", function () { self.enter(d[0] === "bell"); });
+    inv.appendChild(b);
+    self.invEls.push({ id: d[0], el: b, hall: true });
   });
 
   // Bookshelf panel: clickable spines.
@@ -645,7 +760,7 @@ function Room(root) {
   this.canvas.addEventListener("pointerdown", function (e) { downAt = { x: e.clientX, y: e.clientY }; self.last = null; self.brush(e); });
   // While zoomed in, a tap or click on anything that isn't an object steps back to the full room (but not the end of a rug stroke).
   root.addEventListener("click", function (e) {
-    if (!self.state.zone || (e.target !== self.canvas && e.target !== root)) return;
+    if (self.state.scene !== "room" || !self.state.zone || (e.target !== self.canvas && e.target !== root)) return;
     if (e.target === self.canvas && downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 8) return;
     self.back();
   });
@@ -653,7 +768,7 @@ function Room(root) {
   this.canvas.addEventListener("pointerleave", function () { self.last = null; });
   this.canvas.addEventListener("pointerup", function () { self.last = null; });
 
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && self.state.zone) self.back(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && self.state.scene === "room" && self.state.zone) self.back(); });
 
   // Stage size, plus how much of the bottom the HUD takes up (phones sit the room right on top of it).
   var hudEl = root.querySelector(".hud");
@@ -692,7 +807,7 @@ Room.prototype.setState = function (patch) {
   for (var k in patch) if (this.state[k] !== patch[k]) { this.state[k] = patch[k]; changed = true; }
   if (!changed) return;
   this.render();
-  if (this.builtFor !== this.mode() || this.paintedHover !== this.state.hover) this.kick();
+  if (this.builtFor !== this.mode() || this.paintedHover !== this.state.hover || this.paintedScene !== this.state.scene) this.kick();
 };
 
 Room.prototype.say = function (text) {
@@ -734,6 +849,37 @@ Room.prototype.act = function (id) {
   this.say(lines[id]);
 };
 
+// Ring or open: the door swings in, the camera walks through the doorway, and the room takes over.
+Room.prototype.enter = function (viaBell) {
+  var self = this;
+  if (this.state.scene !== "hall" || this.entering) return;
+  this.entering = true;
+  try { sessionStorage.setItem("entered", "1"); } catch (e) {}
+  this.setState({ hover: null });
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    this.setState({ scene: "room", zone: null }); this.say(introFor(this.mode())); this.entering = false;
+    return;
+  }
+  this.say(viaBell ? "Ding-dong. The door swings open." : "You open the door.");
+  this.peek = this.roomImage(0).data;
+  setTimeout(function () { self.door = { t0: performance.now() }; self.tick(); }, viaBell ? 700 : 150);
+};
+
+Room.prototype.walkIn = function () {
+  var self = this, st = this.stage;
+  this.setState({ zone: "doorway" });
+  setTimeout(function () {
+    st.classList.remove("ready");
+    self.doorP = 0; self.peek = null;
+    self.setState({ scene: "room", zone: "entry" });
+    st.getBoundingClientRect();
+    requestAnimationFrame(function () {
+      st.classList.add("ready");
+      requestAnimationFrame(function () { self.setState({ zone: null }); self.say(introFor(self.mode())); self.entering = false; });
+    });
+  }, 1000);
+};
+
 Room.prototype.kick = function () { this.dirty = true; this.tick(); };
 Room.prototype.tick = function () {
   var self = this;
@@ -747,15 +893,20 @@ Room.prototype.frame = function () {
     if (left < 0.4) { this.bx.fill(0); this.by.fill(0); this.fluffing = false; }
     this.dirty = true;
   }
+  if (this.door) {
+    var dp = Math.min(1, Math.round((performance.now() - this.door.t0) / 700 * 10) / 10);
+    if (dp !== this.doorP) { this.doorP = dp; this.dirty = true; }
+    if (dp >= 1) { this.door = null; this.walkIn(); }
+  }
   if (this.plane) {
     // Repaint only when the plane moves a pixel or its lights blink.
     var px = Math.round(PLANE.x0 - (performance.now() - this.plane.t0) / 1000 * PLANE.speed);
     if (px < PLANE.x1) { this.plane = null; px = null; this.schedulePlane(); }
     var key = px == null ? null : px + ":" + planeBlink();
-    if (key !== this.planeKey) { this.planeKey = key; this.planeX = px; this.dirty = true; }
+    if (key !== this.planeKey) { this.planeKey = key; this.planeX = px; if (this.state.scene === "room") this.dirty = true; }
   }
   if (this.dirty) { this.dirty = false; this.paint(); }
-  if (this.fluffing || this.plane) this.tick();
+  if (this.fluffing || this.plane || this.door) this.tick();
 };
 
 // Every so often a plane crosses the window, heading southwest and down toward Newark.
@@ -771,6 +922,7 @@ Room.prototype.schedulePlane = function (first) {
 };
 
 Room.prototype.brush = function (e) {
+  if (this.state.scene !== "room") return;
   var rect = this.canvas.getBoundingClientRect();
   var lx = (e.clientX - rect.left) / rect.width * SW, ly = (e.clientY - rect.top) / rect.height * SH;
   if (ly < FLOOR - 4) { this.last = null; return; }
@@ -796,7 +948,21 @@ Room.prototype.brush = function (e) {
 };
 
 Room.prototype.paint = function () {
-  var cv = this.canvas; if (!cv) return;
+  var hv = this.state.hover ? OBJ[this.state.hover] : 0;
+  var img = this.state.scene === "hall" ? this.hallImage(hv) : this.roomImage(hv);
+  this.paintedHover = this.state.hover; this.paintedScene = this.state.scene;
+  this.canvas.getContext("2d").putImageData(img, 0, 0);
+};
+
+Room.prototype.hallImage = function (hv) {
+  var mode = this.mode();
+  if (this.hallFor !== mode) { this.hall = makeHall(mode); this.hallLight = makeHallLight(mode); this.hallFor = mode; }
+  var h = this.hall, col = new Uint8ClampedArray(h.col), emis = new Uint8Array(h.emis), obj = new Uint8Array(h.obj);
+  drawDoor(h, col, emis, obj, this.doorP || 0, this.peek);
+  return composite(col, emis, obj, this.hallLight, hv);
+};
+
+Room.prototype.roomImage = function (hv) {
   var mode = this.mode();
   if (this.builtFor !== mode) { this.scene = makeScene(mode); this.light = makeLight(mode); this.builtFor = mode; }
   var col = new Uint8ClampedArray(this.scene.col), emis = new Uint8Array(this.scene.emis), obj = new Uint8Array(this.scene.obj);
@@ -819,8 +985,12 @@ Room.prototype.paint = function () {
   }
   if (this.planeX != null) drawPlane(this.planeX, mode === "dark", col, emis, obj);
   drawFront(put, setCur);
-  var ctx = cv.getContext("2d"), img = ctx.createImageData(SW, SH), out = img.data, L = this.light;
-  var hv = this.state.hover ? OBJ[this.state.hover] : 0;
+  return composite(col, emis, obj, this.light, hv);
+};
+
+// Light the color buffer, then highlight and outline the hovered object.
+function composite(col, emis, obj, L, hv) {
+  var img = new ImageData(SW, SH), out = img.data;
   for (var i = 0; i < SW * SH; i++) {
     var o = i * 4, p = i * 3;
     if (emis[i]) { out[o] = col[p]; out[o + 1] = col[p + 1]; out[o + 2] = col[p + 2]; }
@@ -843,9 +1013,8 @@ Room.prototype.paint = function () {
       }
     }
   }
-  this.paintedHover = this.state.hover;
-  ctx.putImageData(img, 0, 0);
-};
+  return img;
+}
 
 Room.prototype.camera = function () {
   var s = this.state, vw = s.vw || 1440, vh = s.vh || 900, narrow = vw < 760;
@@ -859,9 +1028,16 @@ Room.prototype.camera = function () {
     S0 = Math.max(vw / SW, vh / SH);
     tx = (vw - SW * S0) / 2; ty = (vh - SH * S0) / 2;
   }
-  // The fill around the room splits wall/rug at the room's floor line, so any exposed edge continues it.
-  this.split = Math.round(ty + FLOOR * S0);
+  // The fill around the scene splits wall/floor at the scene's floor line, so any exposed edge continues it.
+  var floorY = s.scene === "hall" ? HALL.FLOOR : FLOOR;
+  this.split = Math.round(ty + floorY * S0);
   var z = s.zone ? ZONES[s.zone] : null;
+  if (z && z.cover) {
+    var Sc = Math.max(vw / z.w, vh / z.h);
+    tx = vw / 2 - (z.x + z.w / 2) * Sc; ty = vh / 2 - (z.y + z.h / 2) * Sc;
+    this.split = Math.round(ty + floorY * Sc);
+    return "translate(" + tx.toFixed(1) + "px, " + ty.toFixed(1) + "px) scale(" + Sc.toFixed(4) + ")";
+  }
   if (!z) return "translate(" + tx.toFixed(1) + "px, " + ty.toFixed(1) + "px) scale(" + S0.toFixed(4) + ")";
   var panel = !!s.open;
   var area = narrow
@@ -897,17 +1073,24 @@ Room.prototype.render = function () {
   }
 
   var lampVerb = mode === "dark" ? "Turn off" : "Turn on";
-  HOTS.forEach(function (h) { setAttr(this.hotEls[h.id], "aria-label", (h.id === "lamp" ? lampVerb : h.verb) + " " + h.name); }, this);
+  var hall = s.scene === "hall";
+  this.stage.classList.toggle("in-hall", hall);
+  HOTS.forEach(function (h) {
+    var b = this.hotEls[h.id];
+    b.hidden = (h.scene || "room") !== s.scene;
+    setAttr(b, "aria-label", (h.id === "lamp" ? lampVerb : h.verb) + " " + h.name);
+  }, this);
 
   var hov = HOTS.filter(function (h) { return h.id === s.hover; })[0];
   setText(d.action, hov
     ? (hov.id === "lamp" ? lampVerb + " the lamp" : hov.verb + " " + hov.name)
-    : (s.zone ? "Looking closer · click Room to step back" : "Walk around the room"));
+    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · click Room to step back" : "Walk around the room")));
   setText(d.shown, s.say.slice(0, s.n));
   setText(d.caret, s.n < s.say.length ? "▌" : "");
   setText(d.live, s.say);
 
   this.invEls.forEach(function (v) {
+    v.el.hidden = !!v.hall !== hall;
     var on = (open && open === v.id) || (!open && s.zone && v.id === "window" && s.zone === "window") || (v.id === "room" && !s.zone);
     if (v.id === "lamp") setText(v.el, mode === "dark" ? "Lamp off" : "Lamp on");
     v.el.classList.toggle("on", !!on);
