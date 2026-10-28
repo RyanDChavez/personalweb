@@ -119,20 +119,39 @@ function makeScene(mode) {
   rect(9, 88, 92, 3, C.teakL);
   // three cacti in small pots on the sill, clear of the mullions
   var CG = [74, 124, 76], CGL = [110, 160, 98], CGD = [46, 84, 54], SPINE = [236, 232, 204];
+  var EYE = [28, 30, 26], BLUSH = [236, 132, 140];
+  // smiling in the afternoon; asleep in the evening (closed eyes, small open mouth)
+  function face(ex1, ex2, ey, smile, cheeks) {
+    if (night) {
+      put(ex1 - 1, ey + 1, EYE); put(ex1, ey + 1, EYE); put(ex2, ey + 1, EYE); put(ex2 + 1, ey + 1, EYE);
+      put(smile[1][0], smile[1][1], EYE);
+    } else {
+      put(ex1, ey, EYE); put(ex2, ey, EYE);
+      smile.forEach(function (p) { put(p[0], p[1], EYE); });
+    }
+    cheeks.forEach(function (p) { put(p[0], p[1], BLUSH); });
+  }
+  // tall cactus with arms, terracotta pot
   rect(21, 84, 7, 4, [176, 92, 56]); rect(21, 84, 7, 1, [204, 118, 76]); rect(22, 87, 5, 1, [140, 70, 42]);
-  rect(23, 72, 3, 12, CG); rect(23, 72, 1, 12, CGL); rect(25, 73, 1, 11, CGD); rect(24, 71, 1, 1, CG);
-  rect(20, 77, 3, 2, CG); rect(20, 74, 2, 3, CG); put(20, 74, CGL); put(20, 75, CGL);
-  rect(26, 79, 2, 2, CG); rect(27, 75, 2, 4, CG); put(28, 75, CGD); put(28, 77, CGD);
-  [[24, 74], [24, 78], [24, 82], [21, 75], [28, 76]].forEach(function (p) { put(p[0], p[1], SPINE); });
+  rect(22, 71, 5, 13, CG); rect(22, 71, 1, 13, CGL); rect(26, 72, 1, 12, CGD); rect(23, 70, 3, 1, CG);
+  rect(19, 78, 3, 2, CG); rect(19, 74, 2, 4, CG); put(19, 74, CGL); put(19, 75, CGL);
+  rect(27, 80, 2, 2, CG); rect(28, 75, 2, 5, CG); put(29, 76, CGD); put(29, 78, CGD);
+  [[24, 72], [23, 82], [25, 83], [19, 76], [28, 77]].forEach(function (p) { put(p[0], p[1], SPINE); });
+  face(23, 25, 75, [[23, 77], [24, 78], [25, 77]], [[22, 77], [26, 77]]);
+  // round barrel cactus with a pink flower, white pot
   rect(52, 84, 8, 4, [238, 234, 222]); rect(52, 84, 8, 1, [250, 248, 240]); rect(53, 87, 6, 1, [196, 190, 176]);
-  for (y = -3; y <= 3; y++) for (x = -4; x <= 4; x++) if (x * x / 16 + y * y / 9 <= 1) put(56 + x, 80 + y, x < -1 ? CGL : (x > 1 ? CGD : (x % 2 === 0 ? CG : CGD)));
+  for (y = -3; y <= 3; y++) for (x = -4; x <= 4; x++) if (x * x / 16 + y * y / 9 <= 1) put(56 + x, 80 + y, x < -2 ? CGL : (x > 2 ? CGD : CG));
   put(55, 76, [232, 108, 140]); put(56, 76, [246, 150, 176]); put(57, 76, [232, 108, 140]); put(56, 75, [232, 108, 140]);
-  [[54, 79], [58, 79], [56, 82]].forEach(function (p) { put(p[0], p[1], SPINE); });
+  [[52, 80], [60, 80], [53, 78], [59, 78]].forEach(function (p) { put(p[0], p[1], SPINE); });
+  face(54, 58, 79, [[55, 81], [56, 82], [57, 81]], [[53, 81], [59, 81]]);
+  // prickly pear with a yellow flower, mustard pot
   rect(80, 84, 7, 4, [196, 152, 60]); rect(80, 84, 7, 1, [222, 182, 90]); rect(81, 87, 5, 1, [150, 112, 40]);
-  [[83, 79, 3, 4], [80, 75, 2, 3], [86, 74, 2, 3]].forEach(function (pd) {
+  [[80, 75, 2, 3], [86, 74, 2, 3], [83, 79, 3, 4]].forEach(function (pd) {
     for (y = -pd[3]; y <= pd[3]; y++) for (x = -pd[2]; x <= pd[2]; x++) if (x * x / (pd[2] * pd[2]) + y * y / (pd[3] * pd[3]) <= 1) put(pd[0] + x, pd[1] + y, x < 0 ? CGL : CG);
-    put(pd[0], pd[1], SPINE);
   });
+  put(80, 75, SPINE); put(86, 74, SPINE); put(81, 82, SPINE); put(85, 82, SPINE);
+  put(86, 70, [244, 196, 40]); put(85, 71, [244, 196, 40]); put(87, 71, [244, 196, 40]); put(86, 71, [200, 120, 30]);
+  face(82, 84, 78, [[82, 80], [83, 81], [84, 80]], [[81, 80], [85, 80]]);
 
   // ---- bookshelf: walnut ladder shelves with a drawer cabinet, open back ----
   cur = OBJ.shelf;
