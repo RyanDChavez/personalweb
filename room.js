@@ -442,6 +442,26 @@ function drawFront(put, setCur) {
   setCur(0);
 }
 
+var PLANE = { x0: 97, x1: 8, speed: 11 };
+function planeBlink() { return Math.floor(performance.now() / 450) % 2; }
+function drawPlane(px, night, col, emis, obj) {
+  var py = Math.round(23 + (PLANE.x0 - px) * 0.07), blink = planeBlink();
+  var body = night ? [70, 74, 92] : [238, 240, 242], belly = night ? [46, 48, 60] : [168, 174, 184];
+  // nose to the left: fuselage, tail fin, swept wing
+  var pts = [[0, 0, belly], [1, 0, body], [2, 0, body], [3, 0, body], [4, 0, body], [5, 0, body], [6, 0, body], [6, -1, body], [7, -1, body], [7, -2, body], [3, 1, belly], [4, 1, belly], [5, 1, belly]];
+  if (night) {
+    pts.push([0, 0, [255, 236, 190]]);
+    if (blink) pts.push([7, -2, [255, 255, 255]]);
+    pts.push([5, 1, blink ? [230, 60, 50] : [120, 40, 36]]);
+  }
+  pts.forEach(function (p) {
+    var x = px + p[0], y = py + p[1], i = y * SW + x;
+    if (x < 15 || x > 94 || y < 17 || y > 50) return;
+    if (!emis[i] || obj[i] !== OBJ.window) return; // sky only: not the mullions
+    col[i * 3] = p[2][0]; col[i * 3 + 1] = p[2][1]; col[i * 3 + 2] = p[2][2];
+  });
+}
+
 var HOTS = [
   { id: "window", name: "the window", verb: "Look out", x: 12, y: 14, w: 86, h: 77 },
   { id: "shelf", name: "the bookshelf", verb: "Browse", x: 100, y: 16, w: 57, h: 112 },
@@ -646,6 +666,7 @@ function Room(root) {
 
   this.render();
   this.paint();
+  this.schedulePlane(true);
   // Turn the camera glide on only after the first placement, so the page doesn't swoop in on load.
   requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.add("ready"); }); });
 }
@@ -684,9 +705,10 @@ Room.prototype.act = function (id) {
     return;
   }
   var lines = {
-    window: night
+    window: (night
       ? "The Hudson at night, from the northwest Bronx. The GWB is lit up to the south."
-      : "The Hudson and the Palisades, from the northwest Bronx. The George Washington Bridge is to the south.",
+      : "The Hudson and the Palisades, from the northwest Bronx. The George Washington Bridge is to the south.")
+      + (this.plane ? " A plane is on its way down to Newark." : ""),
     clock: "The clock says 10:09. It's actually " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ".",
     record: "You put a record on.",
     portrait: "A poster of Ryan.",
@@ -700,7 +722,8 @@ Room.prototype.act = function (id) {
   this.say(lines[id]);
 };
 
-Room.prototype.kick = function () {
+Room.prototype.kick = function () { this.dirty = true; this.tick(); };
+Room.prototype.tick = function () {
   var self = this;
   if (!this.raf) this.raf = requestAnimationFrame(function () { self.raf = 0; self.frame(); });
 };
@@ -710,9 +733,29 @@ Room.prototype.frame = function () {
     var left = 0;
     for (var i = 0; i < this.bx.length; i++) { this.bx[i] *= 0.8; this.by[i] *= 0.8; left += Math.abs(this.bx[i]) + Math.abs(this.by[i]); }
     if (left < 0.4) { this.bx.fill(0); this.by.fill(0); this.fluffing = false; }
+    this.dirty = true;
   }
-  this.paint();
-  if (this.fluffing) this.kick();
+  if (this.plane) {
+    // Repaint only when the plane moves a pixel or its lights blink.
+    var px = Math.round(PLANE.x0 - (performance.now() - this.plane.t0) / 1000 * PLANE.speed);
+    if (px < PLANE.x1) { this.plane = null; px = null; this.schedulePlane(); }
+    var key = px == null ? null : px + ":" + planeBlink();
+    if (key !== this.planeKey) { this.planeKey = key; this.planeX = px; this.dirty = true; }
+  }
+  if (this.dirty) { this.dirty = false; this.paint(); }
+  if (this.fluffing || this.plane) this.tick();
+};
+
+// Every so often a plane crosses the window, heading southwest and down toward Newark.
+Room.prototype.schedulePlane = function (first) {
+  var self = this;
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  clearTimeout(this.planeTimer);
+  this.planeTimer = setTimeout(function () {
+    if (document.hidden) { self.schedulePlane(); return; }
+    self.plane = { t0: performance.now() };
+    self.tick();
+  }, first ? 6000 + Math.random() * 6000 : 20000 + Math.random() * 25000);
 };
 
 Room.prototype.brush = function (e) {
@@ -762,6 +805,7 @@ Room.prototype.paint = function () {
       put(st.x + st.lean * f + fx * ff + st.bend * Math.sin(f * 3.1) * 0.5, st.y - j + fy * ff, f < rootEnd ? st.fam[0] : (j >= shown - hi ? st.fam[2] : st.fam[1]));
     }
   }
+  if (this.planeX != null) drawPlane(this.planeX, mode === "dark", col, emis, obj);
   drawFront(put, setCur);
   var ctx = cv.getContext("2d"), img = ctx.createImageData(SW, SH), out = img.data, L = this.light;
   var hv = this.state.hover ? OBJ[this.state.hover] : 0;
@@ -799,12 +843,12 @@ Room.prototype.camera = function () {
     // The whole room, full width, resting on the HUD: wall fills the space above, rug the space around the HUD.
     S0 = vw / SW;
     tx = 0; ty = vh - hud - SH * S0;
-    this.split = Math.round(ty + FLOOR * S0);
   } else {
     S0 = Math.max(vw / SW, vh / SH);
     tx = (vw - SW * S0) / 2; ty = (vh - SH * S0) / 2;
-    this.split = null;
   }
+  // The fill around the room splits wall/rug at the room's floor line, so any exposed edge continues it.
+  this.split = Math.round(ty + FLOOR * S0);
   var z = s.zone ? ZONES[s.zone] : null;
   if (!z) return "translate(" + tx.toFixed(1) + "px, " + ty.toFixed(1) + "px) scale(" + S0.toFixed(4) + ")";
   var panel = !!s.open;
@@ -814,6 +858,12 @@ Room.prototype.camera = function () {
   var S = Math.max(S0 * 1.15, Math.min(area.w / z.w, area.h / z.h) * 0.94);
   tx = area.x + area.w / 2 - (z.x + z.w / 2) * S;
   ty = area.y + area.h / 2 - (z.y + z.h / 2) * S;
+  // Don't slide past the room's edges (the window and plant sit at the far left); the object goes off-center instead.
+  // Edges the panel covers don't count.
+  var right = panel && !narrow ? area.w : vw, bottom = panel && narrow ? area.h : vh;
+  if (SW * S >= right) tx = Math.min(0, Math.max(right - SW * S, tx));
+  if (SH * S >= bottom) ty = Math.min(0, Math.max(bottom - SH * S, ty));
+  this.split = Math.round(ty + FLOOR * S);
   return "translate(" + tx.toFixed(1) + "px, " + ty.toFixed(1) + "px) scale(" + S.toFixed(4) + ")";
 };
 
@@ -830,7 +880,7 @@ Room.prototype.render = function () {
   var cam = this.camera();
   if (cam !== this.renderedCam) {
     this.cam.style.transform = cam; this.renderedCam = cam;
-    this.stage.style.setProperty("--split", this.split == null ? "55%" : this.split + "px");
+    this.stage.style.setProperty("--split", this.split + "px");
     this.stage.style.setProperty("--hud-h", (s.hud || 236) + "px");
   }
 
