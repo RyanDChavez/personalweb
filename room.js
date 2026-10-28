@@ -607,7 +607,8 @@ var ZONES = {
   entry: { x: 116.5, y: 0, w: 91.5, h: 180, cover: true }
 };
 var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant" };
-var PANELS = { shelf: 1, radio: 1, contact: 1 };
+// The receiver's Now panel is parked until the radio gets a proper interaction.
+var PANELS = { shelf: 1, contact: 1 };
 
 var BOOKS = [
   ["Fintech", 140, "#334232", "#EEF0E2", "Fintech. Most of my career has been at venture-backed fintech startups."],
@@ -859,7 +860,7 @@ Room.prototype.act = function (id) {
     chair: "You sit in the swivel chair and spin around once.",
     plant: "You water the snake plant.",
     shelf: "Pick a book.",
-    radio: "The receiver warms up. Pick a station.",
+    radio: "The receiver's broken. It won't turn on.",
     contact: "You open the Rolodex to Ryan's card."
   };
   this.setState({ zone: ZONE_FOR[id] || null, open: PANELS[id] ? id : null });
