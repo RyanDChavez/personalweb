@@ -1,0 +1,119 @@
+/* The Living Room. Colors come from TOKENS in room.js, set as custom properties on #stage. */
+
+:root {
+  --wallFill: #C6CDB5; --rugFill: #1C251B; --ink: #1D251C;
+  --hud: rgba(29, 37, 28, 0.92); --hudInk: #EEF0E2; --hudLine: #5E7A58; --gold: #E2BF5E;
+  --frame: #1D251C; --panel: #EEF0E2; --panelInk: #1D251C; --panelMuted: #465643;
+  --dial: #E9DDB8; --invBg: #2A3829; --invOn: #E2BF5E;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: #1C251B; }
+
+/* ---- the room (only with JS) ---- */
+.stage { display: none; }
+.js .stage {
+  display: block; position: relative; height: 100vh; height: 100dvh; min-height: 560px; overflow: hidden;
+  background: linear-gradient(180deg, var(--wallFill) 0 55%, var(--rugFill) 55% 100%);
+  color: var(--ink); font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 17px; line-height: 1.55;
+}
+
+.cam { position: absolute; left: 0; top: 0; width: 320px; height: 180px; transform-origin: 0 0; will-change: transform; }
+.ready .cam { transition: transform 0.95s cubic-bezier(0.65, 0, 0.35, 1); }
+.room-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: pan-y; cursor: crosshair; }
+.hot { position: absolute; background: transparent; border: 0; padding: 0; margin: 0; cursor: pointer; }
+.hot:focus-visible { outline: 1px solid #E2BF5E; outline-offset: 0; }
+
+.pbtn { cursor: pointer; }
+.pbtn:hover { transform: translate(-2px, -2px); }
+.pbtn:focus-visible, .card-v:focus-visible { outline: 3px solid #E2BF5E; outline-offset: 3px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.hudbox { background: var(--hud); color: var(--hudInk); border: 3px solid var(--hudLine); box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35); }
+
+.nametag { position: absolute; left: 16px; top: 16px; display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; }
+.nametag-name { margin: 0; font-family: 'Pixelify Sans', monospace; font-weight: 700; font-size: 22px; line-height: 1.1; }
+.nametag-sub { font-family: Silkscreen, monospace; font-size: 11px; letter-spacing: 0.05em; color: var(--gold); }
+
+/* ---- close-up panels ---- */
+.panel {
+  position: absolute; right: 24px; top: 24px; bottom: 152px; width: calc(44% - 48px);
+  background: var(--panel); color: var(--panelInk); border: 4px solid var(--frame); box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.4);
+  overflow: auto; display: flex; flex-direction: column;
+  animation: panelIn 0.4s steps(6) 0.6s both;
+}
+.panel[hidden] { display: none; }
+@keyframes panelIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+@media (max-width: 759px) { .panel { left: 12px; right: 12px; width: auto; top: 37%; bottom: 236px; } }
+
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: var(--hud); color: var(--hudInk); }
+.panel-head h2 { margin: 0; font-family: Silkscreen, monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.05em; }
+.back-btn { min-height: 44px; padding: 0 12px; background: var(--gold); color: #1D251C; border: 0; font-family: Silkscreen, monospace; font-size: 12px; }
+.panel-body { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.panel-body p { margin: 0; }
+.say-big { font-family: 'Pixelify Sans', monospace; font-size: 19px; line-height: 1.35; }
+
+/* bookshelf */
+.books { display: flex; align-items: flex-end; gap: 4px; padding: 0 10px; overflow-x: auto; }
+.spine { flex: 0 0 auto; width: 30px; padding: 0; border: 0; box-shadow: inset -4px 0 0 rgba(0, 0, 0, 0.2); display: flex; align-items: center; justify-content: center; }
+.spine span { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Silkscreen, monospace; font-size: 10px; white-space: nowrap; }
+.plank { height: 10px; background: #8A5A34; box-shadow: 0 5px 0 #5E3A1E; }
+.book-line { margin-top: 6px !important; min-height: 52px; }
+
+/* receiver */
+.radio-body { gap: 18px; }
+.receiver { background: #1E1C1A; padding: 14px; border: 4px solid #121110; border-top: 12px solid #7A4A28; display: flex; flex-direction: column; gap: 12px; }
+.dial { background: var(--dial); color: #2A1A08; border: 4px solid #121110; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.scale { position: relative; height: 16px; background: repeating-linear-gradient(90deg, #2A1A08 0 2px, transparent 2px 10px); background-size: 100% 7px; background-repeat: no-repeat; background-position: bottom; }
+.needle { position: absolute; top: 0; width: 4px; height: 16px; background: #B5432A; transition: left 0.5s steps(6); }
+.dial-labels { display: flex; justify-content: space-between; font-family: Silkscreen, monospace; font-size: 11px; }
+.stations { display: flex; flex-wrap: wrap; gap: 8px; }
+.station { flex: 1 1 80px; min-height: 44px; background: #2E2B28; color: #E8E6E0; border: 3px solid #121110; font-family: Silkscreen, monospace; font-size: 12px; }
+.station[aria-pressed="true"] { background: #E2BF5E; color: #1D251C; }
+.station-out { display: flex; flex-direction: column; gap: 8px; }
+.kicker { font-family: Silkscreen, monospace; font-size: 12px; letter-spacing: 0.05em; color: var(--panelMuted); }
+.station-title { font-family: 'Pixelify Sans', monospace; font-weight: 700; font-size: 24px; line-height: 1.2; }
+
+/* Rolodex */
+.contact-body { padding-bottom: 24px; gap: 14px; }
+.rolodex { position: relative; padding-top: 22px; }
+.rolodex-tab { position: absolute; top: 0; left: 18px; padding: 2px 12px 0; background: #D9C998; color: #1D251C; font-family: Silkscreen, monospace; font-size: 11px; }
+.rolodex-back { position: absolute; top: 14px; left: 8px; right: -6px; height: 100%; background: #CDBE90; }
+.card {
+  position: relative; background: #F1E8CC; color: #1D251C; padding: 16px 20px 20px; box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
+  background-image: repeating-linear-gradient(180deg, transparent 0 31px, #C9D4C0 31px 32px); background-position: 0 50px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.card-name { margin: 0; font-family: 'Pixelify Sans', monospace; font-weight: 700; font-size: 24px; line-height: 1.2; color: #A63C24; }
+.card-role { margin: 0 0 10px !important; font-family: Silkscreen, monospace; font-size: 13px; letter-spacing: 0.06em; color: #1D251C; }
+.card-row { display: flex; flex-wrap: wrap; gap: 2px 12px; min-height: 32px; align-items: baseline; }
+.card-k { flex: 0 0 88px; font-family: Silkscreen, monospace; font-size: 11px; color: #465643; }
+.card-v { font-size: 17px; color: #1D251C; text-underline-offset: 3px; }
+
+/* ---- HUD / narrator ---- */
+.hud { position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: stretch; padding: 12px 14px; }
+.narrator { flex: 3 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 4px; min-height: 76px; }
+.action { font-family: Silkscreen, monospace; font-size: 12px; letter-spacing: 0.05em; color: var(--gold); }
+.say { margin: 0; font-family: 'Pixelify Sans', monospace; font-size: 19px; line-height: 1.35; }
+.caret { color: var(--gold); }
+.inv { flex: 2 1 280px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; align-content: center; }
+.inv-btn { min-height: 40px; padding: 4px 6px; background: var(--invBg); color: var(--hudInk); border: 2px solid var(--hudLine); font-family: Silkscreen, monospace; font-size: 11px; }
+.inv-btn.on { background: var(--invOn); color: #1D251C; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ready .cam { transition: none; }
+  .panel { animation: none; }
+  .needle { transition: none; }
+}
+
+/* ---- text version: the whole page without JS (and for crawlers); the room replaces it when JS runs ---- */
+.text-version {
+  max-width: 640px; margin: 0 auto; padding: 48px 20px 64px;
+  background: #EEF0E2; color: #1D251C; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 18px; line-height: 1.6;
+}
+.text-version h1 { font-family: 'Pixelify Sans', monospace; font-size: 36px; line-height: 1.1; margin: 0 0 4px; }
+.text-version h2 { font-family: Silkscreen, monospace; font-weight: 400; font-size: 16px; letter-spacing: 0.05em; margin: 36px 0 8px; }
+.text-version .sub { font-family: Silkscreen, monospace; font-size: 13px; color: #465643; margin: 0; }
+.text-version a { color: #1D251C; text-underline-offset: 3px; }
+html:not(.js) body { background: #EEF0E2; }
+.js .text-version { display: none; }
