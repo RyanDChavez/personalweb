@@ -551,8 +551,11 @@ function Room(root) {
     var enter = function () { self.setState({ hover: h.id }); };
     var leave = function () { self.setState(function (s) { return s.hover === h.id ? { hover: null } : null; }); };
     b.addEventListener("click", function () { self.act(h.id); });
-    b.addEventListener("mouseenter", enter); b.addEventListener("focus", enter);
-    b.addEventListener("mouseleave", leave); b.addEventListener("blur", leave);
+    // Hover highlight for a real mouse or keyboard focus only; taps would leave it stuck on.
+    b.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") enter(); });
+    b.addEventListener("pointerleave", leave);
+    b.addEventListener("focus", function () { if (b.matches(":focus-visible")) enter(); });
+    b.addEventListener("blur", leave);
     self.cam.appendChild(b);
     self.hotEls[h.id] = b;
   });
@@ -616,12 +619,15 @@ function Room(root) {
 
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && self.state.zone) self.back(); });
 
+  // Stage size, plus how much of the bottom the HUD takes up (phones sit the room right on top of it).
+  var hudEl = root.querySelector(".hud");
   var measure = function () {
-    var b = root.getBoundingClientRect();
-    if (b.width && (Math.abs(b.width - self.state.vw) > 1 || Math.abs(b.height - self.state.vh) > 1)) self.setState({ vw: b.width, vh: b.height });
+    var b = root.getBoundingClientRect(), hb = hudEl.getBoundingClientRect();
+    var hud = hb.height ? Math.round(b.bottom - hb.top) : self.state.hud;
+    if (b.width && (Math.abs(b.width - self.state.vw) > 1 || Math.abs(b.height - self.state.vh) > 1 || Math.abs(hud - self.state.hud) > 1)) self.setState({ vw: b.width, vh: b.height, hud: hud });
   };
   measure();
-  if (typeof ResizeObserver !== "undefined") new ResizeObserver(measure).observe(root);
+  if (typeof ResizeObserver !== "undefined") { var ro = new ResizeObserver(measure); ro.observe(root); ro.observe(hudEl); }
   else window.addEventListener("resize", measure);
 
   this.render();
@@ -773,14 +779,17 @@ Room.prototype.paint = function () {
 
 Room.prototype.camera = function () {
   var s = this.state, vw = s.vw || 1440, vh = s.vh || 900, narrow = vw < 760;
-  var hud = narrow ? 236 : 150;
+  var hud = narrow ? (s.hud || 236) : 150;
   var S0, tx, ty;
   if (narrow) {
-    S0 = Math.min(vw / 240, (vh - hud) / 180);
-    tx = vw / 2 - 160 * S0; ty = Math.max(0, (vh - hud - 180 * S0) / 2);
+    // The whole room, full width, resting on the HUD: wall fills the space above, rug the space around the HUD.
+    S0 = vw / SW;
+    tx = 0; ty = vh - hud - SH * S0;
+    this.split = Math.round(ty + FLOOR * S0);
   } else {
     S0 = Math.max(vw / SW, vh / SH);
     tx = (vw - SW * S0) / 2; ty = (vh - SH * S0) / 2;
+    this.split = null;
   }
   var z = s.zone ? ZONES[s.zone] : null;
   if (!z) return "translate(" + tx.toFixed(1) + "px, " + ty.toFixed(1) + "px) scale(" + S0.toFixed(4) + ")";
@@ -805,7 +814,11 @@ Room.prototype.render = function () {
   }
 
   var cam = this.camera();
-  if (cam !== this.renderedCam) { this.cam.style.transform = cam; this.renderedCam = cam; }
+  if (cam !== this.renderedCam) {
+    this.cam.style.transform = cam; this.renderedCam = cam;
+    this.stage.style.setProperty("--split", this.split == null ? "55%" : this.split + "px");
+    this.stage.style.setProperty("--hud-h", (s.hud || 236) + "px");
+  }
 
   var lampVerb = mode === "dark" ? "Turn off" : "Turn on";
   HOTS.forEach(function (h) { setAttr(this.hotEls[h.id], "aria-label", (h.id === "lamp" ? lampVerb : h.verb) + " " + h.name); }, this);
@@ -825,6 +838,7 @@ Room.prototype.render = function () {
   });
 
   for (var p in d.panels) d.panels[p].hidden = open !== p;
+  this.stage.classList.toggle("panel-open", !!open);
 
   this.bookEls.forEach(function (b, i) {
     setAttr(b, "aria-pressed", s.book === i ? "true" : "false");

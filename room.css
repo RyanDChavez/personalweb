@@ -14,7 +14,7 @@ body { margin: 0; background: #1C251B; }
 .stage { display: none; }
 .js .stage {
   display: block; position: relative; height: 100vh; height: 100dvh; min-height: 560px; overflow: hidden;
-  background: linear-gradient(180deg, var(--wallFill) 0 55%, var(--rugFill) 55% 100%);
+  background: linear-gradient(180deg, var(--wallFill) 0 var(--split, 55%), var(--rugFill) var(--split, 55%) 100%);
   color: var(--ink); font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 17px; line-height: 1.55;
 }
 
@@ -44,7 +44,7 @@ body { margin: 0; background: #1C251B; }
 }
 .panel[hidden] { display: none; }
 @keyframes panelIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
-@media (max-width: 759px) { .panel { left: 12px; right: 12px; width: auto; top: 37%; bottom: 236px; } }
+@media (max-width: 759px) { .panel { left: 12px; right: 12px; width: auto; top: 37%; bottom: calc(var(--hud-h, 236px) + 12px); } }
 
 .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: var(--hud); color: var(--hudInk); }
 .panel-head h2 { margin: 0; font-family: Silkscreen, monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.05em; }
@@ -99,6 +99,19 @@ body { margin: 0; background: #1C251B; }
 .inv { flex: 2 1 280px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; align-content: center; }
 .inv-btn { min-height: 40px; padding: 4px 6px; background: var(--invBg); color: var(--hudInk); border: 2px solid var(--hudLine); font-family: Silkscreen, monospace; font-size: 11px; }
 .inv-btn.on { background: var(--invOn); color: #1D251C; }
+
+/* Phones: smaller name tag and a steady-height narrator, so the room doesn't shift as lines change length. */
+@media (max-width: 759px) {
+  .nametag { left: 12px; top: 12px; padding: 8px 12px; }
+  .nametag-name { font-size: 19px; }
+  .nametag-sub { font-size: 10px; }
+  .hud { left: 12px; right: 12px; bottom: 12px; padding: 10px 12px; }
+  .narrator { flex-basis: 100%; min-height: 112px; }
+  .say { font-size: 17px; }
+  /* An open panel gets the whole lower screen; it has its own way back. */
+  .panel-open .hud { display: none; }
+  .panel-open .panel { bottom: 12px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .ready .cam { transition: none; }
