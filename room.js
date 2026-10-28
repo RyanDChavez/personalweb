@@ -117,12 +117,18 @@ function makeScene(mode) {
   }
   rect(41, Y0, 2, Y1 - Y0, C.teak); rect(68, Y0, 2, Y1 - Y0, C.teak);
   rect(9, 88, 92, 3, C.teakL);
-  // three happy cacti in small pots on the sill, clear of the mullions
+  // three cacti in small pots on the sill, clear of the mullions
   var CG = [74, 124, 76], CGL = [110, 160, 98], CGD = [46, 84, 54], SPINE = [236, 232, 204];
   var EYE = [28, 30, 26], BLUSH = [236, 132, 140];
+  // smiling in the afternoon; asleep in the evening (closed eyes, small open mouth)
   function face(ex1, ex2, ey, smile, cheeks) {
-    put(ex1, ey, EYE); put(ex2, ey, EYE);
-    smile.forEach(function (p) { put(p[0], p[1], EYE); });
+    if (night) {
+      put(ex1 - 1, ey + 1, EYE); put(ex1, ey + 1, EYE); put(ex2, ey + 1, EYE); put(ex2 + 1, ey + 1, EYE);
+      put(smile[1][0], smile[1][1], EYE);
+    } else {
+      put(ex1, ey, EYE); put(ex2, ey, EYE);
+      smile.forEach(function (p) { put(p[0], p[1], EYE); });
+    }
     cheeks.forEach(function (p) { put(p[0], p[1], BLUSH); });
   }
   // tall cactus with arms, terracotta pot
