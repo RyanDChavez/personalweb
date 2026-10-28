@@ -465,7 +465,7 @@ var PANELS = { shelf: 1, radio: 1, contact: 1 };
 var BOOKS = [
   ["Fintech", 140, "#334232", "#EEF0E2", "Fintech. Most of my career has been at venture-backed fintech startups."],
   ["Series A–B", 124, "#C9A646", "#1D251C", "Series A–B. The stage of the startups I've worked at."],
-  ["Product", 150, "#8A5A34", "#F7EEE0", "Product. I help take products from zero to one."],
+  ["Product", 150, "#8A5A34", "#F7EEE0", "Product. What I do now."],
   ["Operations", 132, "#4A6A52", "#F4F4EA", "Operations. Some of my startup roles were on the operations side."],
   ["Teaching", 116, "#9A4E2A", "#FFF4E6", "Teaching. I've taught."],
   ["NGO work", 136, "#E9DDB8", "#1D251C", "NGO work. I've worked at an NGO."],
