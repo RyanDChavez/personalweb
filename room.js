@@ -640,11 +640,15 @@ var CARD_ROWS = [
 
 var THEME_KEY = "theme";
 
+// Afternoon or evening follows the visitor's clock (evening 6pm-6am). Flipping the lamp sticks for this
+// visit only, so the next visit goes by the clock again.
 function storedMode() {
-  try { var m = localStorage.getItem(THEME_KEY); if (m === "light" || m === "dark") return m; } catch (e) {}
-  return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  try { localStorage.removeItem(THEME_KEY); } catch (e) {} // the old site kept this for good
+  try { var m = sessionStorage.getItem(THEME_KEY); if (m === "light" || m === "dark") return m; } catch (e) {}
+  var h = new Date().getHours();
+  return h >= 18 || h < 6 ? "dark" : "light";
 }
-function storeMode(m) { try { localStorage.setItem(THEME_KEY, m); } catch (e) {} }
+function storeMode(m) { try { sessionStorage.setItem(THEME_KEY, m); } catch (e) {} }
 
 var HALL_INTRO = "You're at Ryan's front door.";
 function entered() { try { return sessionStorage.getItem("entered") === "1"; } catch (e) { return false; } }
