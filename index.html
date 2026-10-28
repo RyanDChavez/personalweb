@@ -2,154 +2,153 @@
 <html lang="en">
 
 <head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Ryan D. Chavez — product person with a background in Fintech.">
+  <title>Ryan D. Chavez</title>
+  <meta name="description" content="Ryan D. Chavez, a product person in New York. Senior Product Manager at Conduit Financial.">
   <link rel="canonical" href="https://ryandchavez.com/">
-  <meta property="og:title" content="Ryan D. Chavez">
-  <meta property="og:description" content="Product person with a background in Fintech.">
-  <meta property="og:image" content="https://ryandchavez.com/ryan.jpg">
+  <meta property="og:title" content="Ryan D. Chavez · The Living Room">
+  <meta property="og:description" content="Product person in New York.">
+  <meta property="og:image" content="https://ryandchavez.com/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A pixel-art midcentury living room with a bookshelf, record console, orange swivel chair and a window over the Hudson.">
   <meta property="og:url" content="https://ryandchavez.com/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ry_and_chavez">
-  <meta name="twitter:title" content="Ryan D. Chavez">
-  <meta name="twitter:description" content="Product person with a background in Fintech.">
-  <meta name="twitter:image" content="https://ryandchavez.com/ryan.jpg">
-  <title>Ryan D. Chavez</title>
+  <meta name="twitter:title" content="Ryan D. Chavez · The Living Room">
+  <meta name="twitter:description" content="Product person in New York.">
+  <meta name="twitter:image" content="https://ryandchavez.com/og.png">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/icon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-  <meta name="theme-color" content="#334232">
-  <link rel="stylesheet" type="text/css" href="style.css" />
+  <meta name="theme-color" content="#1D251C">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+  <link rel="stylesheet" href="room.css">
+  <script>document.documentElement.classList.add("js");</script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Ryan D. Chavez",
     "url": "https://ryandchavez.com/",
-    "image": "https://ryandchavez.com/ryan.jpg",
-    "jobTitle": ["Product Manager", "Senior Product Manager"],
-    "description": "Product person with a background in Fintech.",
+    "jobTitle": "Senior Product Manager",
+    "worksFor": { "@type": "Organization", "name": "Conduit Financial" },
+    "homeLocation": { "@type": "Place", "name": "New York, NY" },
+    "alumniOf": { "@type": "CollegeOrUniversity", "name": "Princeton University" },
+    "description": "Product person with a background in fintech.",
     "sameAs": [
       "https://www.linkedin.com/in/ryan-d-chavez",
-      "https://www.x.com/ry_and_chavez",
+      "https://x.com/ry_and_chavez",
       "https://www.instagram.com/ry_and_chavez"
     ]
   }
   </script>
+  <script src="room.js" defer></script>
 </head>
 
 <body>
-  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
-    <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="5"></circle>
-      <line x1="12" y1="1" x2="12" y2="3"></line>
-      <line x1="12" y1="21" x2="12" y2="23"></line>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-      <line x1="1" y1="12" x2="3" y2="12"></line>
-      <line x1="21" y1="12" x2="23" y2="12"></line>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-    </svg>
-    <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-    </svg>
-  </button>
+  <div class="stage" id="stage">
 
-  <div class="container">
-    <section class="hero">
-      <header>
-        <h1 class="reveal">Ryan D Chavez</h1>
-      </header>
+    <div class="cam" id="cam">
+      <canvas class="room-canvas" id="room" width="320" height="180" aria-hidden="true"></canvas>
+      <!-- hotspot buttons are added by room.js -->
+    </div>
 
-      <main>
-        <p class="intro reveal">I'm Ryan, a product person with a background in Fintech.</p>
-      </main>
+    <div class="nametag hudbox">
+      <h1 class="nametag-name">Ryan D. Chavez</h1>
+      <span class="nametag-sub">Product person · New York</span>
+    </div>
 
-      <div class="image-container reveal">
-        <img src="ryan.jpg" alt="Portrait of Ryan D. Chavez" width="800" height="800" class="circular-image" />
+    <section class="panel" id="panel-shelf" aria-label="Close-up: the bookshelf" hidden>
+      <div class="panel-head">
+        <h2>The bookshelf · About</h2>
+        <button class="pbtn back-btn" type="button" data-back>Back to the room</button>
+      </div>
+      <div class="panel-body">
+        <div>
+          <div class="books" id="books"></div>
+          <div class="plank" aria-hidden="true"></div>
+        </div>
+        <p class="say-big book-line" id="book-line" aria-live="polite"></p>
+        <p>I help take products from zero to one. That work comes on the back of stints at several Series A–B, venture-backed fintech startups, in roles spanning product and operations.</p>
+        <p>I'm just as shaped by the detours in between: I've taught, worked at an NGO and toured with a band. I studied East African history at Princeton.</p>
       </div>
     </section>
 
-    <section class="section reveal" id="about">
-      <h4>About</h4>
-      <p>Professionally, I help take products from zero to one. That work comes on the back of
-        stints at several Series A–B, venture-backed fintech startups, in roles spanning
-        product and operations.</p>
-      <p>I'm just as shaped by the detours in between — I've taught, worked at an NGO, and
-        toured with a band in previous lives. My path has been a winding one, driven by
-        curiosity: from studying East African history at Princeton to joining early-stage
-        startups, it's been a life enriched by saying yes and figuring things out as I go.</p>
-    </section>
-
-    <section class="section reveal" id="now">
-      <h4>Now</h4>
-      <p>I'm a Senior Product Manager at Conduit Financial in New York, building an AI-native,
-        multi-bank and stablecoin USD money-movement API for cross-border payments. Small team
-        shipping quickly, and building software in the AI era.</p>
-    </section>
-
-    <section class="section connect reveal" id="connect">
-      <h4>Connect with Me</h4>
-      <div class="social-links">
-        <a href="https://www.linkedin.com/in/ryan-d-chavez" class="button" target="_blank" rel="noopener noreferrer">
-          <img src="linked.svg" alt="LinkedIn"></a>
-        <a href="https://www.x.com/ry_and_chavez" class="button" target="_blank" rel="noopener noreferrer">
-          <img src="x.svg" alt="X"></a>
-        <a href="https://www.instagram.com/ry_and_chavez" class="button" target="_blank" rel="noopener noreferrer">
-          <img src="insta.svg" alt="Instagram"></a>
+    <section class="panel" id="panel-radio" aria-label="Close-up: the stereo receiver" hidden>
+      <div class="panel-head">
+        <h2>The receiver · Now</h2>
+        <button class="pbtn back-btn" type="button" data-back>Back to the room</button>
+      </div>
+      <div class="panel-body radio-body">
+        <div class="receiver">
+          <div class="dial">
+            <div class="scale" aria-hidden="true">
+              <div class="needle" id="needle"></div>
+            </div>
+            <div class="dial-labels"><span>Before</span><span>Startups</span><span>Now</span></div>
+          </div>
+          <div class="stations" id="stations" role="group" aria-label="Tune the radio"></div>
+        </div>
+        <div class="station-out" aria-live="polite">
+          <span class="kicker" id="station-kicker"></span>
+          <p class="station-title" id="station-title"></p>
+          <p id="station-text"></p>
+        </div>
       </div>
     </section>
+
+    <section class="panel" id="panel-contact" aria-label="Close-up: the phone and Rolodex" hidden>
+      <div class="panel-head">
+        <h2>The phone table · Contact</h2>
+        <button class="pbtn back-btn" type="button" data-back>Back to the room</button>
+      </div>
+      <div class="panel-body contact-body">
+                <div class="rolodex">
+          <div class="rolodex-tab" aria-hidden="true">C</div>
+          <div class="rolodex-back" aria-hidden="true"></div>
+          <div class="card" id="card-rows">
+            <p class="card-name">Ryan D. Chavez</p>
+            <p class="card-role">Product person</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="hud hudbox">
+      <div class="narrator">
+        <span class="action" id="action"></span>
+        <p class="say" aria-hidden="true"><span id="say-shown"></span><span class="caret" id="caret"></span></p>
+        <span class="sr" id="say-live" aria-live="polite"></span>
+      </div>
+      <nav class="inv" id="inv" aria-label="Things in the room"></nav>
+    </div>
   </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Theme Toggle Logic
-      const themeToggle = document.getElementById('theme-toggle');
-      const root = document.documentElement;
 
-      function getActiveTheme() {
-        return root.getAttribute('data-theme') ||
-          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      }
+  <main class="text-version" aria-label="Text version">
+    <h1>Ryan D. Chavez</h1>
+    <p class="sub">Product person · New York</p>
 
-      function updateToggleIcon(theme) {
-        root.setAttribute('data-theme', theme);
-        themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-      }
+    <h2>About</h2>
+    <p>I help take products from zero to one. That work comes on the back of stints at several Series A–B, venture-backed fintech startups, in roles spanning product and operations.</p>
+    <p>I'm just as shaped by the detours in between: I've taught, worked at an NGO and toured with a band. I studied East African history at Princeton.</p>
 
-      // Check for saved theme or default to system preference
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        root.setAttribute('data-theme', savedTheme);
-      }
-      updateToggleIcon(getActiveTheme());
+    <h2>Now</h2>
+    <p>I'm a Senior Product Manager at Conduit Financial in New York, building an AI-native, multi-bank and stablecoin USD money-movement API for cross-border payments. Small team, shipping quickly.</p>
 
-      themeToggle.addEventListener('click', () => {
-        const currentTheme = getActiveTheme();
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        root.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        updateToggleIcon(newTheme);
-      });
-
-      // Reveal Animations
-      const reveals = document.querySelectorAll('.reveal');
-      reveals.forEach((el, index) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1)';
-        setTimeout(() => {
-          el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
-        }, 200 + (index * 150));
-      });
-    });
-  </script>
+    <h2>Contact</h2>
+    <ul>
+      <li>LinkedIn: <a href="https://www.linkedin.com/in/ryan-d-chavez">ryan-d-chavez</a></li>
+      <li>X: <a href="https://x.com/ry_and_chavez">@ry_and_chavez</a></li>
+      <li>Instagram: <a href="https://www.instagram.com/ry_and_chavez">@ry_and_chavez</a></li>
+    </ul>
+  </main>
 </body>
 
 </html>
