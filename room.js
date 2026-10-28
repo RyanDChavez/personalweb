@@ -463,21 +463,21 @@ var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "crede
 var PANELS = { shelf: 1, radio: 1, contact: 1 };
 
 var BOOKS = [
-  ["Fintech", 140, "#334232", "#EEF0E2", "Fintech. The thickest volume. Most of Ryan's career is venture-backed fintech startups."],
-  ["Series A–B", 124, "#C9A646", "#1D251C", "Series A–B. The stage those startups were at: early enough that the product is still taking shape."],
-  ["Product", 150, "#8A5A34", "#F7EEE0", "Product. Zero to one. Taking an idea and turning it into something people use."],
-  ["Operations", 132, "#4A6A52", "#F4F4EA", "Operations. The other half of the job: making the thing actually run."],
-  ["Teaching", 116, "#9A4E2A", "#FFF4E6", "Teaching. A well-thumbed copy from before fintech."],
-  ["NGO work", 136, "#E9DDB8", "#1D251C", "NGO work. Another chapter from before fintech."],
-  ["On tour", 126, "#1F2A1E", "#E6EDD8", "On tour. Yes, he toured with a band. The spine is a little beat up."],
-  ["East African History", 160, "#3E2614", "#F4EBDD", "East African History. What he studied at Princeton."],
-  ["Princeton", 120, "#C9A646", "#1D251C", "Princeton. Where he studied East African history. A sensible bookend."]
+  ["Fintech", 140, "#334232", "#EEF0E2", "Fintech. Most of my career has been at venture-backed fintech startups."],
+  ["Series A–B", 124, "#C9A646", "#1D251C", "Series A–B. The stage of the startups I've worked at."],
+  ["Product", 150, "#8A5A34", "#F7EEE0", "Product. I help take products from zero to one."],
+  ["Operations", 132, "#4A6A52", "#F4F4EA", "Operations. Some of my startup roles were on the operations side."],
+  ["Teaching", 116, "#9A4E2A", "#FFF4E6", "Teaching. I've taught."],
+  ["NGO work", 136, "#E9DDB8", "#1D251C", "NGO work. I've worked at an NGO."],
+  ["On tour", 126, "#1F2A1E", "#E6EDD8", "On tour. I've toured with a band."],
+  ["East African History", 160, "#3E2614", "#F4EBDD", "East African History. What I studied at Princeton."],
+  ["Princeton", 120, "#C9A646", "#1D251C", "Princeton. Where I studied East African history."]
 ];
 
 var STATIONS = {
-  before: { label: "Before", needle: 10, kicker: "Tuned to: before fintech", title: "Teaching, NGOs and a band", text: "Before fintech, Ryan taught, worked at NGOs and toured with a band. He said yes and learned on the job." },
-  startups: { label: "Startups", needle: 48, kicker: "Tuned to: the startup years", title: "Fintech, Series A to B", text: "Product and operations at venture-backed fintech startups, taking products from zero to one." },
-  now: { label: "Now", needle: 88, kicker: "Now playing", title: "Senior Product Manager, Conduit Financial", text: "In New York, building an AI-native API for cross-border money movement. It connects multiple banks and runs on stablecoin USD." }
+  before: { label: "Before", needle: 10, kicker: "Before", title: "Teaching, an NGO, a band", text: "I've taught, worked at an NGO and toured with a band." },
+  startups: { label: "Startups", needle: 48, kicker: "Startups", title: "Series A–B fintech", text: "Product and operations roles at several venture-backed fintech startups." },
+  now: { label: "Now", needle: 88, kicker: "Now", title: "Senior Product Manager, Conduit Financial", text: "I'm in New York, building an AI-native, multi-bank and stablecoin USD money-movement API for cross-border payments. Small team, shipping quickly." }
 };
 
 var CARD_ROWS = [
@@ -500,8 +500,8 @@ function storeMode(m) { try { localStorage.setItem(THEME_KEY, m); } catch (e) {}
 
 function introFor(m) {
   return m === "dark"
-    ? "Evening in Ryan's living room. The lamp's on and the bridge is lit. Have a look around."
-    : "Afternoon in Ryan's living room. Sun's on the shag and the river's out the window. Have a look around.";
+    ? "Evening in Ryan's living room. Have a look around."
+    : "Afternoon in Ryan's living room. Have a look around.";
 }
 
 function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -538,8 +538,8 @@ function Room(root) {
     themeColor: document.querySelector('meta[name="theme-color"]')
   };
 
-  this.back = function () { self.setState({ open: null, zone: null }); self.say("You step back and take in the room."); };
-  this.fluff = function () { self.fluffing = true; self.kick(); self.say("You fluff the rug back up. Good as new."); };
+  this.back = function () { self.setState({ open: null, zone: null }); self.say("You step back."); };
+  this.fluff = function () { self.fluffing = true; self.kick(); self.say("You fluff the rug."); };
 
   // Hotspots: real buttons over each object, positioned in scene percentages.
   this.hotEls = {};
@@ -660,21 +660,21 @@ Room.prototype.act = function (id) {
     var next = night ? "light" : "dark";
     storeMode(next);
     this.setState({ mode: next });
-    this.say(next === "dark" ? "Click. Evening falls and the lamp warms the room." : "Click. Lamp off. Afternoon light floods back in.");
+    this.say(next === "dark" ? "You turn on the lamp." : "You turn off the lamp.");
     return;
   }
   var lines = {
     window: night
-      ? "Night over the Hudson from the northwest Bronx. The Palisades are a dark ridge, and the GWB strings its lights off to the south."
-      : "The northwest Bronx, looking out over the Hudson to the Palisades, with the George Washington Bridge off to the south.",
-    clock: "A spare German wall clock: white face, black ticks, a yellow second hand. It says " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ". Less, but better.",
-    record: "The needle drops. The record console underneath is packed with more where that came from.",
-    portrait: "A midcentury poster of Ryan D. Chavez: curls, browlines, striped tee. Unmistakable.",
-    chair: "You sink into the orange corduroy swivel chair and give it a spin. The phone and the Rolodex are right there on the side table.",
-    plant: "You water the snake plant. It doesn't need much, but it appreciates the thought.",
-    shelf: "You run a finger along the spines. Pull one out.",
-    radio: "Click. The receiver hums and the tuning dial lights up. Turn the dial.",
-    contact: "You pick up the receiver and flip open the Rolodex. Ryan's card is right up front."
+      ? "The Hudson at night, from the northwest Bronx. The GWB is lit up to the south."
+      : "The Hudson and the Palisades, from the northwest Bronx. The George Washington Bridge is to the south.",
+    clock: "The clock says 10:09. It's actually " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ".",
+    record: "You put a record on.",
+    portrait: "A poster of Ryan.",
+    chair: "You sit in the swivel chair and spin around once.",
+    plant: "You water the snake plant.",
+    shelf: "Pick a book.",
+    radio: "The receiver warms up. Pick a station.",
+    contact: "You open the Rolodex to Ryan's card."
   };
   this.setState({ zone: ZONE_FOR[id] || null, open: PANELS[id] ? id : null });
   this.say(lines[id]);
@@ -704,7 +704,7 @@ Room.prototype.brush = function (e) {
   if (sp < 0.3) return;
   this.last = { x: lx, y: ly };
   this.fluffing = false;
-  if (!this.brushed) { this.brushed = true; this.say("You run a hand through the shag. It keeps every stroke, like fresh vacuum lines."); }
+  if (!this.brushed) { this.brushed = true; this.say("You brush the rug. The lines stay."); }
   var maxB = 5, tgx = dx / sp * maxB, tgy = dy / sp * maxB * 0.75;
   var rc = 6 / CELL, steps = Math.max(1, Math.ceil(sp / CELL)), GW = this.GW, GH = this.GH;
   for (var s = 1; s <= steps; s++) {
