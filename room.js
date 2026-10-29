@@ -410,8 +410,24 @@ function drawFront(put, setCur, rdxOpen) {
     put(238 + leg[0], 144 + leg[1], C.black);
   });
   setCur(0);
-  rect(264, 120, 40, 3, C.teakL); rect(264, 123, 40, 2, C.teak);
-  for (i = 0; i < 22; i++) { put(268 + i / 6, 125 + i, C.black); put(300 - i / 6, 125 + i, C.black); }
+  // phone stand: a small midcentury chest in acacia, with an open cubby (handle slot in the back), two drawers
+  // with dark knobs, and splayed tapered legs
+  var AC = [196, 132, 66], ACL = [224, 162, 94], ACD = [150, 96, 46], ACG = [180, 118, 58], ACIN = [116, 72, 36], KNOB = [56, 42, 34];
+  for (i = 0; i < 14; i++) {
+    var lt = i / 13, lw = i < 7 ? 2 : 1;
+    rect(Math.round(272 + lt), 142 + i, 1, 1, ACD); rect(Math.round(295 - lt), 142 + i, 1, 1, ACD);
+    rect(Math.round(267 - lt * 3), 142 + i, lw, 1, AC); rect(Math.round(299 + lt * 3), 142 + i, lw, 1, AC);
+  }
+  rect(264, 120, 40, 22, AC);
+  rect(264, 120, 40, 1, ACL); rect(264, 120, 2, 22, ACL); rect(302, 120, 2, 22, ACD);
+  rect(266, 122, 36, 6, ACIN); rect(266, 122, 36, 1, [92, 56, 28]); rect(279, 123, 8, 1, [214, 204, 182]);
+  rect(265, 128, 38, 1, ACL); rect(266, 129, 36, 1, ACD);
+  [130, 136].forEach(function (dy) {
+    for (y = dy; y < dy + 5; y++) for (x = 266; x < 302; x++) put(x, y, (x * 7 + y * 3) % 11 === 0 ? ACG : AC);
+    rect(266, dy + 5, 36, 1, ACD);
+    put(272, dy + 2, KNOB); put(295, dy + 2, KNOB);
+  });
+  rect(264, 141, 40, 1, ACD);
   setCur(OBJ.contact);
   // sage rotary desk phone with a clear dial and a coiled cord
   var PH = [146, 170, 120], PHL = [178, 198, 150], PHD = [104, 126, 86], CLR = [222, 226, 210], CRD = [126, 148, 104];
