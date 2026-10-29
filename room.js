@@ -413,10 +413,12 @@ function drawFront(put, setCur, rdxOpen) {
   // phone stand: a small midcentury chest in acacia, with an open cubby, two drawers
   // with dark knobs, and splayed tapered legs
   var AC = [196, 132, 66], ACL = [224, 162, 94], ACD = [150, 96, 46], ACG = [180, 118, 58], ACIN = [116, 72, 36], KNOB = [56, 42, 34];
-  for (i = 0; i < 14; i++) {
-    var lt = i / 13, lw = i < 7 ? 2 : 1;
-    rect(Math.round(272 + lt), 142 + i, 1, 1, ACD); rect(Math.round(295 - lt), 142 + i, 1, 1, ACD);
-    rect(Math.round(267 - lt * 3), 142 + i, lw, 1, AC); rect(Math.round(299 + lt * 3), 142 + i, lw, 1, AC);
+  // legs: back pair short and dark, front pair 2px wide, splaying out one pixel every four rows, tapering at the foot
+  for (i = 0; i < 9; i++) { put(272, 142 + i, ACD); put(295, 142 + i, ACD); }
+  for (i = 0; i < 12; i++) {
+    var lo = (i / 4) | 0, lx = 266 - lo, rx = 300 + lo;
+    if (i < 10) { put(lx, 142 + i, ACL); put(lx + 1, 142 + i, AC); put(rx, 142 + i, AC); put(rx + 1, 142 + i, ACD); }
+    else { put(lx, 142 + i, AC); put(rx + 1, 142 + i, AC); }
   }
   rect(264, 120, 40, 22, AC);
   rect(264, 120, 40, 1, ACL); rect(264, 120, 2, 22, ACL); rect(302, 120, 2, 22, ACD);
