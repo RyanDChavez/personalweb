@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
-  <link rel="stylesheet" href="room.css?v=24">
+  <link rel="stylesheet" href="room.css?v=27">
   <script>document.documentElement.classList.add("js");</script>
   <script type="application/ld+json">
   {
@@ -49,7 +49,7 @@
     ]
   }
   </script>
-  <script src="room.js?v=25" defer></script>
+  <script src="room.js?v=27" defer></script>
 </head>
 
 <body>
@@ -76,14 +76,14 @@
           <div class="plank" aria-hidden="true"></div>
         </div>
         <div class="book-read" aria-live="polite">
-          <p class="say-big book-line" id="book-line"></p>
+          <span class="kicker" id="book-kicker"></span>
+          <p class="station-title" id="book-title"></p>
+          <p id="book-text"></p>
         </div>
         <div class="book-nav">
           <button class="pbtn book-step" type="button" id="book-prev">← Previous</button>
           <button class="pbtn book-step" type="button" id="book-next">Next →</button>
         </div>
-        <p>I help take products from zero to one. That work comes on the back of stints at several Series A–B, venture-backed fintech startups, in roles spanning product and operations.</p>
-        <p>I'm just as shaped by the detours in between: I've taught, worked at an NGO and toured with a band. I studied East African history at Princeton.</p>
       </div>
       <div class="more" aria-hidden="true"><span>▼ More</span></div>
     </section>
@@ -146,17 +146,15 @@
 
     <h2>About</h2>
     <p>I help take products from zero to one. That work comes on the back of stints at several Series A–B, venture-backed fintech startups, in roles spanning product and operations.</p>
-    <p>I'm just as shaped by the detours in between: I've taught, worked at an NGO and toured with a band. I studied East African history at Princeton.</p>
-
-    <h2>The shelf, in order</h2>
     <ol>
-      <li>Princeton, 2015–2019. A.B. in History with a certificate in African Studies. My senior thesis, “Idi Amin’s Uganda and Tanzanian Foreign Policy 1971–1972: From Mwongozo wa TANU to The Mogadishu Agreement,” won the prize for best thesis in African History.</li>
-      <li>After graduating I moved to Kampala to work at an NGO in Uganda.</li>
-      <li>Nearside, 2020–2023. My first startup, a business neobank in San Francisco. I joined as employee 18 in operations, moved into product, and saw it through to acquisition.</li>
-      <li>After Nearside I got into Stanford Law. Then I decided I didn't want to be a lawyer.</li>
-      <li>So I explored teaching for a bit, moved to New York, and decided to go back to startups.</li>
-      <li>Thatch Health, 2024–2025. Operations at a health benefits startup in New York: enrollments and payments across more than 60 insurance carriers.</li>
-      <li>Conduit Financial, 2025–now. Product Manager, back in fintech and crypto.</li>
+      <li><strong>Idi Amin’s Uganda</strong> (Princeton · 2015–2019). I studied history at Princeton, with a certificate in African Studies. My senior thesis, “Idi Amin’s Uganda and Tanzanian Foreign Policy 1971–1972: From Mwongozo wa TANU to The Mogadishu Agreement,” won the prize for best thesis in African History.</li>
+      <li><strong>City in the Clouds</strong> (College · 2015–2019). In college I played in a band, City in the Clouds. We toured a couple of times and played around SXSW in 2019. Our album is out on Spotify.</li>
+      <li><strong>An NGO in Uganda</strong> (Kampala, Uganda). After graduating I moved to Kampala to work at an NGO in Uganda.</li>
+      <li><strong>Nearside</strong> (San Francisco · 2020–2023). My first startup, a business neobank. I joined as employee 18 in operations, moved into product, and saw it through to acquisition.</li>
+      <li><strong>Stanford Law</strong> (After Nearside). After Nearside I got into Stanford Law. Then I decided I didn’t want to be a lawyer.</li>
+      <li><strong>Teaching</strong> (A side quest). So I explored teaching for a bit, moved to New York, and decided to go back to startups.</li>
+      <li><strong>Thatch Health</strong> (New York · 2024–2025). Operations at a health benefits startup: enrollments and payments across more than 60 insurance carriers, on a four-person carrier ops team.</li>
+      <li><strong>Conduit Financial</strong> (New York · 2025–now). Product Manager, back in fintech and crypto. I’m building an AI-native, multi-bank and stablecoin USD money-movement API for cross-border payments. Small team, shipping quickly.</li>
     </ol>
 
     <h2>Now</h2>
