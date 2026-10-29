@@ -76,6 +76,8 @@ body { margin: 0; background: #1C251B; }
 .spine span { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Silkscreen, monospace; font-size: 10px; white-space: nowrap; }
 .plank { height: 10px; background: #8A5A34; box-shadow: 0 5px 0 #5E3A1E; }
 .book-read { display: flex; flex-direction: column; gap: 8px; min-height: 172px; }
+/* Book details in the legible body font; only spines and titles are stylized. */
+.book-kicker { font-size: 15px; font-weight: 700; color: var(--panelMuted); }
 .book-nav { display: flex; gap: 8px; }
 .book-step { flex: 1 1 0; min-height: 44px; background: var(--hud); color: var(--hudInk); border: 0; font-family: Silkscreen, monospace; font-size: 12px; }
 .book-step:disabled { opacity: 0.35; cursor: default; transform: none !important; }

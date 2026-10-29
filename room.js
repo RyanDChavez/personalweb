@@ -668,7 +668,7 @@ var PANELS = { shelf: 1, contact: 1 };
 // The shelf reads left to right, oldest first: [spine, height, color, ink, kicker, title, paragraph]
 var BOOKS = [
   ["Idi Amin's Uganda", 156, "#3E2614", "#F4EBDD", "Princeton · 2015–2019", "Idi Amin’s Uganda", "I studied history at Princeton, with a certificate in African Studies. My senior thesis, “Idi Amin’s Uganda and Tanzanian Foreign Policy 1971–1972: From Mwongozo wa TANU to The Mogadishu Agreement,” won the prize for best thesis in African History."],
-  ["City in the Clouds", 152, "#4B3F72", "#EEE8FA", "College · 2015–2019", "City in the Clouds", "In college I played in a band, City in the Clouds. We toured a couple of times and played around SXSW in 2019. Our album is out on Spotify."],
+  ["City in the Clouds", 152, "#4B3F72", "#EEE8FA", "College · 2015–2019", "City in the Clouds", "In college I played in a band, City in the Clouds. We toured a couple of times and played around SXSW in 2019. Our album, Lost in the City, is out on Spotify."],
   ["Kampala", 124, "#C9A646", "#1D251C", "Kampala, Uganda", "An NGO in Uganda", "After graduating I moved to Kampala to work at an NGO in Uganda."],
   ["Nearside", 148, "#334232", "#EEF0E2", "San Francisco · 2020–2023", "Nearside", "My first startup, a business neobank. I joined as employee 18 in operations, moved into product, and saw it through to acquisition."],
   ["Stanford Law", 132, "#8C1515", "#FFF4E6", "After Nearside", "Stanford Law", "After Nearside I got into Stanford Law. Then I decided I didn’t want to be a lawyer."],
