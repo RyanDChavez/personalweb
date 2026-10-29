@@ -433,9 +433,30 @@ function drawFront(put, setCur) {
   for (x = 268; x <= 284; x++) put(x, 106, PHL);
   for (i = 0; i < 9; i++) { put(264 - (i % 2), 108 + i * 1.4, i % 2 ? CRD : PHL); put(265 - (i % 2), 109 + i * 1.4, CRD); }
   setCur(OBJ.contact);
-  rect(287, 116, 14, 4, C.black); rect(288, 115, 12, 1, C.metalD);
-  for (i = 0; i < 6; i++) rect(289 + i * 2, 106 + (i % 2), 1, 10 - (i % 2), i % 3 === 0 ? [217, 201, 152] : C.cream);
-  rect(288, 110, 12, 1, C.metal); put(287, 110, C.black); put(300, 110, C.black);
+  // swivel Rolodex, after the NSW-35C: smoked cover rolled back, cream cards with blue tabs and two black clips,
+  // ribbed knobs on a black cradle, round pedestal base
+  var RDX = { k: [24, 24, 26], K: [96, 96, 104], f: [34, 34, 38], F: [84, 84, 92], s: [92, 86, 108], S: [160, 154, 176], c: [248, 240, 214], l: [206, 194, 160], t: [96, 150, 186], x: [24, 24, 26], b: [72, 72, 80], B: [28, 28, 30], n: [40, 40, 44] };
+  [
+    "...sSsssssss...",
+    "..sSsttsssttss.",
+    "..scccccccccs..",
+    "..slllllllllS..",
+    "..scccccccccs..",
+    "..flllllllllf..",
+    "kKfcccccccccfKk",
+    "KkfcccxcxcccfkK",
+    "kKfcccxcxcccfKk",
+    "KkflllllllllfkK",
+    "kKfcccccccccfKk",
+    "..fccccctcccf..",
+    "..FFFFFFFFFFF..",
+    "..fffffffffff..",
+    ".....nnnnn.....",
+    ".....nnnnn.....",
+    "..bbbbbbbbbbb..",
+    ".BBBBBBBBBBBBB.",
+    "..BBBBBBBBBBB.."
+  ].forEach(function (row, ry) { for (var rx = 0; rx < row.length; rx++) if (row[rx] !== ".") put(289 + rx, 101 + ry, RDX[row[rx]]); });
   setCur(OBJ.lamp);
   rect(306, 146, 14, 3, C.black); rect(308, 145, 10, 1, C.metal);
   setCur(OBJ.plant);
