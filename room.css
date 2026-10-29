@@ -91,7 +91,7 @@ body { margin: 0; background: #1C251B; }
 /* Rolodex */
 .contact-body { padding-bottom: 24px; gap: 14px; }
 .rolodex { position: relative; padding-top: 22px; }
-.rolodex-tab { position: absolute; top: 0; left: 18px; padding: 2px 12px 0; background: #D9C998; color: #1D251C; font-family: Silkscreen, monospace; font-size: 11px; }
+.rolodex-tab { position: absolute; top: 0; left: 18px; padding: 2px 12px 0; background: #6E9CB8; color: #F1E8CC; font-family: Silkscreen, monospace; font-size: 11px; }
 .rolodex-back { position: absolute; top: 14px; left: 8px; right: -6px; height: 100%; background: #CDBE90; }
 .card {
   position: relative; background: #F1E8CC; color: #1D251C; padding: 16px 20px 20px; box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
