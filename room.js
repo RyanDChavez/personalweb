@@ -924,7 +924,7 @@ Room.prototype.act = function (id) {
     portrait: "A poster of Ryan.",
     chair: "You sit in the swivel chair and spin around once.",
     plant: "You water the snake plant.",
-    shelf: "Pick a book.",
+    shelf: "The bookshelf appears to be a kind of archive of Ryan's life.",
     radio: "The receiver's broken. It won't turn on.",
     contact: "You open the Rolodex to Ryan's card."
   };
