@@ -373,7 +373,7 @@ function makeLight(mode) {
   return mode === "dark" ? { A: A, G: G, at: [0.84, 0.92, 1.08], gt: [1.24, 1.02, 0.72] } : { A: A, G: G, at: [1, 1, 1], gt: [1.1, 1.04, 0.84] };
 }
 
-function drawFront(put, setCur) {
+function drawFront(put, setCur, rdxOpen) {
   var x, y, i;
   function rect(rx, ry, w, h, c) { for (var j = ry; j < ry + h; j++) for (var k = rx; k < rx + w; k++) put(k, j, c); }
   setCur(OBJ.chair);
@@ -433,10 +433,11 @@ function drawFront(put, setCur) {
   for (x = 268; x <= 284; x++) put(x, 106, PHL);
   for (i = 0; i < 9; i++) { put(264 - (i % 2), 108 + i * 1.4, i % 2 ? CRD : PHL); put(265 - (i % 2), 109 + i * 1.4, CRD); }
   setCur(OBJ.contact);
-  // swivel Rolodex, after the NSW-35C: smoked cover rolled back, cream cards with blue tabs and two black clips,
-  // ribbed knobs on a black cradle, round pedestal base
-  var RDX = { k: [24, 24, 26], K: [96, 96, 104], f: [34, 34, 38], F: [84, 84, 92], s: [92, 86, 108], S: [160, 154, 176], c: [248, 240, 214], l: [206, 194, 160], t: [96, 150, 186], x: [24, 24, 26], b: [72, 72, 80], B: [28, 28, 30], n: [40, 40, 44] };
-  [
+  // swivel Rolodex, after the NSW-35C: ribbed knobs on a black cradle, round pedestal base. Closed, the smoked
+  // cover is down over the cards; open (while looking at the phone table) it's rolled back to show cream cards
+  // with blue tabs and two black clips.
+  var RDX = { k: [24, 24, 26], K: [96, 96, 104], f: [34, 34, 38], F: [84, 84, 92], s: [92, 86, 108], S: [160, 154, 176], c: [248, 240, 214], l: [206, 194, 160], t: [96, 150, 186], x: [24, 24, 26], b: [72, 72, 80], B: [28, 28, 30], n: [40, 40, 44], d: [150, 140, 156], e: [126, 118, 136], w: [196, 196, 204] };
+  var RDX_TOP = rdxOpen ? [
     "...sSsssssss...",
     "..sSsttsssttss.",
     "..scccccccccs..",
@@ -448,7 +449,22 @@ function drawFront(put, setCur) {
     "kKfcccxcxcccfKk",
     "KkflllllllllfkK",
     "kKfcccccccccfKk",
-    "..fccccctcccf..",
+    "..fccccctcccf.."
+  ] : [
+    "...sSSssssss...",
+    "..sSdddddddds..",
+    "..sSdeeeeeeds..",
+    "..sSdddddddds..",
+    "..sSdeeeeeeds..",
+    "..sSdddddddds..",
+    "kKfSddddddddfKk",
+    "KkfSddddddddfkK",
+    "kKfSddwwwwddfKk",
+    "KkfSddddddddfkK",
+    "kKfSddddddddfKk",
+    "..fSddddddddf.."
+  ];
+  RDX_TOP.concat([
     "..FFFFFFFFFFF..",
     "..fffffffffff..",
     ".....nnnnn.....",
@@ -456,7 +472,7 @@ function drawFront(put, setCur) {
     "..bbbbbbbbbbb..",
     ".BBBBBBBBBBBBB.",
     "..BBBBBBBBBBB.."
-  ].forEach(function (row, ry) { for (var rx = 0; rx < row.length; rx++) if (row[rx] !== ".") put(289 + rx, 101 + ry, RDX[row[rx]]); });
+  ]).forEach(function (row, ry) { for (var rx = 0; rx < row.length; rx++) if (row[rx] !== ".") put(289 + rx, 101 + ry, RDX[row[rx]]); });
   setCur(OBJ.lamp);
   rect(306, 146, 14, 3, C.black); rect(308, 145, 10, 1, C.metal);
   setCur(OBJ.plant);
@@ -850,7 +866,7 @@ Room.prototype.setState = function (patch) {
   for (var k in patch) if (this.state[k] !== patch[k]) { this.state[k] = patch[k]; changed = true; }
   if (!changed) return;
   this.render();
-  if (this.builtFor !== this.mode() || this.paintedHover !== this.state.hover || this.paintedScene !== this.state.scene) this.kick();
+  if (this.builtFor !== this.mode() || this.paintedHover !== this.state.hover || this.paintedScene !== this.state.scene || this.paintedRdx !== (this.state.open === "contact")) this.kick();
 };
 
 Room.prototype.say = function (text) {
@@ -994,7 +1010,7 @@ Room.prototype.brush = function (e) {
 Room.prototype.paint = function () {
   var hv = this.state.hover ? OBJ[this.state.hover] : 0;
   var img = this.state.scene === "hall" ? this.hallImage(hv) : this.roomImage(hv);
-  this.paintedHover = this.state.hover; this.paintedScene = this.state.scene;
+  this.paintedHover = this.state.hover; this.paintedScene = this.state.scene; this.paintedRdx = this.state.open === "contact";
   this.canvas.getContext("2d").putImageData(img, 0, 0);
 };
 
@@ -1028,7 +1044,7 @@ Room.prototype.roomImage = function (hv) {
     }
   }
   if (this.planeX != null) drawPlane(this.planeX, mode === "dark", col, emis, obj);
-  drawFront(put, setCur);
+  drawFront(put, setCur, this.state.open === "contact");
   return composite(col, emis, obj, this.light, hv);
 };
 
