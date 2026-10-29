@@ -27,7 +27,10 @@ body { margin: 0; background: #1C251B; }
 .hot:focus-visible { outline: 1px solid #E2BF5E; outline-offset: 0; }
 
 .pbtn { cursor: pointer; }
-.pbtn:hover { transform: translate(-2px, -2px); }
+/* Lift on hover only where there's a real pointer; on touch screens :hover sticks after a tap. */
+@media (hover: hover) { .pbtn:hover { transform: translate(-2px, -2px); } }
+/* No double-tap zoom on the room or its buttons (quick repeat taps zoomed the page on iPhone). */
+.js .stage, .js .stage button { touch-action: manipulation; }
 .pbtn:focus-visible, .card-v:focus-visible { outline: 3px solid #E2BF5E; outline-offset: 3px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
