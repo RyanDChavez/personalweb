@@ -676,7 +676,7 @@ var BOOKS = [
   ["Thatch", 138, "#4A6A52", "#F4F4EA", "New York · 2024–2025", "Thatch Health", "Operations at a health benefits startup: enrollments and payments across more than 60 insurance carriers, on a four-person carrier ops team."],
   ["Conduit", 150, "#8A5A34", "#F7EEE0", "New York · 2025–now", "Conduit Financial", "Product Manager, back in fintech and crypto. I’m building an AI-native, multi-bank and stablecoin USD money-movement API for cross-border payments. Small team, shipping quickly."]
 ];
-var SHELF_INTRO = ["About", "Start on the left", "I help take products from zero to one. That work comes on the back of stints at several Series A–B, venture-backed fintech startups, in roles spanning product and operations."];
+var SHELF_INTRO = ["Oldest first", "Start on the left", ""];
 
 var STATIONS = {
   before: { label: "Before", needle: 10, kicker: "Before", title: "Teaching, an NGO, a band", text: "I've taught, worked at an NGO and toured with a band." },
