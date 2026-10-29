@@ -665,16 +665,15 @@ var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "crede
 // The receiver's Now panel is parked until the radio gets a proper interaction.
 var PANELS = { shelf: 1, contact: 1 };
 
+// The shelf reads left to right, oldest first: [spine, height, color, ink, line]
 var BOOKS = [
-  ["Fintech", 140, "#334232", "#EEF0E2", "Fintech. Most of my career has been at venture-backed fintech startups."],
-  ["Series A–B", 124, "#C9A646", "#1D251C", "Series A–B. The stage of the startups I've worked at."],
-  ["Product", 150, "#8A5A34", "#F7EEE0", "Product. What I do now."],
-  ["Operations", 132, "#4A6A52", "#F4F4EA", "Operations. Some of my startup roles were on the operations side."],
-  ["Teaching", 116, "#9A4E2A", "#FFF4E6", "Teaching. I've taught."],
-  ["NGO work", 136, "#E9DDB8", "#1D251C", "NGO work. I've worked at an NGO."],
-  ["On tour", 126, "#1F2A1E", "#E6EDD8", "On tour. I've toured with a band."],
-  ["East African History", 160, "#3E2614", "#F4EBDD", "East African History. What I studied at Princeton."],
-  ["Princeton", 120, "#C9A646", "#1D251C", "Princeton. Where I studied East African history."]
+  ["Princeton Thesis", 156, "#3E2614", "#F4EBDD", "Princeton, 2015–2019. A.B. in History with a certificate in African Studies. My senior thesis won the prize for best thesis in African History."],
+  ["Kampala", 124, "#C9A646", "#1D251C", "After graduating I moved to Kampala to work at an NGO in Uganda."],
+  ["Nearside", 148, "#334232", "#EEF0E2", "Nearside, 2020–2023. My first startup, a business neobank in San Francisco. I joined as employee 18 in operations, moved into product, and saw it through to acquisition."],
+  ["Stanford Law", 132, "#8C1515", "#FFF4E6", "After Nearside I got into Stanford Law. Then I decided I didn't want to be a lawyer."],
+  ["Teaching", 116, "#9A4E2A", "#FFF4E6", "So I explored teaching for a bit, moved to New York, and decided to go back to startups."],
+  ["Thatch", 138, "#4A6A52", "#F4F4EA", "Thatch Health, 2024–2025. Operations at a health benefits startup in New York: enrollments and payments across more than 60 insurance carriers."],
+  ["Conduit", 150, "#8A5A34", "#F7EEE0", "Conduit Financial, 2025–now. Product Manager, back in fintech and crypto: building an AI-native, multi-bank and stablecoin USD money-movement API for cross-border payments."]
 ];
 
 var STATIONS = {
@@ -745,7 +744,7 @@ function Room(root) {
   this.dom = {
     action: $("action"), shown: $("say-shown"), caret: $("caret"), live: $("say-live"),
     panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact") },
-    bookLine: $("book-line"), needle: $("needle"),
+    bookLine: $("book-line"), bookPrev: $("book-prev"), bookNext: $("book-next"), needle: $("needle"),
     kicker: $("station-kicker"), title: $("station-title"), text: $("station-text"),
     themeColor: document.querySelector('meta[name="theme-color"]')
   };
@@ -802,6 +801,10 @@ function Room(root) {
     shelf.appendChild(b);
     self.bookEls.push(b);
   });
+
+  // Read the shelf in order.
+  this.dom.bookPrev.addEventListener("click", function () { self.setState({ book: Math.max(0, self.state.book - 1) }); });
+  this.dom.bookNext.addEventListener("click", function () { self.setState({ book: Math.min(BOOKS.length - 1, self.state.book + 1) }); });
 
   // Receiver panel: station buttons.
   this.stationEls = {};
@@ -1182,7 +1185,11 @@ Room.prototype.render = function () {
     setAttr(b, "aria-pressed", s.book === i ? "true" : "false");
     b.style.marginBottom = (s.book === i ? 10 : 0) + "px";
   });
-  setText(d.bookLine, s.book >= 0 ? BOOKS[s.book][4] : "Pull a book off the shelf.");
+  var bk = BOOKS[s.book];
+  setText(d.bookLine, bk ? bk[4] : "Pull a book off the shelf. Start on the left.");
+  d.bookPrev.disabled = s.book <= 0;
+  d.bookNext.disabled = s.book >= BOOKS.length - 1;
+  setText(d.bookNext, s.book < 0 ? "Start →" : "Next →");
 
   var st = STATIONS[s.station];
   for (var key in this.stationEls) setAttr(this.stationEls[key], "aria-pressed", s.station === key ? "true" : "false");
