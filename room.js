@@ -435,8 +435,8 @@ function drawFront(put, setCur, rdxOpen) {
   setCur(OBJ.contact);
   // swivel Rolodex, after the NSW-35C: ribbed knobs on a black cradle, round pedestal base. Closed, the smoked
   // cover is down over the cards; open (while looking at the phone table) it's rolled back to show cream cards
-  // with blue tabs and two black clips.
-  var RDX = { k: [24, 24, 26], K: [96, 96, 104], f: [34, 34, 38], F: [84, 84, 92], s: [92, 86, 108], S: [160, 154, 176], c: [248, 240, 214], l: [206, 194, 160], t: [96, 150, 186], x: [24, 24, 26], b: [72, 72, 80], B: [28, 28, 30], n: [40, 40, 44], d: [150, 140, 156], e: [126, 118, 136], w: [196, 196, 204] };
+  // with blue tabs, split across the rail by two black clips.
+  var RDX = { k: [24, 24, 26], K: [96, 96, 104], f: [34, 34, 38], F: [84, 84, 92], s: [92, 86, 108], S: [160, 154, 176], c: [248, 240, 214], l: [206, 194, 160], t: [96, 150, 186], x: [24, 24, 26], b: [72, 72, 80], B: [28, 28, 30], n: [40, 40, 44], d: [150, 140, 156], e: [126, 118, 136], w: [196, 196, 204], m: [212, 200, 166], r: [70, 62, 56] };
   var RDX_TOP = rdxOpen ? [
     "...sSsssssss...",
     "..sSsttsssttss.",
@@ -445,11 +445,11 @@ function drawFront(put, setCur, rdxOpen) {
     "..scccccccccs..",
     "..flllllllllf..",
     "kKfcccccccccfKk",
-    "KkfcccxcxcccfkK",
-    "kKfcccxcxcccfKk",
-    "KkflllllllllfkK",
+    "KkfmxmmmmmxmfkK",
+    "kKfrxrrrrrxrfKk",
+    "KkfcxcccccxcfkK",
     "kKfcccccccccfKk",
-    "..fccccctcccf.."
+    "..fcccccctccf.."
   ] : [
     "...sSSssssss...",
     "..sSdddddddds..",
