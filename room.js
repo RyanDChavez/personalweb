@@ -410,7 +410,7 @@ function drawFront(put, setCur, rdxOpen) {
     put(238 + leg[0], 144 + leg[1], C.black);
   });
   setCur(0);
-  // phone stand: a small midcentury chest in acacia, with an open cubby (handle slot in the back), two drawers
+  // phone stand: a small midcentury chest in acacia, with an open cubby, two drawers
   // with dark knobs, and splayed tapered legs
   var AC = [196, 132, 66], ACL = [224, 162, 94], ACD = [150, 96, 46], ACG = [180, 118, 58], ACIN = [116, 72, 36], KNOB = [56, 42, 34];
   for (i = 0; i < 14; i++) {
@@ -420,7 +420,7 @@ function drawFront(put, setCur, rdxOpen) {
   }
   rect(264, 120, 40, 22, AC);
   rect(264, 120, 40, 1, ACL); rect(264, 120, 2, 22, ACL); rect(302, 120, 2, 22, ACD);
-  rect(266, 122, 36, 6, ACIN); rect(266, 122, 36, 1, [92, 56, 28]); rect(279, 123, 8, 1, [214, 204, 182]);
+  rect(266, 122, 36, 6, ACIN); rect(266, 122, 36, 1, [92, 56, 28]);
   rect(265, 128, 38, 1, ACL); rect(266, 129, 36, 1, ACD);
   [130, 136].forEach(function (dy) {
     for (y = dy; y < dy + 5; y++) for (x = 266; x < 302; x++) put(x, y, (x * 7 + y * 3) % 11 === 0 ? ACG : AC);
