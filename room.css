@@ -1,11 +1,4 @@
-/* The Living Room. Colors come from TOKENS in room.js, set as custom properties on #stage. */
-
-:root {
-  --wallFill: #C6CDB5; --rugFill: #1C251B; --ink: #1D251C;
-  --hud: rgba(29, 37, 28, 0.92); --hudInk: #EEF0E2; --hudLine: #5E7A58; --gold: #E2BF5E;
-  --frame: #1D251C; --panel: #EEF0E2; --panelInk: #1D251C; --panelMuted: #465643;
-  --dial: #E9DDB8; --invBg: #2A3829; --invOn: #E2BF5E;
-}
+/* The Living Room. Colors come from TOKENS in room.js, set as custom properties on #stage before it's shown. */
 
 * { box-sizing: border-box; }
 body { margin: 0; background: #1C251B; }
@@ -22,7 +15,7 @@ body { margin: 0; background: #1C251B; }
 
 .cam { position: absolute; left: 0; top: 0; width: 320px; height: 180px; transform-origin: 0 0; will-change: transform; }
 .ready .cam { transition: transform 0.95s cubic-bezier(0.65, 0, 0.35, 1); }
-.room-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: pan-y; cursor: crosshair; }
+.room-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; cursor: crosshair; }
 .hot { position: absolute; background: transparent; border: 0; padding: 0; margin: 0; cursor: pointer; }
 .hot:focus-visible { outline: 1px solid #E2BF5E; outline-offset: 0; }
 
@@ -48,6 +41,7 @@ body { margin: 0; background: #1C251B; }
   animation: panelIn 0.4s steps(6) 0.6s both;
 }
 .panel[hidden] { display: none; }
+.panel:focus { outline: none; }
 @keyframes panelIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
 @media (max-width: 759px) { .panel { left: 12px; right: 12px; width: auto; top: 37%; bottom: calc(var(--hud-h, 236px) + 12px); } }
 
@@ -56,7 +50,6 @@ body { margin: 0; background: #1C251B; }
 .back-btn { min-height: 44px; padding: 0 12px; background: var(--gold); color: #1D251C; border: 0; font-family: Silkscreen, monospace; font-size: 12px; }
 .panel-body { flex: 1 0 auto; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
 .panel-body p { margin: 0; }
-.say-big { font-family: 'Pixelify Sans', monospace; font-size: 19px; line-height: 1.35; }
 
 /* scroll hint: a fade and a chip pinned to the panel's bottom edge while there's more below */
 .more {
