@@ -803,10 +803,21 @@ function Room(root) {
     shelf.appendChild(b);
     self.bookEls.push(b);
   });
+  // The next book isn't written yet: a blank spine at the end that opens the Rolodex.
+  var nextBook = el("button", "pbtn spine spine-next");
+  nextBook.type = "button";
+  nextBook.setAttribute("aria-label", "Next? Open the Rolodex");
+  nextBook.appendChild(el("span", null, "Next?"));
+  nextBook.addEventListener("click", function () { self.act("contact"); });
+  shelf.appendChild(nextBook);
 
   // Read the shelf in order.
   this.dom.bookPrev.addEventListener("click", function () { self.setState({ book: Math.max(0, self.state.book - 1) }); });
-  this.dom.bookNext.addEventListener("click", function () { self.setState({ book: Math.min(BOOKS.length - 1, self.state.book + 1) }); });
+  // Past the last book the story continues on the Rolodex: what's next is up to whoever's reading.
+  this.dom.bookNext.addEventListener("click", function () {
+    if (self.state.book >= BOOKS.length - 1) self.act("contact");
+    else self.setState({ book: self.state.book + 1 });
+  });
 
   // Receiver panel: station buttons.
   this.stationEls = {};
@@ -1190,8 +1201,9 @@ Room.prototype.render = function () {
   var bk = s.book >= 0 ? BOOKS[s.book].slice(4) : SHELF_INTRO;
   setText(d.bookKicker, bk[0]); setText(d.bookTitle, bk[1]); setText(d.bookText, bk[2]);
   d.bookPrev.disabled = s.book <= 0;
-  d.bookNext.disabled = s.book >= BOOKS.length - 1;
-  setText(d.bookNext, s.book < 0 ? "Start →" : "Next →");
+  var last = s.book >= BOOKS.length - 1;
+  setText(d.bookNext, s.book < 0 ? "Start →" : (last ? "Next?" : "Next →"));
+  if (last) setAttr(d.bookNext, "aria-label", "Next? Open the Rolodex"); else d.bookNext.removeAttribute("aria-label");
 
   var st = STATIONS[s.station];
   for (var key in this.stationEls) setAttr(this.stationEls[key], "aria-pressed", s.station === key ? "true" : "false");
