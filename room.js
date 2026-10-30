@@ -1197,59 +1197,82 @@ function makeKitchen(mode) {
   rect(26, 66, 12, 9, [240, 234, 216]); rect(27, 67, 10, 5, [110, 160, 196]); rect(27, 70, 10, 2, [214, 190, 120]); put(31, 65, [200, 60, 50]);
   rect(14, 84, 3, 3, [200, 60, 50]);
 
-  ox = -9; // the cart and the print, in from the right edge
-  // Ryan's coffee bar cart: black steel frame, walnut tray, wine glasses hanging upside down underneath
+  // Ryan's bar cart, after his: a walnut tray on a black steel frame; under it a rack of wine glasses hanging upside
+  // down, a wine rack of bottles lying on their sides, and a bottom shelf of liquor
   cur = OBJ.coffee;
   var BK = [36, 36, 40], BKL = [70, 70, 76];
-  rect(258, 94, 2, 37, BK); rect(313, 94, 2, 37, BK); rect(258, 103, 57, 2, BK); rect(258, 103, 57, 1, BKL);
-  rect(259, 94, 55, 4, DW); rect(259, 94, 55, 1, DWL); rect(259, 97, 55, 1, DWD);
-  rect(258, 94, 3, 4, BK); rect(312, 94, 3, 4, BK);
-  [267, 277, 287, 297, 306].forEach(function (gx) {
-    var GL = [204, 216, 222], GLL = [240, 246, 248], GLD = [150, 164, 172];
-    rect(gx - 2, 105, 5, 1, GLD); rect(gx, 106, 1, 6, GL);
-    for (y = 112; y < 121; y++) { var hw2 = y < 114 ? 1 : (y < 119 ? 3 : 2); rect(gx - hw2, y, hw2 * 2 + 1, 1, GL); put(gx - hw2, y, GLD); put(gx + hw2, y, GLD); if (y > 113 && y < 119) put(gx - hw2 + 1, y, GLL); }
+  rect(249, 94, 2, 36, BK); rect(304, 94, 2, 36, BK);
+  rect(249, 98, 57, 1, BK); rect(249, 110, 57, 1, BK); rect(249, 118, 57, 1, BKL); rect(249, 128, 57, 2, BK); rect(250, 128, 55, 1, DW);
+  put(250, 130, [60, 60, 64]); put(250, 131, [24, 24, 26]); put(304, 130, [60, 60, 64]); put(304, 131, [24, 24, 26]);
+  rect(250, 93, 55, 5, DW); rect(250, 93, 55, 1, DWL); rect(250, 97, 55, 1, DWD); rect(249, 93, 3, 5, BK); rect(303, 93, 3, 5, BK);
+  // glasses: wine glasses and a couple of martini glasses
+  var GL = [204, 216, 222], GLL = [240, 246, 248], GLD = [150, 164, 172];
+  [[255, 0], [261, 1], [267, 0], [273, 0], [279, 1], [285, 0], [291, 0], [298, 0]].forEach(function (g) {
+    var gx = g[0];
+    rect(gx - 1, 99, 3, 1, GLD); rect(gx, 100, 1, 3, GL);
+    if (g[1]) { for (y = 103; y < 108; y++) { var mw = y - 103; rect(gx - mw, y, mw * 2 + 1, 1, GL); put(gx - mw, y, GLD); put(gx + mw, y, GLD); } }
+    else for (y = 103; y < 109; y++) { var hw2 = y === 103 ? 1 : 2; rect(gx - hw2, y, hw2 * 2 + 1, 1, GL); put(gx - hw2, y, GLD); put(gx + hw2, y, GLD); if (y > 103 && y < 108) put(gx - hw2 + 1, y, GLL); }
   });
+  // wine bottles lying in the rack, necks toward the front left
+  [[253, [44, 62, 44]], [262, [64, 30, 34]], [271, [36, 40, 36]], [281, [70, 52, 30]], [291, [44, 62, 44]]].forEach(function (wb) {
+    for (i = 0; i < 9; i++) { var wx = wb[0] + i, wy2 = 116 - Math.round(i * 0.5); put(wx, wy2, i < 3 ? (i === 0 ? [200, 60, 50] : wb[1]) : wb[1]); put(wx, wy2 - 1, i < 3 ? wb[1] : mix(wb[1], [255, 255, 255], 0.2)); if (i > 3) put(wx, wy2 + 1, wb[1]); }
+    rect(wb[0] + 5, 113, 2, 2, [232, 224, 200]);
+  });
+  // bottom shelf: a clear botanical liqueur, an amber whiskey, a dark bottle, the white Hibiki box, a stack of pink
+  // cups, and a bourbon with red wax
+  var bottle = function (bx, w, h, c, neck, label) { rect(bx, 128 - h, w, h, c); rect(bx + (w >> 1) - (neck >> 1), 128 - h - 3, neck, 3, c); put(bx, 128 - h, mix(c, [255, 255, 255], 0.35)); if (label) rect(bx, 128 - h + Math.floor(h / 2) - 1, w, 3, label); };
+  bottle(252, 4, 8, [214, 222, 216], 2, [244, 238, 222]); put(253, 117, [214, 170, 120]);
+  bottle(257, 4, 7, [176, 112, 52], 2, [236, 228, 210]);
+  bottle(262, 5, 9, [28, 26, 30], 2, null);
+  bottle(268, 4, 8, [150, 92, 46], 2, [214, 196, 160]);
+  rect(273, 117, 7, 11, [240, 238, 232]); rect(273, 117, 7, 1, [214, 210, 200]); rect(275, 120, 3, 4, [30, 30, 32]); put(276, 119, [30, 30, 32]);
+  for (y = 110; y < 128; y += 2) rect(282, y, 5, 2, y % 4 ? [232, 112, 168] : [214, 92, 150]); rect(283, 110, 3, 1, [244, 150, 194]);
+  bottle(289, 5, 8, [160, 98, 40], 2, [240, 232, 214]); rect(290, 116, 3, 2, [200, 30, 40]); put(291, 118, [200, 30, 40]);
+  bottle(296, 4, 9, [212, 222, 226], 2, null); rect(296, 123, 4, 3, [176, 196, 210]);
+
   // on the tray: the DeLonghi espresso machine with a striped towel on top, the black grinder full of beans with a
   // steel cup on its lid, a tamper, and the drip brewer over its glass carafe
   var SS = [176, 178, 184], SSL = [214, 216, 222], SSD = [120, 122, 128];
-  rect(261, 77, 16, 17, [30, 30, 32]); rect(262, 77, 14, 7, SS); rect(262, 77, 14, 1, SSL); disc(269, 80, 2, SSL, [240, 242, 246]); put(269, 80, SSD);
-  rect(264, 85, 10, 7, SSD); rect(265, 86, 8, 2, SS); rect(263, 88, 3, 1, [20, 20, 22]); rect(261, 89, 3, 1, [20, 20, 22]);
-  rect(263, 92, 12, 2, SS); put(273, 79, [90, 200, 110], night);
-  rect(260, 73, 18, 4, [236, 234, 228]); for (x = 260; x < 278; x += 3) rect(x, 73, 1, 4, [126, 128, 140]); rect(260, 77, 3, 4, [236, 234, 228]); put(261, 78, [126, 128, 140]);
-  rect(281, 82, 12, 12, [30, 30, 32]); rect(281, 82, 1, 12, [60, 60, 64]); rect(285, 86, 4, 3, SSD); rect(286, 89, 2, 2, SS); put(291, 84, [200, 60, 50]); disc(293, 88, 1, SS);
-  rect(282, 74, 10, 8, [210, 214, 216]); for (y = 75; y < 81; y++) for (x = 283; x < 291; x++) put(x, y, (x * 3 + y * 5) % 4 === 0 ? [98, 62, 38] : [62, 40, 26]); rect(281, 73, 12, 1, [30, 30, 32]);
-  rect(284, 68, 4, 5, SS); rect(284, 68, 1, 5, SSL); rect(283, 68, 6, 1, SSL);
-  rect(294, 89, 3, 5, [30, 30, 32]); rect(294, 88, 3, 1, [60, 60, 64]);
-  rect(309, 74, 3, 20, SS); rect(309, 74, 1, 20, SSL);
-  rect(298, 74, 13, 2, [30, 30, 32]); rect(299, 76, 11, 2, [30, 30, 32]); rect(301, 78, 7, 2, [30, 30, 32]); rect(303, 80, 3, 2, [30, 30, 32]); rect(302, 72, 6, 2, SS);
-  rect(299, 83, 10, 11, [196, 210, 216]); rect(299, 83, 10, 1, [30, 30, 32]); rect(300, 90, 8, 3, [98, 62, 38]); rect(299, 84, 1, 9, [236, 244, 248]); rect(308, 85, 2, 5, [196, 210, 216]);
+  rect(253, 75, 18, 18, [30, 30, 32]); rect(254, 75, 16, 8, SS); rect(254, 75, 16, 1, SSL); disc(260, 79, 2, SSL, [240, 242, 246]); put(260, 79, SSD); rect(265, 78, 3, 1, [40, 40, 44]);
+  put(256, 80, [90, 200, 110], night); put(256, 82, [200, 60, 50], night);
+  rect(256, 84, 12, 2, SSD); rect(258, 86, 8, 2, SS); rect(255, 87, 3, 1, [20, 20, 22]); rect(253, 88, 3, 1, [20, 20, 22]); rect(267, 85, 1, 5, SS); put(268, 89, SS);
+  rect(255, 91, 14, 2, SS); rect(255, 91, 14, 1, SSL);
+  rect(252, 71, 20, 4, [236, 234, 228]); for (x = 252; x < 272; x += 3) rect(x, 71, 1, 4, [126, 128, 140]); rect(252, 75, 3, 4, [236, 234, 228]); put(253, 76, [126, 128, 140]); rect(262, 70, 6, 1, [236, 234, 228]);
+  rect(274, 80, 14, 13, [30, 30, 32]); rect(274, 80, 1, 13, [60, 60, 64]); rect(279, 83, 4, 3, [20, 20, 22]); rect(280, 86, 2, 3, SS); put(284, 82, [200, 60, 50]); disc(288, 87, 1, SS);
+  rect(275, 70, 12, 9, [210, 214, 216]); for (y = 71; y < 79; y++) for (x = 276; x < 286; x++) put(x, y, (x * 3 + y * 5) % 4 === 0 ? [98, 62, 38] : [62, 40, 26]);
+  rect(274, 69, 14, 1, [30, 30, 32]); rect(275, 79, 12, 1, [30, 30, 32]);
+  rect(279, 64, 5, 5, SS); rect(279, 64, 1, 5, SSL); rect(278, 64, 7, 1, SSL);
+  rect(287, 88, 3, 5, [30, 30, 32]); rect(287, 87, 3, 1, [60, 60, 64]);
+  rect(299, 72, 3, 21, SS); rect(299, 72, 1, 21, SSL);
+  rect(290, 71, 12, 2, SS); rect(290, 73, 11, 2, [30, 30, 32]); rect(291, 75, 9, 2, [30, 30, 32]); rect(293, 77, 5, 2, [30, 30, 32]); rect(294, 79, 3, 2, [30, 30, 32]);
+  rect(291, 82, 9, 11, [196, 210, 216]); rect(291, 82, 9, 1, [30, 30, 32]); rect(292, 89, 7, 3, [98, 62, 38]); rect(291, 83, 1, 9, [236, 244, 248]); rect(300, 84, 1, 5, [196, 210, 216]);
 
-  // the Oakland Chinatown print over the cart: storefronts drawn in red line on white, in a white frame
+  // the Oakland Chinatown print over the cart: OAKLAND CHINATOWN in red tiles across the top, then twenty little
+  // shopfronts drawn in red line on pale pink, in a white frame
   cur = OBJ.kprint;
-  rect(263, 16, 46, 52, [200, 196, 186]); rect(262, 15, 46, 52, [246, 244, 238]); rect(264, 17, 42, 48, [252, 250, 246]);
-  var INK = [204, 70, 76], INKL = [226, 146, 150];
-  // twenty little shopfronts, each a little different: a sign bar or an awning, a door, a window or two
+  rect(268, 22, 33, 42, [200, 196, 186]); rect(267, 21, 33, 42, [246, 244, 238]); rect(268, 22, 31, 40, [250, 238, 236]);
+  var INK = [204, 70, 76], INKL = [228, 150, 152];
+  for (x = 274; x < 293; x += 2) rect(x, 24, 1, 2, INK);
+  for (x = 272; x < 295; x += 2) rect(x, 27, 1, 2, INK);
   for (var row = 0; row < 5; row++) for (var cl = 0; cl < 4; cl++) {
-    var sx = 266 + cl * 10, sy = 19 + row * 9, sw = 8 + (r() < 0.3 ? -1 : 0), sh = 7, tall = r() < 0.35 ? 1 : 0;
-    rect(sx, sy + 1 - tall, sw, 1, INKL); rect(sx, sy + sh, sw, 1, INKL); rect(sx, sy + 1 - tall, 1, sh + tall, INKL); rect(sx + sw - 1, sy + 1 - tall, 1, sh + tall, INKL);
-    if (r() < 0.5) rect(sx, sy + 2, sw, 2, INK); else { rect(sx + 1, sy + 2, sw - 2, 1, INK); for (var aw = sx + 1; aw < sx + sw - 1; aw += 2) put(aw, sy + 3, INK); }
-    var door = sx + 1 + Math.floor(r() * (sw - 4));
-    rect(door, sy + 5, 2, 2, INK);
-    if (door > sx + 3) put(sx + 1, sy + 5, INKL); else rect(sx + sw - 3, sy + 5, 2, 1, INKL);
+    var sx = 270 + cl * 7, sy = 31 + row * 6, sw = 6, sh = 5;
+    rect(sx, sy, sw, 1, INKL); rect(sx, sy + sh - 1, sw, 1, INKL); rect(sx, sy, 1, sh, INKL); rect(sx + sw - 1, sy, 1, sh, INKL);
+    if (r() < 0.5) rect(sx + 1, sy + 1, sw - 2, 1, INK); else put(sx + 1 + Math.floor(r() * 3), sy + 1, INK);
+    put(sx + 1 + Math.floor(r() * 3), sy + 3, INK);
   }
+  rect(270, 60, 12, 1, INKL);
 
-  // string lights down the right edge, in every color, lit at night
-  ox = -13;
+  // string lights down the side of the cart, in every color, lit at night; little white ones wound around the frame
   cur = OBJ.klights;
   var BUL = [[232, 60, 60], [80, 200, 96], [244, 160, 60], [80, 140, 230], [240, 110, 170]];
-  for (y = 4; y < 104; y++) put(317 + Math.round(Math.sin(y / 6) * 1.2), y, [40, 64, 44]);
-  for (i = 0, y = 7; y < 102; y += 6, i++) {
-    var bxx = 317 + Math.round(Math.sin(y / 6) * 1.2) + (i % 2 ? 1 : -1), bc = BUL[i % BUL.length];
+  for (y = 18; y < 106; y++) put(307 + Math.round(Math.sin(y / 6) * 1.2), y, [40, 64, 44]);
+  for (i = 0, y = 21; y < 104; y += 6, i++) {
+    var bxx = 307 + Math.round(Math.sin(y / 6) * 1.2) + (i % 2 ? 1 : -1), bc = BUL[i % BUL.length];
     put(bxx, y, night ? bc : mix(bc, [120, 116, 108], 0.55), night); put(bxx, y + 1, night ? mix(bc, [255, 255, 255], 0.4) : mix(bc, [120, 116, 108], 0.6), night);
   }
-  ox = -9;
-  // and a run of little white ones under the cart's rack
-  for (x = 262; x < 312; x += 7) { put(x, 106 + (x % 3), night ? [255, 240, 196] : [200, 196, 184], night); }
+  cur = OBJ.coffee;
+  for (x = 253; x < 304; x += 6) put(x, 100 + (x % 4 === 1 ? 1 : 0), night ? [255, 240, 196] : [200, 196, 184], night);
+  for (y = 112; y < 128; y += 5) { put(250 + (y % 2), y, night ? [255, 240, 196] : [200, 196, 184], night); }
   cur = 0; ox = 0;
   return { col: col, emis: emis, obj: obj };
 }
@@ -1265,7 +1288,7 @@ function makeKitchenLight(mode) {
         var fall = Math.max(0, 1 - (y - 50) / 50);
         if ((x >= 100 && x < 248) || (x >= 58 && x < 102)) g += 0.55 * fall + 0.25;
       }
-      var lx = x - 304, ly = y - 56, ld = Math.sqrt(lx * lx * 0.8 + ly * ly * 0.25);
+      var lx = x - 307, ly = y - 62, ld = Math.sqrt(lx * lx * 0.8 + ly * ly * 0.25);
       g += Math.pow(Math.max(0, 1 - ld / 46), 1.5) * 0.6;
       var cx = x - 178, cy = y - 132, cd = Math.sqrt(cx * cx * 0.4 + cy * cy * 2);
       g += Math.max(0, 1 - cd / 70) * 0.25;
@@ -1303,15 +1326,15 @@ var HOTS = [
   { id: "apple", scene: "bedroom", name: "the computer", verb: "Use", x: 84, y: 56, w: 41, h: 41 },
   { id: "nlamp", scene: "bedroom", name: "the bedside lamp", verb: "Turn on", x: 298, y: 85, w: 18, h: 27 },
   { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 152, y: 78, w: 26, h: 19 },
-  { id: "kprint", scene: "kitchen", name: "the print", verb: "Look at", x: 252, y: 14, w: 49, h: 54 },
+  { id: "kprint", scene: "kitchen", name: "the print", verb: "Look at", x: 266, y: 20, w: 35, h: 44 },
   { id: "kwindow", scene: "kitchen", name: "the window", verb: "Look out", x: 147, y: 17, w: 62, h: 57 },
   { id: "fridge", scene: "kitchen", name: "the fridge", verb: "Open", x: 3, y: 23, w: 52, h: 108 },
   { id: "stove", scene: "kitchen", name: "the stove", verb: "Look at", x: 55, y: 73, w: 48, h: 58 },
-  { id: "coffee", scene: "kitchen", name: "the coffee setup", verb: "Make coffee at", x: 248, y: 68, w: 57, h: 63 },
+  { id: "coffee", scene: "kitchen", name: "the coffee setup", verb: "Make coffee at", x: 248, y: 64, w: 58, h: 68 },
   { id: "sink", scene: "kitchen", name: "the sink", verb: "Use", x: 157, y: 78, w: 42, h: 18 },
   { id: "fruit", scene: "kitchen", name: "the fruit bowl", verb: "Look at", x: 112, y: 77, w: 26, h: 17 },
   { id: "recipes", scene: "kitchen", name: "the recipe box", verb: "Open", x: 211, y: 79, w: 20, h: 14 },
-  { id: "klights", scene: "kitchen", name: "the string lights", verb: "Turn on", x: 300, y: 2, w: 8, h: 102 }
+  { id: "klights", scene: "kitchen", name: "the string lights", verb: "Turn on", x: 305, y: 16, w: 6, h: 92 }
 ];
 
 // Camera zones: the part of the room each object zooms to.
