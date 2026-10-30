@@ -768,7 +768,7 @@ function Room(root) {
     b.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") enter(); });
     b.addEventListener("pointerleave", leave);
     b.addEventListener("focus", function () { if (b.matches(":focus-visible")) enter(); });
-    b.addEventListener("blur", leave);
+    b.addEventListener("blur", function () { if (!b.matches(":hover")) leave(); });
     self.cam.appendChild(b);
     self.hotEls[h.id] = b;
   });
@@ -861,6 +861,12 @@ function Room(root) {
   this.canvas.addEventListener("pointerleave", function () { self.last = null; });
   this.canvas.addEventListener("pointerup", function () { self.last = null; });
 
+  // A mouse click or tap shouldn't leave a button focused: a later key press (like Esc) would make the browser
+  // draw its keyboard focus ring around it. Keyboard presses (detail 0) keep focus where it is.
+  root.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest("button");
+    if (btn && e.detail > 0) btn.blur();
+  });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && self.state.scene === "room" && self.state.zone) self.back(); });
 
   // Stage size, plus how much of the bottom the HUD takes up (phones sit the room right on top of it).
