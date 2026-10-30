@@ -12,6 +12,7 @@ body { margin: 0; background: #1C251B; }
 }
 
 .js .stage.in-bedroom { background: linear-gradient(180deg, var(--bedWall) 0 var(--split, 55%), var(--bedFloor) var(--split, 55%) 100%); }
+.js .stage.in-kitchen { background: linear-gradient(180deg, var(--kitWall) 0 var(--split, 55%), var(--kitFloor) var(--split, 55%) 100%); }
 .js .stage.in-hall { background: linear-gradient(180deg, var(--hallWall) 0 var(--split, 55%), var(--hallFloor) var(--split, 55%) 100%); }
 
 .cam { position: absolute; left: 0; top: 0; width: 320px; height: 180px; transform-origin: 0 0; will-change: transform; }
