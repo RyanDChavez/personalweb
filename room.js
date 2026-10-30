@@ -19,7 +19,7 @@ var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122,
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
 // Object ids painted into the scene, used for in-scene highlights.
-var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21, nlamp: 22, map: 23, fridge: 24, stove: 25, sink: 26, fruit: 27, recipes: 28, coffee: 29, kprint: 30, klights: 31, kwindow: 32 };
+var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21, nlamp: 22, map: 23, outlet: 33, fridge: 24, stove: 25, sink: 26, fruit: 27, recipes: 28, coffee: 29, kprint: 30, klights: 31, kwindow: 32 };
 
 function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
@@ -1081,7 +1081,7 @@ function makeKitchen(mode) {
   var TILE = [160, 188, 164], TILEL = [176, 202, 180], GROUT = [216, 214, 198];
   for (y = 52; y < 92; y++) for (x = 56; x < 246; x++) put(x, y, (y - 52) % 5 === 4 || (x - 56) % 5 === 4 ? GROUT : ((x + y) % 11 === 0 ? TILEL : TILE));
 
-  // walnut upper cabinets, with a strip light underneath that glows at night
+  // walnut upper cabinets
   var DW = [154, 98, 54], DWL = [186, 128, 76], DWD = [108, 66, 34];
   [[102, 46], [208, 38]].forEach(function (u) {
     var ux = u[0], uw = u[1], hw = uw / 2;
@@ -1089,12 +1089,11 @@ function makeKitchen(mode) {
     rect(ux + hw, 15, 1, 34, DWD); rect(ux, 15, 1, 34, DWL); rect(ux + uw - 1, 15, 1, 34, DWD);
     for (y = 16; y < 48; y++) for (x = ux + 1; x < ux + uw - 1; x++) if (x !== ux + hw && (x * 7 + y * 3) % 13 === 0) put(x, y, [140, 88, 48]);
     put(ux + hw - 3, 45, C.goldL); put(ux + hw + 3, 45, C.goldL);
-    rect(ux + 2, 50, uw - 4, 1, night ? [255, 228, 170] : [200, 196, 184], night);
   });
 
   // white range hood over the stove
   var EN = [238, 236, 228], ENL = [250, 248, 242], END = [196, 194, 186], CHR = [196, 198, 204], CHRD = [132, 134, 140];
-  rect(58, 40, 44, 8, EN); rect(58, 40, 44, 1, ENL); rect(56, 46, 48, 3, EN); rect(56, 48, 48, 1, END); rect(62, 49, 36, 1, night ? [255, 228, 170] : CHRD, night);
+  rect(58, 40, 44, 8, EN); rect(58, 40, 44, 1, ENL); rect(56, 46, 48, 3, EN); rect(56, 48, 48, 1, END); rect(62, 49, 36, 1, CHRD);
 
   // window over the sink: across the courtyard, rooftops with a wooden water tower; a fire escape rail outside,
   // and a few herbs on the sill
@@ -1132,6 +1131,15 @@ function makeKitchen(mode) {
   for (y = 97; y < 127; y++) for (x = 103; x < 245; x++) if ((x * 7 + y * 3) % 13 === 0) put(x, y, [140, 88, 48]);
   [114, 138, 164, 192, 216, 236].forEach(function (hx) { rect(hx - 2, 99, 5, 1, CHR); put(hx - 2, 106, C.goldL); });
   rect(102, 96, 144, 1, DWL);
+
+  // the outlet by the window, with a light-sensor nightlight cover: thin light bars along its top and bottom edges
+  // come on by themselves after dark and wash the tile up and down, like hotel sconces
+  cur = OBJ.outlet;
+  rect(139, 68, 8, 13, [244, 242, 234]); rect(139, 68, 8, 1, [252, 250, 244]); rect(146, 69, 1, 12, [210, 206, 196]); rect(139, 80, 8, 1, [210, 206, 196]);
+  rect(140, 68, 6, 1, night ? [255, 236, 190] : [222, 218, 208], night); rect(140, 80, 6, 1, night ? [255, 236, 190] : [222, 218, 208], night);
+  [71, 76].forEach(function (oy) { put(141, oy, [90, 88, 84]); put(144, oy, [90, 88, 84]); put(142, oy + 2, [120, 118, 112]); put(143, oy + 2, [120, 118, 112]); });
+  put(145, 74, night ? [80, 80, 86] : [150, 146, 138]);
+  cur = 0;
 
   // sink: a steel basin set into the counter, gooseneck faucet
   cur = OBJ.sink;
@@ -1290,16 +1298,16 @@ function makeKitchenLight(mode) {
   for (var y = 0; y < SH; y++) for (var x = 0; x < SW; x++) {
     var i = y * SW + x, b = BAYER[(y & 3) * 4 + (x & 3)], g = 0, a;
     if (mode === "dark") {
-      // the strip lights under the cabinets and over the stove wash the backsplash and counter; the string lights glow
-      a = 0.26;
-      if (y >= 50 && y < 100) {
-        var fall = Math.max(0, 1 - (y - 50) / 50);
-        if ((x >= 100 && x < 248) || (x >= 58 && x < 102)) g += 0.55 * fall + 0.25;
-      }
+      // the outlet nightlight throws a soft fan of light up the tile to the cabinets and down onto the counter;
+      // the string lights glow around the cart
+      a = 0.24;
+      var ux = x - 142.5, up = 68 - y, dn = y - 80;
+      if (up > 0 && Math.abs(ux) < 3 + up * 0.28) g += Math.max(0, 1 - up / 26) * 0.75 * (1 - Math.abs(ux) / (3 + up * 0.28) * 0.5);
+      if (dn > 0 && y < 96 && Math.abs(ux) < 3 + dn * 0.6) g += Math.max(0, 1 - dn / 22) * 0.75 * (1 - Math.abs(ux) / (3 + dn * 0.6) * 0.5);
+      var hx = x - 142.5, hy = (y - 74) * 1.6, hd = Math.sqrt(hx * hx + hy * hy);
+      g += Math.max(0, 1 - hd / 22) * 0.25;
       var lx = x - 277, ly = y - 108, ld = Math.sqrt(lx * lx * 0.45 + ly * ly * 0.7);
       g += Math.pow(Math.max(0, 1 - ld / 46), 1.5) * 0.6;
-      var cx = x - 178, cy = y - 132, cd = Math.sqrt(cx * cx * 0.4 + cy * cy * 2);
-      g += Math.max(0, 1 - cd / 70) * 0.25;
       g = q(Math.min(1.1, g), 6, b);
     } else {
       // daylight from the window over the sink
@@ -1340,6 +1348,7 @@ var HOTS = [
   { id: "stove", scene: "kitchen", name: "the stove", verb: "Look at", x: 55, y: 73, w: 48, h: 58 },
   { id: "coffee", scene: "kitchen", name: "the coffee setup", verb: "Make coffee at", x: 248, y: 64, w: 58, h: 68 },
   { id: "sink", scene: "kitchen", name: "the sink", verb: "Use", x: 157, y: 78, w: 42, h: 18 },
+  { id: "outlet", scene: "kitchen", name: "the nightlight", verb: "Look at", x: 138, y: 67, w: 10, h: 15 },
   { id: "fruit", scene: "kitchen", name: "the fruit bowl", verb: "Look at", x: 112, y: 77, w: 26, h: 17 },
   { id: "recipes", scene: "kitchen", name: "the recipe box", verb: "Open", x: 211, y: 79, w: 20, h: 14 }
 ];
@@ -1371,7 +1380,7 @@ var ZONES = {
   recipes: { x: 176, y: 54, w: 92, h: 50 },
   coffee: { x: 240, y: 8, w: 72, h: 126 }
 };
-var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", fridge: "fridge", stove: "stove", sink: "sink", kwindow: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
+var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", fridge: "fridge", stove: "stove", sink: "sink", kwindow: "sink", outlet: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
 var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1, recipes: 1 };
 
@@ -2067,9 +2076,10 @@ Room.prototype.act = function (id) {
     map: "A world map with a pin in every city Ryan has been to.",
     // kitchen
     fridge: "You open the fridge. Leftovers, mostly.",
-    stove: "A red Dutch oven sits on the stove.",
+    stove: "A red Dutch oven sits on the stove. It looks well used.",
     sink: "The dishes are done.",
     kwindow: night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.",
+    outlet: night ? "A nightlight in the outlet. It came on by itself when it got dark." : "A nightlight in the outlet. It comes on by itself when it gets dark.",
     fruit: "You take an apple. The bananas are a day or two from banana bread.",
     recipes: "A recipe box, with a faded printout tucked in the front.",
     coffee: "Ryan's coffee setup: an espresso machine, a grinder full of beans and a drip brewer.",
