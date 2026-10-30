@@ -203,7 +203,7 @@ body { margin: 0; background: #1C251B; }
 .inv-btn[hidden] { display: none; }
 /* At the door: two wide buttons over the same two rows, so the HUD keeps its height going in */
 .inv-hall { grid-column: 1 / -1; }
-/* Floor plan (apartment flag): the rooms as a little blueprint beside the menu, walls between them with doorways cut
+/* Floor plan: the rooms as a little blueprint beside the menu, walls between them with doorways cut
    through, and the front door in the living room's bottom wall. Kitchen, living room, bedroom, left to right; the
    room you're in is outlined in gold. */
 .plan { position: relative; flex: 0 0 172px; min-height: 86px; display: flex; gap: 3px; background: #0E120D; border: 3px solid #0E120D; box-shadow: 0 0 0 2px var(--hudLine); }
@@ -228,7 +228,6 @@ body { margin: 0; background: #1C251B; }
 .daynight { position: absolute; top: -4px; right: 0; min-height: 30px; padding: 0 10px; background: var(--invBg); color: var(--hudInk); border: 2px solid var(--hudLine); font-family: Silkscreen, monospace; font-size: 11px; }
 .daynight[aria-checked="true"] { color: var(--gold); }
 .daynight[hidden] { display: none; }
-.plan-two .plan-door-front { left: calc(30% - 8px); }
 .has-plan .action { padding-right: 100px; }
 .has-plan .inv { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 /* Fade between rooms */
