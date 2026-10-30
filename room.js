@@ -1135,10 +1135,12 @@ function makeKitchen(mode) {
   // the outlet by the window, with a light-sensor nightlight cover: thin light bars along its top and bottom edges
   // come on by themselves after dark and wash the tile up and down, like hotel sconces
   cur = OBJ.outlet;
-  rect(139, 68, 8, 13, [244, 242, 234]); rect(139, 68, 8, 1, [252, 250, 244]); rect(146, 69, 1, 12, [210, 206, 196]); rect(139, 80, 8, 1, [210, 206, 196]);
-  rect(140, 68, 6, 1, night ? [255, 236, 190] : [222, 218, 208], night); rect(140, 80, 6, 1, night ? [255, 236, 190] : [222, 218, 208], night);
-  [71, 76].forEach(function (oy) { put(141, oy, [90, 88, 84]); put(144, oy, [90, 88, 84]); put(142, oy + 2, [120, 118, 112]); put(143, oy + 2, [120, 118, 112]); });
-  put(145, 74, night ? [80, 80, 86] : [150, 146, 138]);
+  // a white plate and cover, set on end
+  rect(139, 66, 8, 16, [236, 234, 226]); rect(139, 66, 8, 1, [250, 248, 242]); rect(139, 66, 1, 16, [248, 246, 238]); rect(146, 66, 1, 16, [200, 196, 186]); rect(139, 81, 8, 1, [200, 196, 186]);
+  rect(140, 67, 6, 14, [242, 240, 232]); rect(145, 68, 1, 12, [214, 210, 200]);
+  rect(141, 67, 4, 1, night ? [255, 240, 204] : [214, 212, 204], night); rect(141, 80, 4, 1, night ? [255, 240, 204] : [214, 212, 204], night);
+  [70, 75].forEach(function (oy) { put(141, oy, [90, 88, 84]); put(144, oy, [90, 88, 84]); put(142, oy + 2, [120, 118, 112]); put(143, oy + 2, [120, 118, 112]); });
+  disc(143, 79, 0, night ? [120, 120, 126] : [170, 168, 160]);
   cur = 0;
 
   // sink: a steel basin set into the counter, gooseneck faucet
@@ -1301,11 +1303,13 @@ function makeKitchenLight(mode) {
       // the outlet nightlight throws a soft fan of light up the tile to the cabinets and down onto the counter;
       // the string lights glow around the cart
       a = 0.24;
-      var ux = x - 142.5, up = 68 - y, dn = y - 80;
-      if (up > 0 && Math.abs(ux) < 3 + up * 0.28) g += Math.max(0, 1 - up / 26) * 0.75 * (1 - Math.abs(ux) / (3 + up * 0.28) * 0.5);
-      if (dn > 0 && y < 96 && Math.abs(ux) < 3 + dn * 0.6) g += Math.max(0, 1 - dn / 22) * 0.75 * (1 - Math.abs(ux) / (3 + dn * 0.6) * 0.5);
-      var hx = x - 142.5, hy = (y - 74) * 1.6, hd = Math.sqrt(hx * hx + hy * hy);
-      g += Math.max(0, 1 - hd / 22) * 0.25;
+      // a soft wash, brightest right at the cover and fading out as it spreads; it catches the underside of the
+      // cabinet above and pools on the counter below
+      var ux = x - 143, up = 66 - y, dn = y - 81, wu = 3 + up * 0.32, wd = 3 + dn * 0.55, e;
+      if (up > 0 && y >= 49 && Math.abs(ux) < wu) { e = 1 - Math.abs(ux) / wu; g += Math.pow(Math.max(0, 1 - up / 20), 1.3) * 0.8 * e * e + (y <= 50 ? 0.5 * e : 0); }
+      if (dn > 0 && y < 97 && Math.abs(ux) < wd) { e = 1 - Math.abs(ux) / wd; g += Math.pow(Math.max(0, 1 - dn / 18), 1.2) * 0.8 * e * e + (y >= 92 ? 0.25 * e : 0); }
+      var hx = x - 143, hy = (y - 74) * 1.4, hd = Math.sqrt(hx * hx + hy * hy);
+      g += Math.max(0, 1 - hd / 18) * 0.3 + (x >= 139 && x <= 146 && y >= 66 && y <= 81 ? 0.55 : 0);
       var lx = x - 277, ly = y - 108, ld = Math.sqrt(lx * lx * 0.45 + ly * ly * 0.7);
       g += Math.pow(Math.max(0, 1 - ld / 46), 1.5) * 0.6;
       g = q(Math.min(1.1, g), 6, b);
@@ -1348,7 +1352,7 @@ var HOTS = [
   { id: "stove", scene: "kitchen", name: "the stove", verb: "Look at", x: 55, y: 73, w: 48, h: 58 },
   { id: "coffee", scene: "kitchen", name: "the coffee setup", verb: "Make coffee at", x: 248, y: 64, w: 58, h: 68 },
   { id: "sink", scene: "kitchen", name: "the sink", verb: "Use", x: 157, y: 78, w: 42, h: 18 },
-  { id: "outlet", scene: "kitchen", name: "the nightlight", verb: "Look at", x: 138, y: 67, w: 10, h: 15 },
+  { id: "outlet", scene: "kitchen", name: "the nightlight", verb: "Look at", x: 138, y: 65, w: 10, h: 18 },
   { id: "fruit", scene: "kitchen", name: "the fruit bowl", verb: "Look at", x: 112, y: 77, w: 26, h: 17 },
   { id: "recipes", scene: "kitchen", name: "the recipe box", verb: "Open", x: 211, y: 79, w: 20, h: 14 }
 ];
