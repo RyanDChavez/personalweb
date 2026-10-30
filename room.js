@@ -704,6 +704,27 @@ function makeBedroom(mode) {
     }
   }
 
+  // oriental rug on the floor in front of the desk, widening toward the viewer; the chair stands on it and it tucks
+  // under the bed. Red field, navy border between cream guard stripes, a stepped medallion, fringe on the short ends
+  var RY0 = 134, RY1 = 176, RCR = [226, 210, 170], RNV = [36, 48, 92], RRD = [152, 40, 42], RRDD = [118, 30, 34], RGD = [206, 160, 80];
+  for (y = RY0; y <= RY1; y++) {
+    var rt = (y - RY0) / (RY1 - RY0), rl = 30 - 12 * rt, rr = 186 + 12 * rt, rw = rr - rl;
+    for (x = Math.ceil(rl); x <= Math.floor(rr); x++) {
+      var ru = (x - rl) / rw, bu = Math.min(ru, 1 - ru) * rw, bv = Math.min(rt, 1 - rt) * (RY1 - RY0) * 1.6, rd = Math.min(bu, bv), rc;
+      if (rd < 1) rc = [52, 30, 36];
+      else if (rd < 2.5) rc = RCR;
+      else if (rd < 6.5) rc = (x + y) % 4 === 0 ? [176, 56, 50] : RNV;
+      else if (rd < 8) rc = RCR;
+      else {
+        var mu = Math.abs(ru - 0.5) * rw, mv = Math.abs(rt - 0.5) * (RY1 - RY0) * 1.6, md = mu + mv * 1.4;
+        rc = md < 4 ? RCR : (md < 10 ? RRD : (md < 17 ? RGD : (md < 25 ? RNV : ((x * 3 + y * 5) % 17 === 0 ? RGD : ((x + y * 2) % 7 === 0 ? RRDD : RRD)))));
+        if (bu < 22 && bv < 14 && bu + bv * 1.4 < 26) rc = (x + y) % 3 === 0 ? RGD : RNV;
+      }
+      put(x, y, rc);
+    }
+    if (y % 2 === 0) { put(Math.ceil(rl) - 1, y, RCR); put(Math.ceil(rl) - 2, y, RCR); put(Math.floor(rr) + 1, y, RCR); put(Math.floor(rr) + 2, y, RCR); }
+  }
+
   // framed world map over the desk, with pins in the places in Ryan's story
   cur = OBJ.map;
   var MX = 80, MY = 10, OCN = [150, 186, 196], OCNL = [164, 198, 206], LND = [226, 210, 160], LNDD = [196, 176, 124];
