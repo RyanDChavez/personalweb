@@ -4,8 +4,8 @@
 var SW = 320, SH = 180, FLOOR = 128, CELL = 3;
 
 var TOKENS = {
-  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", dial: "#E9DDB8", invBg: "#2A3829", invOn: "#E2BF5E", hallWall: "#D6CDB4", hallFloor: "#BDBBB3", bedWall: "#AEBBC1", bedFloor: "#9C7048", themeColor: "#1D251C" },
-  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", dial: "#F2C46B", invBg: "#141A14", invOn: "#E2BF5E", hallWall: "#5E594F", hallFloor: "#3A3936", bedWall: "#353C40", bedFloor: "#2E241C", themeColor: "#0A0E0A" }
+  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", dial: "#E9DDB8", invBg: "#2A3829", invOn: "#E2BF5E", hallWall: "#D6CDB4", hallFloor: "#BDBBB3", bedWall: "#AEBBC1", bedFloor: "#9C7048", kitWall: "#E8DEC6", kitFloor: "#3A5446", themeColor: "#1D251C" },
+  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", dial: "#F2C46B", invBg: "#141A14", invOn: "#E2BF5E", hallWall: "#5E594F", hallFloor: "#3A3936", bedWall: "#353C40", bedFloor: "#2E241C", kitWall: "#3B3730", kitFloor: "#18221C", themeColor: "#0A0E0A" }
 };
 
 var C = {
@@ -19,7 +19,7 @@ var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122,
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
 // Object ids painted into the scene, used for in-scene highlights.
-var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21, nlamp: 22, map: 23 };
+var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21, nlamp: 22, map: 23, fridge: 24, stove: 25, sink: 26, fruit: 27, recipes: 28, coffee: 29, kprint: 30, klights: 31, kwindow: 32 };
 
 function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
@@ -1052,6 +1052,234 @@ function makeBedroomLight(mode) {
   return mode === "dark" ? { A: A, G: G, at: [0.84, 0.92, 1.08], gt: [1.22, 1.06, 0.72] } : { A: A, G: G, at: [1, 1, 1], gt: [1.1, 1.04, 0.84] };
 }
 
+// ---- the kitchen (behind the kitchen flag): a mint fridge, a white range with Ryan's red Dutch oven, the sink
+// under a window, walnut cabinets, and Ryan's coffee bar cart with the Oakland Chinatown print above it ----
+var KFLOOR = 132;
+
+function makeKitchen(mode) {
+  var col = new Uint8ClampedArray(SW * SH * 3), emis = new Uint8Array(SW * SH), obj = new Uint8Array(SW * SH), cur = 0;
+  var ox = 0; // shifts a whole piece into place
+  function put(x, y, c, e) { x = Math.round(x + ox); y = Math.round(y); if (x < 0 || y < 0 || x >= SW || y >= SH) return; var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = e ? 1 : 0; obj[i] = cur; }
+  function rect(x, y, w, h, c, e) { for (var j = y; j < y + h; j++) for (var i = x; i < x + w; i++) put(i, j, c, e); }
+  function disc(cx, cy, rr, c, cl) { for (var yy = -rr; yy <= rr; yy++) for (var xx = -rr; xx <= rr; xx++) if (xx * xx + yy * yy <= rr * rr + rr * 0.6) put(cx + xx, cy + yy, cl && xx + yy < -rr * 0.6 ? cl : c); }
+  var night = mode === "dark", x, y, i, r = rng(night ? 31 : 29);
+
+  // cream plaster, wood crown, white baseboard
+  for (y = 0; y < KFLOOR; y++) for (x = 0; x < SW; x++) put(x, y, (x * 7 + y * 5) % 13 === 0 ? [222, 210, 184] : [232, 222, 198]);
+  rect(0, 0, SW, 3, C.teakD); rect(0, 3, SW, 1, C.teak);
+  rect(0, KFLOOR - 5, SW, 4, [236, 230, 212]); rect(0, KFLOOR - 1, SW, 1, [184, 176, 154]);
+  // a checkerboard floor of cream and green tiles, receding to the same vanishing point as the bedroom's rug
+  for (y = KFLOOR; y < SH; y++) {
+    var s = (y + 200) / (KFLOOR + 200), tj = Math.floor((2400 / (y + 200)) / 0.14);
+    for (x = 0; x < SW; x++) {
+      var ti = Math.floor((160 + (x - 160) / s) / 13), dark = (ti + tj) % 2 === 0;
+      put(x, y, dark ? ((x * 3 + y * 5) % 23 === 0 ? [70, 98, 82] : [58, 84, 70]) : ((x * 5 + y * 3) % 29 === 0 ? [214, 206, 182] : [228, 220, 196]));
+    }
+  }
+
+  // sage tile backsplash between the counters and the cabinets
+  var TILE = [160, 188, 164], TILEL = [176, 202, 180], GROUT = [216, 214, 198];
+  for (y = 52; y < 92; y++) for (x = 56; x < 246; x++) put(x, y, (y - 52) % 5 === 4 || (x - 56) % 5 === 4 ? GROUT : ((x + y) % 11 === 0 ? TILEL : TILE));
+
+  // walnut upper cabinets, with a strip light underneath that glows at night
+  var DW = [154, 98, 54], DWL = [186, 128, 76], DWD = [108, 66, 34];
+  [[102, 46], [208, 38]].forEach(function (u) {
+    var ux = u[0], uw = u[1], hw = uw / 2;
+    rect(ux, 14, uw, 36, DW); rect(ux, 14, uw, 1, DWL); rect(ux, 49, uw, 1, DWD);
+    rect(ux + hw, 15, 1, 34, DWD); rect(ux, 15, 1, 34, DWL); rect(ux + uw - 1, 15, 1, 34, DWD);
+    for (y = 16; y < 48; y++) for (x = ux + 1; x < ux + uw - 1; x++) if (x !== ux + hw && (x * 7 + y * 3) % 13 === 0) put(x, y, [140, 88, 48]);
+    put(ux + hw - 3, 45, C.goldL); put(ux + hw + 3, 45, C.goldL);
+    rect(ux + 2, 50, uw - 4, 1, night ? [255, 228, 170] : [200, 196, 184], night);
+  });
+
+  // white range hood over the stove
+  var EN = [238, 236, 228], ENL = [250, 248, 242], END = [196, 194, 186], CHR = [196, 198, 204], CHRD = [132, 134, 140];
+  rect(58, 40, 44, 8, EN); rect(58, 40, 44, 1, ENL); rect(56, 46, 48, 3, EN); rect(56, 48, 48, 1, END); rect(62, 49, 36, 1, night ? [255, 228, 170] : CHRD, night);
+
+  // window over the sink: across the courtyard, rooftops with a wooden water tower; a fire escape rail outside,
+  // and a few herbs on the sill
+  cur = OBJ.kwindow;
+  rect(148, 18, 60, 58, C.teak);
+  var KX0 = 151, KX1 = 205, KY0 = 21, KY1 = 73;
+  for (y = KY0; y < KY1; y++) for (x = KX0; x < KX1; x++) put(x, y, night ? mix([10, 14, 30], [40, 34, 58], (y - KY0) / 30) : mix([140, 186, 206], [222, 226, 212], Math.min(1, (y - KY0) / 30)), true);
+  var BLD = night ? [34, 32, 40] : [176, 158, 140], BLDD = night ? [26, 24, 32] : [150, 132, 116];
+  for (x = KX0; x < KX1; x++) { var top = x < 170 ? 46 : (x < 188 ? 52 : 44); for (y = top; y < KY1; y++) put(x, y, (x + y) % 9 === 0 ? BLDD : BLD, true); }
+  for (var wy = 50; wy < 70; wy += 8) for (var wx = KX0 + 3; wx < KX1 - 3; wx += 7) if (wy >= (wx < 170 ? 49 : (wx < 188 ? 55 : 47))) rect(wx, wy, 3, 4, night && r() < 0.5 ? [244, 206, 128] : (night ? [18, 20, 28] : [96, 112, 124]), true);
+  // the water tower on the left roof: barrel, conical cap, legs
+  var WT = night ? [40, 30, 26] : [122, 84, 56], WTD = night ? [30, 22, 20] : [92, 62, 40];
+  rect(156, 32, 11, 10, WT, true); for (y = 33; y < 42; y += 3) rect(156, y, 11, 1, WTD, true);
+  for (i = 0; i < 4; i++) rect(156 + i, 31 - i, 11 - i * 2, 1, WTD, true);
+  rect(157, 42, 1, 4, WTD, true); rect(165, 42, 1, 4, WTD, true); rect(161, 42, 1, 4, WTD, true);
+  // fire escape rail
+  var FE = night ? [16, 16, 18] : [40, 40, 44];
+  rect(KX0, 62, KX1 - KX0, 1, FE, true); rect(KX0, 70, KX1 - KX0, 1, FE, true);
+  for (x = KX0 + 2; x < KX1; x += 4) rect(x, 62, 1, 9, FE, true);
+  rect(177, KY0, 2, KY1 - KY0, C.teak);
+  rect(146, 74, 64, 3, C.teakL);
+  // herbs on the sill: terracotta pots
+  [[154, 5], [163, 4], [198, 5]].forEach(function (p, k) {
+    var TC = [190, 104, 64], TCD = [150, 78, 46];
+    rect(p[0], 70, p[1], 4, TC); rect(p[0], 70, p[1], 1, [210, 128, 86]); rect(p[0] + p[1] - 1, 71, 1, 3, TCD);
+    for (var n = 0; n < 9; n++) put(p[0] + Math.floor(r() * p[1]), 64 + Math.floor(r() * 6) + (k === 1 ? 2 : 0), r() < 0.5 ? [78, 132, 70] : [104, 160, 86]);
+  });
+
+  // counter run: white laminate with a chrome edge over walnut drawers and doors, a dark toe kick
+  cur = 0;
+  rect(102, 92, 144, 3, [232, 228, 216]); rect(102, 92, 144, 1, [246, 244, 236]); rect(102, 95, 144, 1, CHR);
+  rect(102, 96, 144, 31, DW); rect(102, 127, 144, 5, [70, 46, 28]);
+  [102, 126, 150, 178, 206, 226, 246].forEach(function (dx) { rect(dx, 96, 1, 31, DWD); });
+  rect(102, 103, 144, 1, DWD);
+  for (y = 97; y < 127; y++) for (x = 103; x < 245; x++) if ((x * 7 + y * 3) % 13 === 0) put(x, y, [140, 88, 48]);
+  [114, 138, 164, 192, 216, 236].forEach(function (hx) { rect(hx - 2, 99, 5, 1, CHR); put(hx - 2, 106, C.goldL); });
+  rect(102, 96, 144, 1, DWL);
+
+  // sink: a steel basin set into the counter, gooseneck faucet
+  cur = OBJ.sink;
+  rect(160, 92, 36, 2, [112, 116, 122]); rect(159, 92, 38, 1, [206, 210, 216]); rect(160, 94, 36, 1, [150, 154, 160]);
+  rect(177, 81, 2, 11, CHR); rect(177, 81, 1, 11, [232, 234, 238]); rect(178, 80, 7, 2, CHR); rect(184, 82, 1, 4, CHRD);
+  rect(171, 89, 3, 2, CHR); rect(182, 89, 3, 2, CHR);
+  // a dish towel hung on the cabinet door below
+  rect(170, 104, 8, 12, [236, 234, 228]); for (y = 105; y < 116; y += 3) rect(170, y, 8, 1, [118, 120, 132]);
+
+  // fruit bowl: a shallow walnut bowl of apples and bananas
+  cur = OBJ.fruit;
+  rect(116, 90, 20, 2, DW); rect(114, 88, 24, 2, DWL); rect(118, 92, 16, 1, DWD);
+  disc(120, 85, 3, [190, 36, 40], [226, 84, 76]); disc(127, 86, 3, [176, 30, 36], [214, 72, 68]); disc(123, 83, 3, [132, 178, 72], [176, 210, 112]);
+  put(120, 81, [90, 60, 30]); put(123, 79, [90, 60, 30]);
+  for (i = 0; i <= 12; i++) {
+    var bx = 124 + i, by = 85 - Math.round(Math.sin(i / 12 * Math.PI) * 4) - Math.round(i * 0.25);
+    put(bx, by, i === 0 || i === 12 ? [92, 70, 30] : [242, 208, 72]); put(bx, by + 1, i === 0 || i === 12 ? [92, 70, 30] : (i % 4 === 0 ? [212, 170, 48] : [232, 196, 62]));
+    if (i > 1 && i < 11) put(bx, by - 1, [250, 226, 120]);
+  }
+
+  // recipe box: a walnut box, a brass label plate, index cards with colored tabs standing up inside
+  cur = OBJ.recipes;
+  rect(215, 81, 12, 4, [244, 240, 228]); rect(215, 83, 12, 1, [214, 208, 192]);
+  rect(216, 80, 3, 1, [214, 96, 72]); rect(221, 80, 3, 1, [78, 108, 176]); rect(224, 82, 2, 1, [214, 170, 90]);
+  rect(213, 84, 16, 8, DW); rect(213, 84, 16, 1, DWL); rect(213, 91, 16, 1, DWD); rect(228, 85, 1, 6, DWD);
+  rect(218, 87, 6, 3, C.gold); rect(219, 88, 4, 1, [244, 240, 228]);
+
+  // the range: white enamel, backguard with a clock and four knobs, a black cooktop, oven window, chrome handle
+  cur = OBJ.stove;
+  rect(56, 74, 46, 13, EN); rect(56, 74, 46, 1, ENL); rect(56, 74, 46, 1, CHR); rect(101, 75, 1, 12, END);
+  disc(79, 79, 3, [250, 246, 232]); put(79, 78, [40, 40, 44]); put(79, 77, [40, 40, 44]); put(80, 79, [40, 40, 44]); put(79, 79, [200, 60, 50]);
+  [62, 68, 90, 96].forEach(function (kx) { rect(kx, 83, 2, 2, [40, 40, 44]); put(kx, 83, [110, 110, 116]); });
+  rect(56, 87, 46, 5, [44, 44, 48]); rect(56, 87, 46, 1, [70, 70, 76]);
+  [[60, 72], [84, 98]].forEach(function (b) { rect(b[0], 89, b[1] - b[0], 1, [24, 24, 26]); rect(b[0] + 2, 90, b[1] - b[0] - 4, 1, [86, 86, 92]); });
+  rect(56, 92, 46, 35, EN); rect(56, 92, 1, 35, ENL); rect(101, 92, 1, 35, END); rect(56, 126, 46, 1, END);
+  rect(58, 96, 42, 1, CHR); rect(58, 97, 42, 1, CHRD);
+  rect(62, 100, 34, 19, END); rect(64, 102, 30, 15, night ? [24, 22, 24] : [52, 50, 54]); rect(64, 102, 30, 1, [80, 78, 84]);
+  rect(58, 121, 42, 1, END);
+  rect(58, 127, 3, 4, [40, 40, 44]); rect(97, 127, 3, 4, [40, 40, 44]);
+  // the striped towel from the coffee cart has a twin on the oven handle
+  rect(66, 97, 7, 11, [236, 234, 228]); for (y = 98; y < 108; y += 2) rect(66, y, 7, 1, [126, 128, 140]); rect(72, 98, 1, 10, [196, 194, 188]);
+
+  // Ryan's red Dutch oven on the back burner: enamel body, a darker rim, lid with a steel knob, loop handles
+  var RD = [196, 40, 36], RDL = [232, 90, 70], RDD = [138, 24, 24];
+  rect(60, 80, 17, 9, RD); rect(61, 89, 15, 1, RDD); rect(60, 80, 17, 1, RDD); rect(76, 81, 1, 8, RDD);
+  rect(61, 82, 2, 5, RDL); put(63, 83, RDL);
+  rect(61, 78, 15, 2, RD); rect(63, 77, 11, 1, RD); rect(63, 77, 6, 1, RDL);
+  rect(67, 75, 3, 2, CHR); put(67, 75, [232, 234, 238]);
+  put(59, 82, RDD); put(59, 83, RDD); put(77, 82, RDD); put(77, 83, RDD);
+
+  // mint fridge with rounded shoulders: freezer on top, chrome handles and badge, a grille at the foot
+  cur = OBJ.fridge;
+  var MT = [178, 214, 198], MTL = [206, 232, 220], MTD = [140, 178, 162];
+  rect(6, 24, 46, 103, MT); rect(4, 26, 50, 101, MT); rect(5, 25, 48, 1, MT);
+  rect(6, 24, 44, 1, MTL); rect(4, 26, 1, 100, MTL); rect(53, 26, 1, 100, MTD); rect(52, 25, 1, 1, MTD);
+  rect(4, 58, 50, 1, MTD); rect(4, 59, 50, 1, MTL);
+  rect(47, 36, 2, 16, CHR); rect(47, 36, 1, 16, [232, 234, 238]); rect(47, 64, 2, 24, CHR); rect(47, 64, 1, 24, [232, 234, 238]);
+  rect(22, 29, 14, 2, CHR); rect(23, 29, 4, 1, [232, 234, 238]);
+  rect(4, 120, 50, 7, MTD); for (x = 8; x < 50; x += 3) rect(x, 122, 2, 3, [96, 120, 110]);
+  rect(6, 127, 4, 4, [40, 40, 44]); rect(48, 127, 4, 4, [40, 40, 44]);
+  // a few magnets: a Dodgers one, a postcard, a little red one
+  disc(16, 70, 3, [26, 84, 164]); put(15, 70, [240, 240, 236]); put(16, 69, [240, 240, 236]); put(17, 70, [240, 240, 236]);
+  rect(26, 66, 12, 9, [240, 234, 216]); rect(27, 67, 10, 5, [110, 160, 196]); rect(27, 70, 10, 2, [214, 190, 120]); put(31, 65, [200, 60, 50]);
+  rect(14, 84, 3, 3, [200, 60, 50]);
+
+  ox = -9; // the cart and the print, in from the right edge
+  // Ryan's coffee bar cart: black steel frame, walnut tray, wine glasses hanging upside down underneath
+  cur = OBJ.coffee;
+  var BK = [36, 36, 40], BKL = [70, 70, 76];
+  rect(258, 94, 2, 37, BK); rect(313, 94, 2, 37, BK); rect(258, 103, 57, 2, BK); rect(258, 103, 57, 1, BKL);
+  rect(259, 94, 55, 4, DW); rect(259, 94, 55, 1, DWL); rect(259, 97, 55, 1, DWD);
+  rect(258, 94, 3, 4, BK); rect(312, 94, 3, 4, BK);
+  [267, 277, 287, 297, 306].forEach(function (gx) {
+    var GL = [204, 216, 222], GLL = [240, 246, 248], GLD = [150, 164, 172];
+    rect(gx - 2, 105, 5, 1, GLD); rect(gx, 106, 1, 6, GL);
+    for (y = 112; y < 121; y++) { var hw2 = y < 114 ? 1 : (y < 119 ? 3 : 2); rect(gx - hw2, y, hw2 * 2 + 1, 1, GL); put(gx - hw2, y, GLD); put(gx + hw2, y, GLD); if (y > 113 && y < 119) put(gx - hw2 + 1, y, GLL); }
+  });
+  // on the tray: the DeLonghi espresso machine with a striped towel on top, the black grinder full of beans with a
+  // steel cup on its lid, a tamper, and the drip brewer over its glass carafe
+  var SS = [176, 178, 184], SSL = [214, 216, 222], SSD = [120, 122, 128];
+  rect(261, 77, 16, 17, [30, 30, 32]); rect(262, 77, 14, 7, SS); rect(262, 77, 14, 1, SSL); disc(269, 80, 2, SSL, [240, 242, 246]); put(269, 80, SSD);
+  rect(264, 85, 10, 7, SSD); rect(265, 86, 8, 2, SS); rect(263, 88, 3, 1, [20, 20, 22]); rect(261, 89, 3, 1, [20, 20, 22]);
+  rect(263, 92, 12, 2, SS); put(273, 79, [90, 200, 110], night);
+  rect(260, 73, 18, 4, [236, 234, 228]); for (x = 260; x < 278; x += 3) rect(x, 73, 1, 4, [126, 128, 140]); rect(260, 77, 3, 4, [236, 234, 228]); put(261, 78, [126, 128, 140]);
+  rect(281, 82, 12, 12, [30, 30, 32]); rect(281, 82, 1, 12, [60, 60, 64]); rect(285, 86, 4, 3, SSD); rect(286, 89, 2, 2, SS); put(291, 84, [200, 60, 50]); disc(293, 88, 1, SS);
+  rect(282, 74, 10, 8, [210, 214, 216]); for (y = 75; y < 81; y++) for (x = 283; x < 291; x++) put(x, y, (x * 3 + y * 5) % 4 === 0 ? [98, 62, 38] : [62, 40, 26]); rect(281, 73, 12, 1, [30, 30, 32]);
+  rect(284, 68, 4, 5, SS); rect(284, 68, 1, 5, SSL); rect(283, 68, 6, 1, SSL);
+  rect(294, 89, 3, 5, [30, 30, 32]); rect(294, 88, 3, 1, [60, 60, 64]);
+  rect(309, 74, 3, 20, SS); rect(309, 74, 1, 20, SSL);
+  rect(298, 74, 13, 2, [30, 30, 32]); rect(299, 76, 11, 2, [30, 30, 32]); rect(301, 78, 7, 2, [30, 30, 32]); rect(303, 80, 3, 2, [30, 30, 32]); rect(302, 72, 6, 2, SS);
+  rect(299, 83, 10, 11, [196, 210, 216]); rect(299, 83, 10, 1, [30, 30, 32]); rect(300, 90, 8, 3, [98, 62, 38]); rect(299, 84, 1, 9, [236, 244, 248]); rect(308, 85, 2, 5, [196, 210, 216]);
+
+  // the Oakland Chinatown print over the cart: storefronts drawn in red line on white, in a white frame
+  cur = OBJ.kprint;
+  rect(263, 16, 46, 52, [200, 196, 186]); rect(262, 15, 46, 52, [246, 244, 238]); rect(264, 17, 42, 48, [252, 250, 246]);
+  var INK = [204, 70, 76], INKL = [226, 146, 150];
+  // twenty little shopfronts, each a little different: a sign bar or an awning, a door, a window or two
+  for (var row = 0; row < 5; row++) for (var cl = 0; cl < 4; cl++) {
+    var sx = 266 + cl * 10, sy = 19 + row * 9, sw = 8 + (r() < 0.3 ? -1 : 0), sh = 7, tall = r() < 0.35 ? 1 : 0;
+    rect(sx, sy + 1 - tall, sw, 1, INKL); rect(sx, sy + sh, sw, 1, INKL); rect(sx, sy + 1 - tall, 1, sh + tall, INKL); rect(sx + sw - 1, sy + 1 - tall, 1, sh + tall, INKL);
+    if (r() < 0.5) rect(sx, sy + 2, sw, 2, INK); else { rect(sx + 1, sy + 2, sw - 2, 1, INK); for (var aw = sx + 1; aw < sx + sw - 1; aw += 2) put(aw, sy + 3, INK); }
+    var door = sx + 1 + Math.floor(r() * (sw - 4));
+    rect(door, sy + 5, 2, 2, INK);
+    if (door > sx + 3) put(sx + 1, sy + 5, INKL); else rect(sx + sw - 3, sy + 5, 2, 1, INKL);
+  }
+
+  // string lights down the right edge, in every color, lit at night
+  ox = -13;
+  cur = OBJ.klights;
+  var BUL = [[232, 60, 60], [80, 200, 96], [244, 160, 60], [80, 140, 230], [240, 110, 170]];
+  for (y = 4; y < 104; y++) put(317 + Math.round(Math.sin(y / 6) * 1.2), y, [40, 64, 44]);
+  for (i = 0, y = 7; y < 102; y += 6, i++) {
+    var bxx = 317 + Math.round(Math.sin(y / 6) * 1.2) + (i % 2 ? 1 : -1), bc = BUL[i % BUL.length];
+    put(bxx, y, night ? bc : mix(bc, [120, 116, 108], 0.55), night); put(bxx, y + 1, night ? mix(bc, [255, 255, 255], 0.4) : mix(bc, [120, 116, 108], 0.6), night);
+  }
+  ox = -9;
+  // and a run of little white ones under the cart's rack
+  for (x = 262; x < 312; x += 7) { put(x, 106 + (x % 3), night ? [255, 240, 196] : [200, 196, 184], night); }
+  cur = 0; ox = 0;
+  return { col: col, emis: emis, obj: obj };
+}
+
+function makeKitchenLight(mode) {
+  var A = new Float32Array(SW * SH), G = new Float32Array(SW * SH), q = function (v, steps, b) { return Math.floor(v * steps + b) / steps; };
+  for (var y = 0; y < SH; y++) for (var x = 0; x < SW; x++) {
+    var i = y * SW + x, b = BAYER[(y & 3) * 4 + (x & 3)], g = 0, a;
+    if (mode === "dark") {
+      // the strip lights under the cabinets and over the stove wash the backsplash and counter; the string lights glow
+      a = 0.26;
+      if (y >= 50 && y < 100) {
+        var fall = Math.max(0, 1 - (y - 50) / 50);
+        if ((x >= 100 && x < 248) || (x >= 58 && x < 102)) g += 0.55 * fall + 0.25;
+      }
+      var lx = x - 304, ly = y - 56, ld = Math.sqrt(lx * lx * 0.8 + ly * ly * 0.25);
+      g += Math.pow(Math.max(0, 1 - ld / 46), 1.5) * 0.6;
+      var cx = x - 178, cy = y - 132, cd = Math.sqrt(cx * cx * 0.4 + cy * cy * 2);
+      g += Math.max(0, 1 - cd / 70) * 0.25;
+      g = q(Math.min(1.1, g), 6, b);
+    } else {
+      // daylight from the window over the sink
+      var dx = (x - 178) / 200, dy = (y - 50) / 220;
+      a = q(1.04 - Math.sqrt(dx * dx + dy * dy) * 0.28, 12, b);
+    }
+    A[i] = a; G[i] = g;
+  }
+  return mode === "dark" ? { A: A, G: G, at: [0.84, 0.92, 1.08], gt: [1.2, 1.04, 0.74] } : { A: A, G: G, at: [1, 1, 1], gt: [1, 1, 1] };
+}
+
 var HOTS = [
   { id: "window", name: "the window", verb: "Look out", x: 12, y: 14, w: 86, h: 77 },
   { id: "shelf", name: "the bookshelf", verb: "Browse", x: 100, y: 16, w: 57, h: 112 },
@@ -1074,7 +1302,16 @@ var HOTS = [
   { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 108, y: 96, w: 36, h: 41 },
   { id: "apple", scene: "bedroom", name: "the computer", verb: "Use", x: 84, y: 56, w: 41, h: 41 },
   { id: "nlamp", scene: "bedroom", name: "the bedside lamp", verb: "Turn on", x: 298, y: 85, w: 18, h: 27 },
-  { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 152, y: 78, w: 26, h: 19 }
+  { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 152, y: 78, w: 26, h: 19 },
+  { id: "kprint", scene: "kitchen", name: "the print", verb: "Look at", x: 252, y: 14, w: 49, h: 54 },
+  { id: "kwindow", scene: "kitchen", name: "the window", verb: "Look out", x: 147, y: 17, w: 62, h: 57 },
+  { id: "fridge", scene: "kitchen", name: "the fridge", verb: "Open", x: 3, y: 23, w: 52, h: 108 },
+  { id: "stove", scene: "kitchen", name: "the stove", verb: "Look at", x: 55, y: 73, w: 48, h: 58 },
+  { id: "coffee", scene: "kitchen", name: "the coffee setup", verb: "Make coffee at", x: 248, y: 68, w: 57, h: 63 },
+  { id: "sink", scene: "kitchen", name: "the sink", verb: "Use", x: 157, y: 78, w: 42, h: 18 },
+  { id: "fruit", scene: "kitchen", name: "the fruit bowl", verb: "Look at", x: 112, y: 77, w: 26, h: 17 },
+  { id: "recipes", scene: "kitchen", name: "the recipe box", verb: "Open", x: 211, y: 79, w: 20, h: 14 },
+  { id: "klights", scene: "kitchen", name: "the string lights", verb: "Turn on", x: 300, y: 2, w: 8, h: 102 }
 ];
 
 // Camera zones: the part of the room each object zooms to.
@@ -1096,9 +1333,15 @@ var ZONES = {
   map: { x: 70, y: 2, w: 132, h: 60 },
   bass: { x: 36, y: 60, w: 60, h: 80 },
   bed: { x: 179, y: 68, w: 141, h: 108 },
-  desk: { x: 70, y: 50, w: 130, h: 88 }
+  desk: { x: 70, y: 50, w: 130, h: 88 },
+  fridge: { x: 0, y: 18, w: 74, h: 118 },
+  stove: { x: 40, y: 56, w: 80, h: 80 },
+  sink: { x: 136, y: 14, w: 84, h: 92 },
+  fruit: { x: 100, y: 68, w: 52, h: 30 },
+  recipes: { x: 198, y: 70, w: 46, h: 28 },
+  coffee: { x: 240, y: 8, w: 72, h: 126 }
 };
-var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map" };
+var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", fridge: "fridge", stove: "stove", sink: "sink", kwindow: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
 var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1 };
 
@@ -1403,14 +1646,19 @@ function storeMode(m) { try { sessionStorage.setItem(THEME_KEY, m); } catch (e) 
 
 var HALL_INTRO = "You're at Ryan's front door.";
 var BEDROOM_INTRO = "You step into Ryan's bedroom.";
+var KITCHEN_INTRO = "You step into the kitchen.";
 
 // The bedroom and the walk between rooms, released. ?apartment=0 hides them again for the tab (?apartment=1 brings
 // them back).
-var FLAGS = { apartment: true };
+var FLAGS = { apartment: true, kitchen: false };
 try {
   var flagParam = /[?&]apartment=([01])/.exec(location.search);
   if (flagParam) { if (flagParam[1] === "0") sessionStorage.setItem("flag-apartment", "0"); else sessionStorage.removeItem("flag-apartment"); }
   if (sessionStorage.getItem("flag-apartment") === "0") FLAGS.apartment = false;
+  // The kitchen isn't released yet: try it with ?kitchen=1 (sticks for the tab; ?kitchen=0 turns it off).
+  var kitParam = /[?&]kitchen=([01])/.exec(location.search);
+  if (kitParam) { if (kitParam[1] === "1") sessionStorage.setItem("flag-kitchen", "1"); else sessionStorage.removeItem("flag-kitchen"); }
+  if (sessionStorage.getItem("flag-kitchen") === "1") FLAGS.kitchen = true;
 } catch (e) {}
 function entered() { try { return sessionStorage.getItem("entered") === "1"; } catch (e) { return false; } }
 
@@ -1499,7 +1747,7 @@ function Room(root) {
   if (FLAGS.apartment) {
     var tabs = el("div", "room-tabs");
     tabs.setAttribute("role", "group"); tabs.setAttribute("aria-label", "Rooms");
-    [["room", "Living room"], ["bedroom", "Bedroom"]].forEach(function (d) {
+    [["room", "Living room"], ["bedroom", "Bedroom"]].concat(FLAGS.kitchen ? [["kitchen", "Kitchen"]] : []).forEach(function (d) {
       var b = el("button", "pbtn room-tab", d[1]);
       b.type = "button";
       b.addEventListener("click", function () { self.goTo(d[0]); });
@@ -1521,6 +1769,9 @@ function Room(root) {
   });
   [["desk", "Desk"], ["apple", "Computer"], ["bshelf", "Books"], ["bass", "Bass"], ["bed", "Bed"], ["map", "Map"], ["blamp", "Lamp"], ["room", "Room"]].forEach(function (d) {
     addInv("bedroom", d[0], d[1], d[0] === "room" ? self.back : function () { self.act(d[0]); });
+  });
+  [["fridge", "Fridge"], ["stove", "Stove"], ["sink", "Sink"], ["coffee", "Coffee"], ["fruit", "Fruit"], ["recipes", "Recipes"], ["klights", "Lights"], ["room", "Room"]].forEach(function (d) {
+    addInv("kitchen", d[0], d[1], d[0] === "room" ? self.back : function () { self.act(d[0]); });
   });
   [["bell", "Ring the bell"], ["door", "Open the door"]].forEach(function (d) {
     addInv("hall", d[0], d[1], function () { self.enter(d[0] === "bell"); }, "inv-hall");
@@ -1754,8 +2005,8 @@ Room.prototype.say = function (text) {
 
 Room.prototype.act = function (id) {
   var night = this.mode() === "dark";
-  if (id === "lamp" || id === "blamp" || id === "nlamp") {
-    var next = night ? "light" : "dark", which = id === "blamp" ? "the banker's lamp" : (id === "nlamp" ? "the bedside lamp" : "the lamp");
+  if (id === "lamp" || id === "blamp" || id === "nlamp" || id === "klights") {
+    var next = night ? "light" : "dark", which = id === "blamp" ? "the banker's lamp" : (id === "nlamp" ? "the bedside lamp" : (id === "klights" ? "the string lights" : "the lamp"));
     storeMode(next);
     this.setState({ mode: next });
     this.say(next === "dark" ? "You turn on " + which + "." : "You turn off " + which + ".");
@@ -1783,7 +2034,16 @@ Room.prototype.act = function (id) {
     dchair: "A wooden desk chair, pushed in.",
     bass: "A black Fender Jazz Bass on its stand. It's got plenty of dings picked up on the road.",
     bed: "The bed's made, under a green flower quilt.",
-    map: "A world map with a pin in every city Ryan has been to."
+    map: "A world map with a pin in every city Ryan has been to.",
+    // kitchen
+    fridge: "You open the fridge. Leftovers, mostly.",
+    stove: "A red Dutch oven sits on the stove.",
+    sink: "The dishes are done.",
+    kwindow: night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.",
+    fruit: "A bowl of bananas and apples.",
+    recipes: "A recipe box. The cards are still blank.",
+    coffee: "Ryan's coffee setup: an espresso machine, a grinder full of beans and a drip brewer.",
+    kprint: "A print of storefronts in Oakland's Chinatown."
   };
   var opener = document.activeElement;
   this.setState({ zone: ZONE_FOR[id] || null, open: PANELS[id] ? id : null, focusId: id });
@@ -1887,7 +2147,7 @@ Room.prototype.goTo = function (scene) {
   var swap = function () {
     st.classList.remove("ready");
     self.setState({ scene: scene, zone: null, open: null, focusId: null, hover: null });
-    self.say(scene === "bedroom" ? BEDROOM_INTRO : introFor(self.mode()));
+    self.say(scene === "bedroom" ? BEDROOM_INTRO : (scene === "kitchen" ? KITCHEN_INTRO : introFor(self.mode())));
     st.getBoundingClientRect();
     st.classList.add("ready");
   };
@@ -1996,7 +2256,7 @@ Room.prototype.brush = function (e) {
 
 Room.prototype.paint = function () {
   var hv = this.state.hover ? OBJ[this.state.hover] : 0;
-  var sc = this.state.scene, img = sc === "hall" ? this.hallImage(hv) : (sc === "bedroom" ? this.bedroomImage(hv) : this.roomImage(hv));
+  var sc = this.state.scene, img = sc === "hall" ? this.hallImage(hv) : (sc === "bedroom" ? this.bedroomImage(hv) : (sc === "kitchen" ? this.kitchenImage(hv) : this.roomImage(hv)));
   this.paintedHover = this.state.hover; this.paintedScene = this.state.scene; this.paintedMode = this.mode(); this.paintedRdx = this.state.open === "contact";
   this.canvas.getContext("2d").putImageData(img, 0, 0);
 };
@@ -2008,6 +2268,14 @@ Room.prototype.hallImage = function (hv) {
   col.set(h.col); emis.set(h.emis); obj.set(h.obj);
   drawDoor(h, col, emis, obj, this.doorP || 0, this.peek);
   return composite(col, emis, obj, this.hallLight, hv, B.img);
+};
+
+Room.prototype.kitchenImage = function (hv) {
+  var mode = this.mode();
+  if (this.kitFor !== mode) { this.kit = makeKitchen(mode); this.kitLight = makeKitchenLight(mode); this.kitFor = mode; }
+  var B = this.buf;
+  B.col.set(this.kit.col); B.emis.set(this.kit.emis); B.obj.set(this.kit.obj);
+  return composite(B.col, B.emis, B.obj, this.kitLight, hv, B.img);
 };
 
 // The computer's screen is a blank prompt: just the block cursor blinking in the corner (steady with reduced motion).
@@ -2151,7 +2419,7 @@ Room.prototype.camera = function () {
     tx = (vw - SW * S0) / 2; ty = (vh - SH * S0) / 2;
   }
   // The fill around the scene splits wall/floor at the scene's floor line, so any exposed edge continues it.
-  var floorY = s.scene === "hall" ? HALL.FLOOR : (s.scene === "bedroom" ? BFLOOR : FLOOR);
+  var floorY = s.scene === "hall" ? HALL.FLOOR : (s.scene === "bedroom" ? BFLOOR : (s.scene === "kitchen" ? KFLOOR : FLOOR));
   this.split = Math.round(ty + floorY * S0);
   var z = s.zone ? ZONES[s.zone] : null;
   if (z && z.cover) {
@@ -2173,7 +2441,7 @@ Room.prototype.camera = function () {
   var right = panel && !narrow ? area.w : vw, bottom = panel && narrow ? area.h : vh;
   if (SW * S >= right) tx = Math.min(0, Math.max(right - SW * S, tx));
   if (SH * S >= bottom) ty = Math.min(0, Math.max(bottom - SH * S, ty));
-  this.split = Math.round(ty + FLOOR * S);
+  this.split = Math.round(ty + floorY * S);
   return "translate(" + tx.toFixed(1) + "px, " + ty.toFixed(1) + "px) scale(" + S.toFixed(4) + ")";
 };
 
@@ -2194,9 +2462,10 @@ Room.prototype.render = function () {
   }
 
   var lampVerb = mode === "dark" ? "Turn off" : "Turn on";
-  var hall = s.scene === "hall", isLamp = function (id) { return id === "lamp" || id === "blamp" || id === "nlamp"; };
+  var hall = s.scene === "hall", isLamp = function (id) { return id === "lamp" || id === "blamp" || id === "nlamp" || id === "klights"; };
   this.stage.classList.toggle("in-hall", hall);
   this.stage.classList.toggle("in-bedroom", s.scene === "bedroom");
+  this.stage.classList.toggle("in-kitchen", s.scene === "kitchen");
   HOTS.forEach(function (h) {
     var b = this.hotEls[h.id];
     b.hidden = (h.scene || "room") !== s.scene;
@@ -2206,7 +2475,7 @@ Room.prototype.render = function () {
   var hov = HOTS.filter(function (h) { return h.id === s.hover; })[0];
   setText(d.action, hov
     ? (isLamp(hov.id) ? lampVerb : hov.verb) + " " + hov.name
-    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · click Room to step back" : (s.scene === "bedroom" ? "Walk around the bedroom" : "Walk around the room"))));
+    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · click Room to step back" : (s.scene === "bedroom" ? "Walk around the bedroom" : (s.scene === "kitchen" ? "Walk around the kitchen" : "Walk around the room")))));
   setText(d.shown, s.say.slice(0, s.n));
   setText(d.caret, s.n < s.say.length ? "▌" : "");
   // A trailing no-break space on alternate lines makes a repeated line still count as new for screen readers.
@@ -2215,7 +2484,7 @@ Room.prototype.render = function () {
   this.invEls.forEach(function (v) {
     v.el.hidden = v.scene !== s.scene;
     var on = (v.id === "room" && !s.zone) || (!!s.zone && s.focusId === v.id);
-    if (isLamp(v.id)) setText(v.el, mode === "dark" ? "Lamp off" : "Lamp on");
+    if (isLamp(v.id)) setText(v.el, v.id === "klights" ? (mode === "dark" ? "Lights off" : "Lights on") : (mode === "dark" ? "Lamp off" : "Lamp on"));
     v.el.classList.toggle("on", !!on);
   });
 
