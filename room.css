@@ -42,6 +42,11 @@ body { margin: 0; background: #1C251B; }
   animation: panelIn 0.4s steps(6) 0.6s both;
 }
 .panel[hidden] { display: none; }
+/* the panels' own scroll bars, squared off in the HUD's colors where the browser allows it */
+.panel { scrollbar-width: thin; scrollbar-color: var(--hudLine) var(--panel); }
+.panel::-webkit-scrollbar { width: 10px; }
+.panel::-webkit-scrollbar-track { background: var(--panel); }
+.panel::-webkit-scrollbar-thumb { background: var(--hudLine); border: 2px solid var(--panel); }
 .panel:focus { outline: none; }
 @keyframes panelIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
 @media (max-width: 759px) { .panel { left: 12px; right: 12px; width: auto; top: 37%; bottom: calc(var(--hud-h, 236px) + 12px); } }
@@ -106,9 +111,13 @@ body { margin: 0; background: #1C251B; }
   .place-out { flex: 1 1 auto; }
   .map-nav { flex: 0 0 360px; }
 }
-/* phones: the map keeps its size and scrolls sideways */
+/* phones: the map keeps its size and scrolls sideways, under a pixel scroll bar of our own (the native one hides) */
+.atlas-bar { position: relative; height: 14px; margin-top: -4px; background: var(--panel); border: 3px solid var(--frame); touch-action: none; cursor: pointer; }
+.atlas-bar[hidden] { display: none; }
+.atlas-bar span { position: absolute; top: 0; bottom: 0; left: 0; background: var(--gold); box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.25); }
 @media (max-width: 759px) {
-  .atlas-wrap { width: 100%; overflow-x: auto; }
+  .atlas-wrap { width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .atlas-wrap::-webkit-scrollbar { display: none; }
   .atlas { width: auto; height: 220px; max-width: none; image-rendering: auto; border-width: 4px; }
 }
 
