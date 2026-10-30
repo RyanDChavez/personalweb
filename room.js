@@ -1785,26 +1785,36 @@ function Room(root) {
   // HUD inventory: the accessible / mobile way around the room.
   this.invEls = [];
   var inv = $("inv");
-  // Getting around the apartment (behind the flag): a little floor plan beside the menu. The living room runs across
-  // the bottom with the front door; the bedroom and the kitchen are through doorways above it. Tap a room to go.
+  // Getting around the apartment (behind the flag): a little floor plan beside the menu. The front door opens into
+  // the living room in the middle, with the kitchen through a doorway on the left and the bedroom on the right. Tap a
+  // room to walk there; tap the one you're in to step back out of a close-up.
   this.tabEls = [];
   if (FLAGS.apartment) {
     var plan = el("nav", "plan" + (FLAGS.kitchen ? "" : " plan-two"));
     plan.setAttribute("aria-label", "Floor plan");
-    [["bedroom", "Bedroom"]].concat(FLAGS.kitchen ? [["kitchen", "Kitchen"]] : []).concat([["room", "Living room"]]).forEach(function (d) {
+    (FLAGS.kitchen ? [["kitchen", "Kitchen"]] : []).concat([["room", "Living room"], ["bedroom", "Bedroom"]]).forEach(function (d) {
       var b = el("button", "plan-room plan-" + (d[0] === "room" ? "living" : d[0]));
       b.type = "button";
       b.appendChild(el("span", null, d[1]));
-      b.addEventListener("click", function () { self.goTo(d[0]); });
+      b.addEventListener("click", function () { if (self.state.scene === d[0]) self.back(); else self.goTo(d[0]); });
       plan.appendChild(b);
       self.tabEls.push({ scene: d[0], el: b });
     });
-    ["bedroom", "kitchen", "front"].forEach(function (k) { if (k !== "kitchen" || FLAGS.kitchen) { var dr = el("span", "plan-door plan-door-" + k); dr.setAttribute("aria-hidden", "true"); plan.appendChild(dr); } });
+    var door = el("span", "plan-door-front");
+    door.setAttribute("aria-hidden", "true");
+    plan.appendChild(door);
     inv.parentNode.insertBefore(plan, inv);
+    var sw = el("button", "pbtn daynight");
+    sw.type = "button"; sw.setAttribute("role", "switch"); sw.setAttribute("aria-label", "Night");
+    sw.addEventListener("click", function () { self.act({ room: "lamp", bedroom: "blamp", kitchen: "klights" }[self.state.scene]); });
+    root.querySelector(".narrator").appendChild(sw);
+    this.dayNight = sw;
     this.tabsEl = plan;
     root.classList.add("has-plan");
   }
   var addInv = function (scene, id, label, onClick, cls) {
+    if (FLAGS.apartment && (id === "room" || id === "lamp" || id === "blamp" || id === "klights")) return;
+    if (FLAGS.apartment && id === "fluff") label = "Rug";
     var b = el("button", "pbtn inv-btn" + (cls ? " " + cls : ""), label);
     b.type = "button";
     b.addEventListener("click", onClick);
@@ -2523,7 +2533,7 @@ Room.prototype.render = function () {
   var hov = HOTS.filter(function (h) { return h.id === s.hover; })[0];
   setText(d.action, hov
     ? (isLamp(hov.id) ? lampVerb : hov.verb) + " " + hov.name
-    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · click Room to step back" : (s.scene === "bedroom" ? "Walk around the bedroom" : (s.scene === "kitchen" ? "Walk around the kitchen" : "Walk around the room")))));
+    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? (this.tabsEl ? "Looking closer · tap outside it to step back" : "Looking closer · click Room to step back") : (s.scene === "bedroom" ? "Walk around the bedroom" : (s.scene === "kitchen" ? "Walk around the kitchen" : "Walk around the room")))));
   setText(d.shown, s.say.slice(0, s.n));
   setText(d.caret, s.n < s.say.length ? "▌" : "");
   // A trailing no-break space on alternate lines makes a repeated line still count as new for screen readers.
@@ -2537,8 +2547,10 @@ Room.prototype.render = function () {
   });
 
   if (this.tabsEl) {
-    this.tabsEl.hidden = hall;
-    this.tabEls.forEach(function (tb) { tb.el.classList.toggle("on", tb.scene === s.scene); if (tb.scene === s.scene) tb.el.setAttribute("aria-current", "true"); else tb.el.removeAttribute("aria-current"); });
+    this.tabsEl.hidden = hall; this.dayNight.hidden = hall;
+    setAttr(this.dayNight, "aria-checked", mode === "dark" ? "true" : "false");
+    setText(this.dayNight, mode === "dark" ? "☾ Night" : "☀ Day");
+    this.tabEls.forEach(function (tb) { tb.el.classList.toggle("on", tb.scene === s.scene); if (tb.scene === s.scene) tb.el.setAttribute("aria-current", "true"); else tb.el.removeAttribute("aria-current"); setAttr(tb.el, "aria-label", tb.el.textContent + (tb.scene === s.scene ? (s.zone ? ", you're here: step back" : ", you're here") : "")); });
   }
 
   for (var p in d.panels) d.panels[p].hidden = open !== p;
