@@ -850,7 +850,7 @@ function makeBedroom(mode) {
   books(48, 19, false, true);
   // a Princeton crest on a walnut plaque at the end of the top shelf: orange shield, black chevron, white open book
   rect(133, 33, 11, 15, WALD); rect(134, 34, 9, 13, WAL);
-  ["KKKKKKKKK", "KOWWOWWOK", "KWWWWWWWK", "KOOOOOOOK", "KOOOKOOOK", "KOOKOKOOK", "KOKOOOKOK", "KKOOOOOKK", ".KOOOOOK.", "..KOOOK..", "...KKK..."].forEach(function (row, ry) {
+  ["KKKKKKKKK", "KOOOOOOOK", "KOWWOWWOK", "KWWWWWWWK", "KOOOOOOOK", "KOOOKOOOK", "KOOKOKOOK", "KOKOOOKOK", ".KOOOOOK.", "..KOOOK..", "...KKK..."].forEach(function (row, ry) {
     for (var k = 0; k < 9; k++) if (row[k] !== ".") put(134 + k, 35 + ry, row[k] === "O" ? [232, 119, 34] : (row[k] === "K" ? [24, 22, 22] : [244, 240, 228]));
   });
   books(70, 18, true);
@@ -877,6 +877,13 @@ function makeBedroom(mode) {
   rect(162, 99, 100, 8, DW); rect(162, 106, 100, 1, DWD); rect(211, 100, 1, 6, DWD);
   for (y = 100; y < 106; y++) for (x = 163; x < 261; x++) if (x !== 211 && (x * 7 + y * 3) % 13 === 0) put(x, y, [140, 88, 48]);
   put(186, 102, [214, 180, 120]); put(236, 102, [214, 180, 120]); put(186, 103, [150, 112, 60]); put(236, 103, [150, 112, 60]);
+  // under the desk on the right: a navy metal drawer unit on casters, six drawers with silver bar handles
+  var HN = [40, 62, 130], HNL = [66, 92, 162], HND = [24, 38, 90], HS = [206, 210, 216];
+  rect(226, 109, 20, 1, HNL); rect(226, 110, 20, 24, HN); rect(226, 110, 1, 24, HNL); rect(245, 110, 1, 24, HND);
+  for (i = 0; i < 6; i++) { rect(227, 113 + i * 4, 18, 1, HND); rect(233, 111 + i * 4, 6, 1, HS); put(233, 112 + i * 4, HND); put(238, 112 + i * 4, HND); }
+  rect(226, 134, 20, 1, HND);
+  [228, 243].forEach(function (cx) { put(cx, 135, [150, 150, 154]); put(cx, 136, [96, 96, 100]); });
+
   // on the desk: an open notebook of scrawled notes, and a mug of coffee
   rect(204, 92, 15, 4, [240, 236, 226]); rect(204, 95, 15, 1, [200, 196, 186]); rect(211, 92, 1, 4, [176, 168, 154]);
   // two lines of hurried writing across each page
