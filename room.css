@@ -157,6 +157,24 @@ body { margin: 0; background: #1C251B; }
   .lib-shelf::after { content: ""; flex: 0 0 8px; }
 }
 
+/* recipe box: a faded, folded printout of a web recipe, with a coffee ring */
+.recipe-body { gap: 16px; padding-bottom: 24px; }
+.printout {
+  position: relative; overflow: hidden; padding: 12px 18px 16px; transform: rotate(-1deg);
+  background: linear-gradient(180deg, transparent 32.5%, rgba(120, 104, 70, 0.18) 33%, transparent 34%, transparent 65.5%, rgba(120, 104, 70, 0.18) 66%, transparent 67%),
+    radial-gradient(ellipse at 50% 40%, #F3EEDF 40%, #E6DCC0 100%);
+  color: #7C7A72; box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; gap: 8px;
+}
+.printout-head, .printout-foot { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: #A29E92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.printout-head span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.printout-kicker { margin-top: 6px !important; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #9C948A; }
+.printout-title { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: 26px; line-height: 1.15; color: #5E5A52; }
+.printout-lines { display: flex; flex-direction: column; gap: 7px; margin: 6px 0 4px; }
+.printout-lines span { height: 6px; background: #C9C3B4; opacity: 0.75; }
+.printout-lines span:nth-child(3n) { width: 72%; } .printout-lines span:nth-child(4n+1) { width: 88%; } .printout-lines span:nth-child(5) { width: 40%; margin-bottom: 8px; }
+.printout-ring { position: absolute; right: 22px; bottom: 36px; width: 74px; height: 74px; border-radius: 50%; border: 5px solid rgba(132, 92, 52, 0.22); border-left-color: rgba(132, 92, 52, 0.12); pointer-events: none; }
+.recipe-link { align-self: flex-start; min-height: 44px; padding: 0 14px; display: inline-flex; align-items: center; background: var(--hud); color: var(--hudInk); font-family: Silkscreen, monospace; font-size: 12px; text-decoration: none; }
+
 /* Rolodex */
 .contact-body { padding-bottom: 24px; gap: 14px; }
 .rolodex { position: relative; padding-top: 22px; }
