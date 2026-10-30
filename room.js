@@ -704,26 +704,31 @@ function makeBedroom(mode) {
     }
   }
 
-  // oriental rug on the floor in front of the desk, widening toward the viewer; the chair stands on it and it tucks
-  // under the bed. Blue and white: indigo field, ivory border with blue dots between navy guard stripes, an ivory and
-  // blue stepped medallion, ivory fringe on the short ends
-  var RY0 = 134, RY1 = 176, RCR = [236, 232, 220], RNV = [26, 38, 80], RRD = [44, 72, 140], RRDD = [32, 54, 112], RGD = [128, 162, 214];
+  // Ryan's rug on the floor in front of the desk, widening toward the viewer; the chair stands on it and it tucks
+  // under the bed. Cream field of coral, blue and gold flowers on green leaves; blue bands around a cream border of
+  // pink roses and green sprigs
+  var RY0 = 134, RY1 = 176, RCR = [236, 228, 206], RBL = [78, 108, 176], RBD = [60, 86, 150], LEAF = [74, 130, 92];
+  var FLOWERS = [[214, 96, 72], [110, 140, 206], [214, 170, 90]], ROSE = [226, 150, 140];
   for (y = RY0; y <= RY1; y++) {
     var rt = (y - RY0) / (RY1 - RY0), rl = 30 - 12 * rt, rr = 186 + 12 * rt, rw = rr - rl;
     for (x = Math.ceil(rl); x <= Math.floor(rr); x++) {
       var ru = (x - rl) / rw, bu = Math.min(ru, 1 - ru) * rw, bv = Math.min(rt, 1 - rt) * (RY1 - RY0) * 1.6, rd = Math.min(bu, bv), rc;
-      if (rd < 1) rc = [24, 30, 56];
-      else if (rd < 2.5) rc = RNV;
-      else if (rd < 6.5) rc = (x + y) % 4 === 0 ? [60, 96, 170] : RCR;
-      else if (rd < 8) rc = RNV;
+      if (rd < 1) rc = RBD;
+      else if (rd < 2.5) rc = (x + y) % 3 === 0 ? RCR : RBL;
+      else if (rd < 6.5) { var bm = (x * 7 + y * 3) % 9; rc = bm === 0 ? ROSE : (bm === 4 ? LEAF : RCR); }
+      else if (rd < 8) rc = (x + y * 2) % 4 === 0 ? RCR : RBL;
       else {
-        var mu = Math.abs(ru - 0.5) * rw, mv = Math.abs(rt - 0.5) * (RY1 - RY0) * 1.6, md = mu + mv * 1.4;
-        rc = md < 4 ? RCR : (md < 10 ? RRD : (md < 17 ? RGD : (md < 25 ? RNV : ((x * 3 + y * 5) % 17 === 0 ? RGD : ((x + y * 2) % 7 === 0 ? RRDD : RRD)))));
-        if (bu < 22 && bv < 14 && bu + bv * 1.4 < 26) rc = (x + y) % 3 === 0 ? RGD : RNV;
+        // flower clusters on a staggered grid: a blossom, a stem and a pair of leaves per cell
+        var cy2 = Math.floor(rt * 6), fv = rt * 6 - cy2, uu = ru * 16 + (cy2 % 2) * 0.5, cx2 = Math.floor(uu), fu = uu - cx2;
+        var dxu = (fu - 0.5) * (rw / 16), dvv = (fv - 0.32) * ((RY1 - RY0) / 6);
+        rc = RCR;
+        if (dxu * dxu + dvv * dvv <= 2.2) rc = FLOWERS[(cx2 * 7 + cy2 * 13) % 3];
+        else if (Math.abs(dxu) < 0.6 && fv > 0.45 && fv < 0.92) rc = LEAF;
+        else if (fv > 0.55 && fv < 0.82 && Math.abs(Math.abs(dxu) - 1.7) < 0.75) rc = LEAF;
+        else if ((x * 5 + y * 11) % 23 === 0) rc = ROSE;
       }
       put(x, y, rc);
     }
-    if (y % 2 === 0) { put(Math.ceil(rl) - 1, y, RCR); put(Math.ceil(rl) - 2, y, RCR); put(Math.floor(rr) + 1, y, RCR); put(Math.floor(rr) + 2, y, RCR); }
   }
 
   // framed world map over the desk, with pins in the places in Ryan's story
