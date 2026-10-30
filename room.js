@@ -654,7 +654,7 @@ function makeBedroom(mode) {
     }
   }
 
-  ox = 138; // the bed's on the right, the window above it
+  ox = 111; // the bed's on the right, the window above it
   // window above the bed: across the street, a brick building (lit windows at night)
   cur = OBJ.bwindow;
   rect(96, 18, 63, 52, C.teak);
@@ -791,7 +791,7 @@ function makeBedroom(mode) {
   ox = 0;
   function line(x0, y0, x1, y1, c, e) { var n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); for (var k = 0; k <= n; k++) put(x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n, c, e); }
 
-  ox = 16; // between the desk and the bed
+  ox = 120; // right of the bed
   // pine nightstand with two drawers, a black task lamp and a few books
   cur = 0;
   var PN = [212, 160, 98], PNL = [232, 186, 124], PND = [168, 118, 64];
@@ -805,7 +805,7 @@ function makeBedroom(mode) {
   rect(182, 88, 4, 1, TL); rect(182, 89, 5, 1, TL); rect(183, 90, 5, 1, TL); rect(184, 91, 5, 1, TLL);
   rect(185, 92, 4, 1, night ? [255, 232, 170] : [90, 90, 96], night);
 
-  ox = 138;
+  ox = 111;
   // the bed: pine plank headboard, pillows (two white, a gray one, the bird pillow), and a quilt of green and
   // white flower tiles on a blue grid, foreshortened so the tiles grow toward the foot of the bed
   cur = OBJ.bed;
@@ -856,12 +856,12 @@ function makeBedroomLight(mode) {
       g = Math.pow(Math.max(0, 1 - d / 78), 1.6) * 0.95;
       var sx = x - 104, sy = y - 69, sd = Math.sqrt(sx * sx + sy * sy * 1.4);
       g += Math.max(0, 1 - sd / 30) * 0.35;
-      var nx = x - 203, ny = y - 100, nd = Math.sqrt(nx * nx + ny * ny * 1.5);
+      var nx = x - 307, ny = y - 100, nd = Math.sqrt(nx * nx + ny * ny * 1.5);
       g += Math.pow(Math.max(0, 1 - nd / 30), 1.4) * 0.5; // the nightstand lamp
       g = q(Math.min(1.2, g), 6, b);
     } else {
       a = q(1.0 - 0.12 * (x / SW), 12, b);
-      if (y >= BFLOOR - 2) { var off = (y - BFLOOR) * 1.4, x0 = 250 + off, x1 = 306 + off, e = Math.min(x - x0, x1 - x); if (e > 0 && Math.abs(x - (278 + off)) > 1.2) g = e > 2 ? 0.24 : (b < e / 2 ? 0.24 : 0); }
+      if (y >= BFLOOR - 2) { var off = (y - BFLOOR) * 1.4, x0 = 223 + off, x1 = 279 + off, e = Math.min(x - x0, x1 - x); if (e > 0 && Math.abs(x - (251 + off)) > 1.2) g = e > 2 ? 0.24 : (b < e / 2 ? 0.24 : 0); }
     }
     A[i] = a; G[i] = g;
   }
@@ -881,10 +881,10 @@ var HOTS = [
   { id: "plant", name: "the snake plant", verb: "Water", x: 0, y: 96, w: 24, h: 80 },
   { id: "door", scene: "hall", name: "the door", verb: "Open", x: 128, y: 30, w: 64, h: 120 },
   { id: "bell", scene: "hall", name: "the doorbell", verb: "Ring", x: 203, y: 74, w: 21, h: 30 },
-  { id: "bwindow", scene: "bedroom", name: "the window", verb: "Look out", x: 231, y: 16, w: 69, h: 58 },
+  { id: "bwindow", scene: "bedroom", name: "the window", verb: "Look out", x: 204, y: 16, w: 69, h: 58 },
   { id: "bshelf", scene: "bedroom", name: "the bookshelf", verb: "Browse", x: 6, y: 26, w: 50, h: 106 },
   { id: "bass", scene: "bedroom", name: "the bass", verb: "Play", x: 56, y: 70, w: 21, h: 64 },
-  { id: "bed", scene: "bedroom", name: "the bed", verb: "Lie down on", x: 214, y: 78, w: 104, h: 95 },
+  { id: "bed", scene: "bedroom", name: "the bed", verb: "Lie down on", x: 187, y: 78, w: 104, h: 95 },
   { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 80, y: 86, w: 108, h: 46 },
   { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 108, y: 96, w: 36, h: 41 },
   { id: "apple", scene: "bedroom", name: "the Apple II", verb: "Use", x: 84, y: 56, w: 41, h: 41 },
@@ -905,10 +905,10 @@ var ZONES = {
   // (framed just past the hinge, so the swung-open slab is off screen when the scenes swap)
   doorway: { x: HALL.DX + 3, y: HALL.DY, w: HALL.DW - 3, h: HALL.DH, cover: true },
   entry: { x: 116.5, y: 0, w: 91.5, h: 180, cover: true },
-  bwindow: { x: 220, y: 8, w: 92, h: 72 },
+  bwindow: { x: 193, y: 8, w: 92, h: 72 },
   bshelf: { x: 0, y: 20, w: 64, h: 118 },
   bass: { x: 36, y: 60, w: 60, h: 80 },
-  bed: { x: 200, y: 68, w: 120, h: 108 },
+  bed: { x: 179, y: 68, w: 141, h: 108 },
   desk: { x: 70, y: 50, w: 130, h: 88 }
 };
 var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed" };
