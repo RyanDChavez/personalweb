@@ -705,16 +705,17 @@ function makeBedroom(mode) {
   }
 
   // oriental rug on the floor in front of the desk, widening toward the viewer; the chair stands on it and it tucks
-  // under the bed. Red field, navy border between cream guard stripes, a stepped medallion, fringe on the short ends
-  var RY0 = 134, RY1 = 176, RCR = [226, 210, 170], RNV = [36, 48, 92], RRD = [152, 40, 42], RRDD = [118, 30, 34], RGD = [206, 160, 80];
+  // under the bed. Blue and white: indigo field, ivory border with blue dots between navy guard stripes, an ivory and
+  // blue stepped medallion, ivory fringe on the short ends
+  var RY0 = 134, RY1 = 176, RCR = [236, 232, 220], RNV = [26, 38, 80], RRD = [44, 72, 140], RRDD = [32, 54, 112], RGD = [128, 162, 214];
   for (y = RY0; y <= RY1; y++) {
     var rt = (y - RY0) / (RY1 - RY0), rl = 30 - 12 * rt, rr = 186 + 12 * rt, rw = rr - rl;
     for (x = Math.ceil(rl); x <= Math.floor(rr); x++) {
       var ru = (x - rl) / rw, bu = Math.min(ru, 1 - ru) * rw, bv = Math.min(rt, 1 - rt) * (RY1 - RY0) * 1.6, rd = Math.min(bu, bv), rc;
-      if (rd < 1) rc = [52, 30, 36];
-      else if (rd < 2.5) rc = RCR;
-      else if (rd < 6.5) rc = (x + y) % 4 === 0 ? [176, 56, 50] : RNV;
-      else if (rd < 8) rc = RCR;
+      if (rd < 1) rc = [24, 30, 56];
+      else if (rd < 2.5) rc = RNV;
+      else if (rd < 6.5) rc = (x + y) % 4 === 0 ? [60, 96, 170] : RCR;
+      else if (rd < 8) rc = RNV;
       else {
         var mu = Math.abs(ru - 0.5) * rw, mv = Math.abs(rt - 0.5) * (RY1 - RY0) * 1.6, md = mu + mv * 1.4;
         rc = md < 4 ? RCR : (md < 10 ? RRD : (md < 17 ? RGD : (md < 25 ? RNV : ((x * 3 + y * 5) % 17 === 0 ? RGD : ((x + y * 2) % 7 === 0 ? RRDD : RRD)))));
@@ -986,7 +987,7 @@ var HOTS = [
   { id: "bed", scene: "bedroom", name: "the bed", verb: "Lie down on", x: 187, y: 78, w: 104, h: 95 },
   { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 80, y: 86, w: 108, h: 46 },
   { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 108, y: 96, w: 36, h: 41 },
-  { id: "apple", scene: "bedroom", name: "the Apple II", verb: "Use", x: 84, y: 56, w: 41, h: 41 },
+  { id: "apple", scene: "bedroom", name: "the computer", verb: "Use", x: 84, y: 56, w: 41, h: 41 },
   { id: "nlamp", scene: "bedroom", name: "the bedside lamp", verb: "Turn on", x: 298, y: 85, w: 18, h: 27 },
   { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 152, y: 78, w: 26, h: 19 }
 ];
@@ -1176,7 +1177,7 @@ function Room(root) {
   [["shelf", "About me"], ["radio", "Radio"], ["contact", "Contact"], ["window", "Window"], ["chair", "Chair"], ["lamp", "Lamp"], ["fluff", "Fluff rug"], ["room", "Room"]].forEach(function (d) {
     addInv("room", d[0], d[1], d[0] === "fluff" ? self.fluff : (d[0] === "room" ? self.back : function () { self.act(d[0]); }));
   });
-  [["desk", "Desk"], ["apple", "Apple II"], ["bshelf", "Books"], ["bass", "Bass"], ["bed", "Bed"], ["map", "Map"], ["blamp", "Lamp"], ["room", "Room"]].forEach(function (d) {
+  [["desk", "Desk"], ["apple", "Computer"], ["bshelf", "Books"], ["bass", "Bass"], ["bed", "Bed"], ["map", "Map"], ["blamp", "Lamp"], ["room", "Room"]].forEach(function (d) {
     addInv("bedroom", d[0], d[1], d[0] === "room" ? self.back : function () { self.act(d[0]); });
   });
   [["bell", "Ring the bell"], ["door", "Open the door"]].forEach(function (d) {
@@ -1255,6 +1256,8 @@ function Room(root) {
   this.canvas.addEventListener("pointercancel", function () { self.last = null; });
   // Remember whether the visitor is on the keyboard, for focus handling around panels.
   document.addEventListener("keydown", function () { self.kbd = true; }, true);
+  // The computer screen pauses while the tab is hidden; pick it back up on return.
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && self.state.scene === "bedroom") self.kick(); });
   document.addEventListener("pointerdown", function () { self.kbd = false; }, true);
 
   // A mouse click or tap shouldn't leave a button focused: a later key press (like Esc) would make the browser
@@ -1347,7 +1350,7 @@ Room.prototype.act = function (id) {
     bwindow: night ? "Across the street, a few windows are lit." : "Across the street, a brick building.",
     bshelf: "More books. The full catalog will live here.",
     desk: "A mid-century walnut desk. The projects will live here.",
-    apple: "An Apple II, blinking at the ] prompt. The software projects will boot up here.",
+    apple: "The computer says HELLO. The software projects will boot up here.",
     dchair: "A wooden desk chair, pushed in.",
     bass: "A black Fender Jazz Bass on its stand.",
     bed: "The bed's made, under a green flower quilt.",
@@ -1492,12 +1495,55 @@ Room.prototype.hallImage = function (hv) {
   return composite(col, emis, obj, this.hallLight, hv, B.img);
 };
 
+// The computer's screen runs a little loop: "]RUN" types out, it prints HELLO, scrolls, and the cursor blinks at a fresh
+// prompt. Tiny 3x5 letters, two lines; with reduced motion it holds the last frame.
+var SCREEN = { x: 92, y: 61, w: 25, h: 15, loop: 6500 };
+var SCREEN_GLYPHS = { "]": ["110", "010", "010", "010", "110"], R: ["110", "101", "110", "101", "101"], U: ["101", "101", "101", "101", "111"], N: ["101", "111", "111", "101", "101"],
+  H: ["101", "101", "111", "101", "101"], E: ["111", "100", "110", "100", "111"], L: ["100", "100", "100", "100", "111"], O: ["010", "101", "101", "101", "010"] };
+function screenFrame(t, still) {
+  if (still) return { lines: ["HELLO", "]"], cur: [1, 1] };
+  var blink = Math.floor(t / 300) % 2 === 0;
+  if (t < 1200) { var n = t < 450 ? 0 : Math.min(3, 1 + Math.floor((t - 450) / 220)); return { lines: ["]" + "RUN".slice(0, n)], cur: blink ? [0, 1 + n] : null }; }
+  if (t < 1500) return { lines: ["]RUN"], cur: null };
+  if (t < 2300) return { lines: ["]RUN", "HELLO"], cur: null };
+  return { lines: ["HELLO", "]"], cur: blink ? [1, 1] : null };
+}
+function drawScreen(col, emis, obj, f) {
+  var S = SCREEN, BGS = [12, 26, 16], PH = [70, 222, 112];
+  var px = function (x, y, c) { var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 1; obj[i] = OBJ.apple; };
+  for (var y = 0; y < S.h; y++) for (var x = 0; x < S.w; x++) if (!((x === 0 || x === S.w - 1) && (y === 0 || y === S.h - 1))) px(S.x + x, S.y + y, BGS);
+  f.lines.forEach(function (ln, li) {
+    for (var ci = 0; ci < ln.length; ci++) {
+      var g = SCREEN_GLYPHS[ln[ci]];
+      for (var gy = 0; gy < 5; gy++) for (var gx = 0; gx < 3; gx++) if (g[gy][gx] === "1") px(S.x + 2 + ci * 4 + gx, S.y + 2 + li * 6 + gy, PH);
+    }
+  });
+  if (f.cur) for (var cy = 0; cy < 5; cy++) for (var cx = 0; cx < 3; cx++) px(S.x + 2 + f.cur[1] * 4 + cx, S.y + 2 + f.cur[0] * 6 + cy, PH);
+}
+function screenKey(f) { return f.lines.join("/") + (f.cur ? "|" + f.cur.join(",") : ""); }
+
 Room.prototype.bedroomImage = function (hv) {
   var mode = this.mode();
   if (this.bedFor !== mode) { this.bed = makeBedroom(mode); this.bedLight = makeBedroomLight(mode); this.bedFor = mode; }
   var B = this.buf;
   B.col.set(this.bed.col); B.emis.set(this.bed.emis); B.obj.set(this.bed.obj);
+  var still = reducedMotion(), f = screenFrame(performance.now() % SCREEN.loop, still);
+  drawScreen(B.col, B.emis, B.obj, f);
+  this.screenShown = screenKey(f);
+  if (!still) this.watchScreen();
   return composite(B.col, B.emis, B.obj, this.bedLight, hv, B.img);
+};
+
+// While the bedroom is on screen, check the computer every 100ms and repaint only when its screen changes.
+Room.prototype.watchScreen = function () {
+  var self = this;
+  if (this.screenTimer) return;
+  this.screenTimer = setTimeout(function () {
+    self.screenTimer = 0;
+    if (self.state.scene !== "bedroom" || document.hidden) return;
+    if (screenKey(screenFrame(performance.now() % SCREEN.loop, false)) !== self.screenShown) self.kick();
+    else self.watchScreen();
+  }, 100);
 };
 
 Room.prototype.roomImage = function (hv) {
