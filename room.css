@@ -93,18 +93,24 @@ body { margin: 0; background: #1C251B; }
 
 /* world map */
 .panel-wide { left: 24px; width: auto; }
-.atlas { display: block; width: 100%; height: auto; image-rendering: pixelated; border: 6px solid #784C2A; box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3); background: #96BAC4; }
-@media (max-width: 759px) { .atlas { image-rendering: auto; border-width: 4px; } }
-.map-side { display: flex; flex-direction: column; gap: 14px; }
-@media (min-width: 1000px) {
-  .map-body { flex-direction: row; align-items: flex-start; }
-  .atlas { flex: 1 1 auto; min-width: 0; }
-  .map-side { flex: 0 0 272px; }
-}
+.map-body { gap: 14px; }
+/* as big as fits above the caption without scrolling */
+.atlas-wrap { position: relative; align-self: center; width: min(100%, calc((100vh - 390px) * 2.75)); }
+.atlas { display: block; width: 100%; height: auto; image-rendering: pixelated; border: 6px solid #784C2A; box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3); background: #96BAC4; touch-action: manipulation; }
+.atlas-tip { position: absolute; transform: translate(-50%, calc(-100% - 12px)); padding: 3px 8px; background: var(--hud); color: var(--hudInk); font-family: Silkscreen, monospace; font-size: 11px; white-space: nowrap; pointer-events: none; }
+.atlas-tip.below { transform: translate(-50%, 14px); }
+.map-foot { display: flex; flex-direction: column; gap: 12px; }
 .place-out { display: flex; flex-direction: column; gap: 6px; min-height: 64px; }
-.places { display: flex; flex-wrap: wrap; gap: 6px; }
-.place { min-height: 36px; padding: 0 9px; background: var(--hud); color: var(--hudInk); border: 0; font-family: Silkscreen, monospace; font-size: 11px; }
-.place[aria-pressed="true"] { background: var(--gold); color: #1D251C; }
+@media (min-width: 760px) {
+  .map-foot { flex-direction: row; align-items: center; gap: 24px; }
+  .place-out { flex: 1 1 auto; }
+  .map-nav { flex: 0 0 360px; }
+}
+/* phones: the map keeps its size and scrolls sideways */
+@media (max-width: 759px) {
+  .atlas-wrap { width: 100%; overflow-x: auto; }
+  .atlas { width: auto; height: 220px; max-width: none; image-rendering: auto; border-width: 4px; }
+}
 
 /* Rolodex */
 .contact-body { padding-bottom: 24px; gap: 14px; }
