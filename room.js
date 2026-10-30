@@ -710,7 +710,7 @@ function makeBedroom(mode) {
   var RY0 = 134, RY1 = 176, RCR = [236, 228, 206], RBL = [78, 108, 176], RBD = [60, 86, 150], LEAF = [74, 130, 92];
   var FLOWERS = [[214, 96, 72], [110, 140, 206], [214, 170, 90]], ROSE = [226, 150, 140];
   for (y = RY0; y <= RY1; y++) {
-    var rt = (y - RY0) / (RY1 - RY0), rl = 30 - 12 * rt, rr = 186 + 12 * rt, rw = rr - rl;
+    var rt = (y - RY0) / (RY1 - RY0), rs = (y + 200) / (RY0 + 200), rl = 160 - 132 * rs, rr = 160 + 24 * rs, rw = rr - rl;
     for (x = Math.ceil(rl); x <= Math.floor(rr); x++) {
       var ru = (x - rl) / rw, bu = Math.min(ru, 1 - ru) * rw, bv = Math.min(rt, 1 - rt) * (RY1 - RY0) * 1.6, rd = Math.min(bu, bv), rc;
       if (rd < 1) rc = RBD;
@@ -917,9 +917,12 @@ function makeBedroom(mode) {
     return (head && !hole) || stem || leaf ? fg : bg;
   };
   var shade = function (c, k) { return [c[0] * k, c[1] * k, c[2] * k]; };
+  // the rug and the bed share one vanishing point, high above the middle of the room (x 160 is 49 here)
   var YB = 108, YF = 158, NX = 4, NY = 3.4;
+  var bedL = function (y) { return Math.round(49 + 41 * (Math.min(y, YF) + 200) / (YB + 200)); };
+  var bedR = function (y) { return Math.round(49 + 115 * (Math.min(y, YF) + 200) / (YB + 200)); };
   for (y = YB; y <= 166; y++) {
-    var tt = Math.min(1, (y - YB) / (YF - YB)), xl = Math.round(90 - 10 * tt), xr = Math.round(164 + 10 * tt);
+    var xl = bedL(y), xr = bedR(y);
     var v = y <= YF ? (y - YB) / (YF - YB) * NY : NY + (y - YF) / 9, dk = y <= YF ? 1 : 0.84;
     for (x = xl; x <= xr; x++) put(x, y, shade(quilt((x - xl) / (xr - xl + 1) * NX, v), dk));
     if (y > YB + 3) for (var sx = 1; sx <= 3; sx++) { put(xl - sx, y, shade(quilt(0.3 + sx * 0.08, v), 0.7)); put(xr + sx, y, shade(quilt(3.7 - sx * 0.08, v), 0.7)); }
@@ -927,15 +930,16 @@ function makeBedroom(mode) {
   // the navy waffle throw across the lower half, draped over the sides; the quilt still shows at the foot
   var NV = [50, 72, 120], NVL = [76, 100, 152], NVD = [32, 48, 86];
   for (y = 128; y <= 153; y++) {
-    var t2 = (y - YB) / (YF - YB), l2 = Math.round(90 - 10 * t2) - 3, r2 = Math.round(164 + 10 * t2) + 3;
+    var l2 = bedL(y) - 3, r2 = bedR(y) + 3;
     for (x = l2; x <= r2; x++) {
       var nc = y === 128 ? NVL : (y >= 152 ? NVD : ((x % 3 === 0 || y % 3 === 0) ? NVL : NV));
       put(x, y, x < l2 + 3 || x > r2 - 3 ? shade(nc, 0.75) : nc);
     }
   }
   // footboard rail and tapered pine legs at the foot corners
-  rect(77, 167, 101, 3, PN); rect(77, 167, 101, 1, PNL); rect(77, 169, 101, 1, PND);
-  for (i = 0; i < 6; i++) { var lw = i < 4 ? 3 : 2; rect(78, 170 + i, lw, 1, PN); put(78 + lw - 1, 170 + i, PND); rect(177 - lw, 170 + i, lw, 1, PN); put(176, 170 + i, PND); }
+  var FL = bedL(YF) - 3, FR = bedR(YF) + 3;
+  rect(FL, 167, FR - FL + 1, 3, PN); rect(FL, 167, FR - FL + 1, 1, PNL); rect(FL, 169, FR - FL + 1, 1, PND);
+  for (i = 0; i < 6; i++) { var lw = i < 4 ? 3 : 2; rect(FL + 1, 170 + i, lw, 1, PN); put(FL + lw, 170 + i, PND); rect(FR - lw, 170 + i, lw, 1, PN); put(FR - 1, 170 + i, PND); }
   var PW = [244, 242, 236], PWD = [212, 208, 198];
   var pillow = function (x0, y0, w, h, c, cd) { for (var yy = 0; yy < h; yy++) for (var xx = 0; xx < w; xx++) if (!((yy === 0 || yy === h - 1) && (xx === 0 || xx === w - 1))) put(x0 + xx, y0 + yy, yy >= h - 2 ? cd : c); };
   pillow(94, 99, 32, 10, PW, PWD); pillow(130, 99, 32, 10, PW, PWD);
@@ -989,7 +993,7 @@ var HOTS = [
   { id: "map", scene: "bedroom", name: "the map", verb: "Look at", x: 78, y: 8, w: 116, h: 48 },
   { id: "bshelf", scene: "bedroom", name: "the bookshelf", verb: "Browse", x: 6, y: 26, w: 50, h: 106 },
   { id: "bass", scene: "bedroom", name: "the bass", verb: "Play", x: 56, y: 70, w: 21, h: 64 },
-  { id: "bed", scene: "bedroom", name: "the bed", verb: "Lie down on", x: 187, y: 78, w: 104, h: 95 },
+  { id: "bed", scene: "bedroom", name: "the bed", verb: "Lie down on", x: 187, y: 78, w: 114, h: 98 },
   { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 80, y: 86, w: 108, h: 46 },
   { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 108, y: 96, w: 36, h: 41 },
   { id: "apple", scene: "bedroom", name: "the computer", verb: "Use", x: 84, y: 56, w: 41, h: 41 },
