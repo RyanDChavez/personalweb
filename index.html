@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
-  <link rel="stylesheet" href="room.css?v=42">
+  <link rel="stylesheet" href="room.css?v=43">
   <script>document.documentElement.classList.add("js");</script>
   <script type="application/ld+json">
   {
@@ -49,7 +49,7 @@
     ]
   }
   </script>
-  <script src="room.js?v=57" defer onerror="document.documentElement.classList.remove('js')"></script>
+  <script src="room.js?v=58" defer onerror="document.documentElement.classList.remove('js')"></script>
 </head>
 
 <body>
@@ -125,6 +125,24 @@
             <p class="card-name">Ryan D. Chavez</p>
             <p class="card-role">Product person</p>
           </div>
+        </div>
+      </div>
+      <div class="more" aria-hidden="true"><span>▼ More</span></div>
+    </section>
+
+    <section class="panel panel-wide" id="panel-map" tabindex="-1" aria-label="Close-up: the world map" hidden>
+      <div class="panel-head">
+        <h2>The map · Places</h2>
+        <button class="pbtn back-btn" type="button" data-back>Back to the room</button>
+      </div>
+      <div class="panel-body map-body">
+        <canvas class="atlas" id="atlas" width="640" height="232" role="img" aria-label="A world map with a pin for each place Ryan has been"></canvas>
+        <div class="map-side">
+          <div class="place-out" aria-live="polite">
+            <p class="station-title" id="place-title"></p>
+            <p id="place-text"></p>
+          </div>
+          <div class="places" id="places" role="group" aria-label="Pick a country"></div>
         </div>
       </div>
       <div class="more" aria-hidden="true"><span>▼ More</span></div>

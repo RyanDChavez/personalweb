@@ -679,6 +679,34 @@ var WORLD = [
   "................................................................................................................"
 ];
 // Pins: places in Ryan's story, in map pixels.
+// The map close-up: everywhere Ryan has been, by country, as [place, latitude, longitude].
+var PLACES = [
+  ["USA", [["Arcadia", 34.14, -118.04], ["Los Angeles", 34.05, -118.24], ["San Diego", 32.72, -117.16], ["San Francisco", 37.77, -122.42], ["Oakland", 37.8, -122.27], ["Seattle", 47.61, -122.33], ["Austin", 30.27, -97.74], ["St. Louis", 38.63, -90.2], ["Chicago", 41.88, -87.63], ["Nashville", 36.16, -86.78], ["Atlanta", 33.75, -84.39], ["Tampa", 27.95, -82.46], ["Orlando", 28.54, -81.38], ["The Keys", 24.56, -81.78], ["Pittsburgh", 40.44, -79.99], ["Washington, DC", 38.91, -77.04], ["Baltimore", 39.29, -76.61], ["Princeton", 40.35, -74.66], ["New York", 40.71, -74.01], ["New Haven", 41.31, -72.92], ["Boston", 42.36, -71.06], ["Portland, Maine", 43.66, -70.26]]],
+  ["Hawaii", [["Kauai", 22.07, -159.5], ["Oahu", 21.47, -157.98], ["Maui", 20.8, -156.33]]],
+  ["Mexico", [["Baja", 28.0, -113.5], ["Parral", 26.93, -105.67], ["Mexico City", 19.43, -99.13]]],
+  ["Costa Rica", [["Papagayo", 10.6, -85.7]]],
+  ["Argentina", [["Buenos Aires", -34.6, -58.38]]],
+  ["Canada", [["Montreal", 45.5, -73.57]]],
+  ["Iceland", [["Reykjavik", 64.15, -21.94]]],
+  ["UK", [["London", 51.51, -0.13], ["York", 53.96, -1.08], ["Bath", 51.38, -2.36]]],
+  ["Ireland", [["Dublin", 53.35, -6.26], ["Galway", 53.27, -9.05]]],
+  ["Portugal", [["Lisbon", 38.72, -9.14], ["Porto", 41.15, -8.61]]],
+  ["France", [["Paris", 48.86, 2.35]]],
+  ["Germany", [["Berlin", 52.52, 13.4]]],
+  ["Czechia", [["Prague", 50.08, 14.44]]],
+  ["Poland", [["Warsaw", 52.23, 21.01], ["Łódź", 51.76, 19.46], ["Gdańsk", 54.35, 18.65], ["Kraków", 50.06, 19.94], ["Zakopane", 49.3, 19.95]]],
+  ["Italy", [["Rome", 41.9, 12.5], ["Florence", 43.77, 11.26], ["Venice", 45.44, 12.32]]],
+  ["Uganda", [["Kampala", 0.35, 32.58]]],
+  ["Tanzania", [["Arusha", -3.37, 36.68], ["Zanzibar", -6.16, 39.2], ["Dar es Salaam", -6.79, 39.21]]],
+  ["India", [["Delhi", 28.61, 77.21], ["Goa", 15.3, 74.12]]],
+  ["Thailand", [["Bangkok", 13.76, 100.5], ["Chiang Mai", 18.79, 98.98]]],
+  ["Vietnam", [["Hanoi", 21.03, 105.85], ["Saigon", 10.82, 106.63]]],
+  ["Hong Kong", [["Hong Kong", 22.32, 114.17]]],
+  ["Philippines", [["Manila", 14.6, 120.98], ["Boracay", 11.97, 121.92]]]
+];
+// Land mask for the close-up (Natural Earth 1:50m land, rasterized): 2px per degree, longitude -165..155, latitude
+// 72..-44. Rows split on "|"; each row alternates water and land runs, starting with water, two base-36 digits a run.
+var ATLAS = { w: 640, h: 232, lon0: -165, lat0: 72, k: 2, rle: "2809030t09070204070x01010y1v43080p090204012z05020d0l0a|0g031s03080r0b01040707110y01011j01070q013d0101060l0b020i012m041406|0a0g1w0t0e0807140t1m03052f0g1b080i0d020i013z|060w0z030l0v090a07150p1u2a02030j1j020f0b034i|04180d01020d02030204080w0503020801010b0703030101010l0o06011l2a0u1h08060c024j|031f040z050i010905080209010107080501020l0q02041h280102120p040k0a0509034i|002t020g01010105020101080208010405080a01010g0t01021f291a0m0206030704010f02090305014b|002u0b080c05030d020101080a04020f0q1d2d01011d0a05071b024h|0133020o010f020b08050102010h0m162n1g0605041d034h|024l0903060j0i152n1j0503041d044i|054h0h0o0g132m1k071i034k|0003034801050h0f010a0g110n04050103051j170407036b|004d010301010j0d04060i0y0p05020d1h190a6e|004c02050c0l04040l0p0z0i1f0j070j0b6e|004b0209070q0r0n0x0k1e0l060l0305026e|0842030a0703060h0q0n110e1e0n040p036j|083y060603040g0g0q0m100201091e01010n037d|010201410a020c020b0801060r0k2p0o037g|00430g030f01060902010t0h2p0o057g|00410h020602020a09050w0g1x020n0p077g|00400p02030c0d020u0f1y010n0p087f|003y0w0e180d2n0p087f|000r0106032w0x0h170b2n0p077g|000p02080201012u0y0g0201060112052b010c0r020202090670|0202020i02050g2m0y0g080314012p0s0d01047101|060g04030n2h0x0i07043d010f0r0a6o0402010102010507|0603020c0v2i0t0k04073b010h08030d096o0q|0f0702020u2g0u0v330201050j04060b0a02026i0s|0e0502040w2g0v0u310201080r0a04010601036h0t|0d0503040x04012b02010s0u300101090m03030a02020504016f0v|0b050501112m0o0u32080l050409086j0x|09051a2n0f03040v32070l0603070a6i0y|06051f2o0c01050x30090k0d0d6g10|0402020101011g2u09122t0601070k0804010c6e12|00041o02022q05182q0601080j0401020a03036f04010y|1s01042p05182n09010102070h050204036s020305010o|1s03022p06192l0806060e02017c04010o|1t02032q041a2k08030a097p0n|1u01042q031b2j08030c067q0n|1v01052m061a2i08040c067q0n|222n021b2j05050e047s0n|223w02032v0b027p02030n|213v03032u0b027q03040m|223s05022u040a7q03040m|243c05030a050201307t03040m|263902030304060a2v7x03050l|283402080a0b2r02017y03020o|283301090b0c2o8204020o|293c0a0e2o8005010p|293b06010b0202032s7v06020o|2a3c06010e012u26020o064r07030n|2a3g0103391t0108050m084q08010p|2a3k391r0604050l0a4p0o010a|2a3901083b0s020x050u084r09020a020d|2a3602073e0s040u0803050j084r0a0308010f|2a3403043i0k0107050s0j0h074r0b0504010h|2932070236010c0i0507040q0m0g074p0c080j|29303f0p03030807050n0o0f084m0c0a0j|29303f0o0c010207070l0q0d0a4e02020d080m|29303f0p0a020406080j0r0d094c0i0204020n|29313e0o0b020508070h09070b0e080102480k020s|2a2x3h0m0e010707060m010c080g0b470k030r|292w3j0k0e040808030b010403150701023p010g0l030r|292t3m0j0g030a0401020209041b063s030e0m040q|2a2s3m0i05020a030b0206070401011b083o040501070o040q|2a2r3m0j0h020d020706051a093n050206040p040q|2b2p3n0j0w02070705190a3j070107070m040r|2c2o3o0h0r0102040808031a0a3k0d080m030s|2c2n3p0h0q060a06010203190a3m0301080101060j050s|2d2l3q0f0l0207040c030401031b073t08060e0102060s|2e2k3v09090h07010d03081c043t09070e090s|2e2l3v020b0k0y0103020403044q0b060d090t|2f2k3v02080o1d4p0d060a02010a0s|2g2h3x07020p0p060c03044n0e06060g0t|2g2h3w0z1702054n0d05060g0v|2h2e3x0z1e4q0c0104010304010710|2l283y111d4q0j030105010212|2n253x141b4s0a02050817|2n243x1a0e040o4s0f010105010118|2o213y1e09080l4u0h031b|2o203z1e090b0i4v0g031b|2p03031t3y1i060g0405024x0h011c|2q03031r3z1l035o1u|2q03031g0209407a0i011c|2r03031a080202053y3903411t|2s04011007040c043x39053z1u|2t03020x0p053h010701053b053x1v|2u03020u0r053j010401043d053x0f011f|2s05030s0s053r2l040r053v1w|2t05030q0u053p2n030s063s1x|2u05030q0t0502013m2n040s0705023i0g011h|2x03030p0u0405013h2q040s0b01013i0f011i|2y02030p0v033n2q040s01010901023h1y|2x03050m0x023m2s040t070308060103022y04011u|2x04050l12023h2s040t06040l2w04021u|2z03050k13013g2u040t01090k2u05031u|3003050j13013f2v06130j2s05031v|3201060i0u010d013a2v06150j2p06031v|3a0h0r093i2x06150j2m08031v|3a0h0q0302083e2z05160i2j0c011w|3b0g0p01030105063c3004150k1404172c|0g012u0g0f070g050501343004140m04010t0a0w03032g|0g022t0h0d070i06383104130n02030s0b0t05022h|0i012s0i0c070j07373005100t0s0c0s07012h|0i022r0i0b070s072z30060z0t0r0f0p06042g|0i022s0i0a070t082x30070y0t0p0h0p05042h|3e0i050101080q0102092w31060w0w0n0j0o05042h|3f0w0i040409020102042r31060u0x0m0l0o05020l041t|3i0s0l010b013232060r0z0l0m0o0s041t|3k0q3z33070q0z0j0o0p0r041t|3m0o3z34060n120j0o0q0p051t|3p0k1h022h34060k160h0o04030l0o041u|3s02050j3r340101040k160e0t01040m0n031v|400j3b010d36050i190c0z0n0m031v|410j3n39040e1c0c0z0n0m041u|420i3o39030c1f0c0z0n0m051s|450e3p3a02091i0c0z0n0m0201051p|480b3p3b01061l0c0o010b03020h0m0203021q|4b083p3g0h01160b0o010b03020h0m0203031p|4c070n02313c0k01160a0p010a04040f0n01030201021n|4d060m0202022z3a0f021c090p010a04060d0p0104021n|4e050j0501052x3b09061d091102070c0l01040202031n|4e050g0f070402012k3a030c1d08100308090m0204061o|4e060f0k020401022l3n1e0712020a050o0106071m|4f060e07020j2n3m1e06020110020b030o01070402011m|4i040404030w2m3l1f0502020y0409030o01080204011m|4j080103010w2n3k1g0403020y0409020o010d041l|4k0603122k3j1i0203040n0109050x010a081l|4n0303132k3i1n050y0317091l|4o0105132k3g1o050n010b020x01090103051l|4v132l3e1p040z040u020901030301011l|4v152k0r042h1q0311050r040c031n|4v1c2f0m082g2k0109060q050d011n|4v1e2e0i0b2f2l0505070o081z|4v1f2e0508010f2d2n0505060m0821|4v1g370204262o0504060l090g011k|4v1h3b0101242q05040509010a0922|4v1h3b0102222s0503050j0923|4u1j3d212q01030503040g0d22|4t1k3c212w0602040e0e0k011h|4s1m3b1z2z0702030903010e0j011i|4s1m3b1y2x0202080102090k0401060105031g|4q1o3b1w300102090b0k020a05021h|4q1p3401041w340a0a0h0501060107011i|43010l1s371w35090101080h04010e0204031b|43030j1w321w37070b0h04020204070304010105030112|4o1z311u350103080a0f04090e0815|4o212z1t370102080102080d050602010203030104010305030101030x|4o21301r3901020b070d05060k0504070d010g|4p2601022s1p3b01010c0102030d04070c040406020b0h0109|4p2b2r1n3f090301070301060404010307020107030l0h0106|4o2d2r1m3g080h0406020103080102010401030o0g0104|4n2f2r1k3i070r0202030o0k0d0304|4n2h2p1k3j060r02020101020p0k0b0304|4o2j2n1i01013k040r0202030t0h0a020501|4o2k2m1i3n0101011h010202060i02070601|4o2k2n1i3o061f02070j030209|4q2i2n1i3n0902031801080i0f|4q2j2m1i3q0e10010d0h0g|4r2i2n1i3r0e0n0109010d0j0f|4s2g2o1h3y0a01010104020203050p0c05050d|4s2g2o1h450101010106010605040r0606040d|4t2e2p1h4g0108040u0408050101040104|4t2e2p1i4e0306031905010108|4u2c2r1i4f0106021b0509|4u2a2t1i4l0111010p|4v292t1i4z01010101020i020o|4v282u1i05014t0302030g020o|4w272u1i0h014j0c09040n|4w262u1j0h024h0c0a040n|4x242u1k0g034g0d0a040n|4x232v1k0f044f0f09040n|4x232v1l0e054704030d010109060l|4y222u1m0d064507020c0c070k|4z212u1m0c07440n0b080j|511z2u1l0a0a440p09080j|521y2t1l090b430t06090j|551v2t1k0a0b4101010w030a0i|561u2t1i0b0b410z030a0i|0v014b1t2t1g0d0b411c0i|591q2v1e0e0b411d0h|591q2v1d0f0b401e0h|591q2w1a0h0a401g0g|591p2y180j093z1j0e|591p2y180i090i013c1q0c|591o30170i093s1t0c|5a1m31170h0a0d023b1w0b|591n32170f0b3o1y0b|591m33170f0a3n2209|591l35160f0a3n2308|591g3a160g093n2308|591f3b160g083o2407|591b3f160g083o2506|591a3g150i073o2605|59193h120l053q2803|58193j104h2704|58193j104g2804|58193j104h2803|58193j104i2703|58193k0z4i2703|571a3l0x4j2703|57193n0v4l2603|57183o0u4n2503|57173q0s4o2503|57173q0s4o2503|56173s0q4p2404|57153t0p4r2304|57133w0n4s0s041704|57133w0m4t0o0b1305|57123x0l4u0j0i1105|56133x0j4w0h0l0y07|5611400g4x0i0m04010s07|56114007050150090v03020r08|560s020643025b050x020202010p08|550vas01020o09|540war03020n09|540wax0l0a|540xaw0l0a|530xax0l0a|530waz0j0b|530wb10d0f|530tb80203030g|530nc2|530nbf010m|520nbp010d|520obh0204020d|520i0202bj080d|520ibo070d|5102010jbl070d|5102010jbm050e|5102010hbo040f|540gc8" };
 var PINS = [["Arcadia", 16, 14], ["San Francisco", 14, 13], ["Austin", 22, 15], ["Princeton", 29, 12], ["New York", 29, 12], ["Kampala", 63, 25]];
 
 function makeBedroom(mode) {
@@ -1033,7 +1061,7 @@ var ZONES = {
 };
 var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
-var PANELS = { shelf: 1, contact: 1 };
+var PANELS = { shelf: 1, contact: 1, map: 1 };
 
 // The shelf reads left to right, oldest first: [spine, height, color, ink, kicker, title, paragraph]
 var BOOKS = [
@@ -1107,7 +1135,7 @@ function Room(root) {
   var $ = function (id) { return root.querySelector("#" + id); };
   // Start at the front door once per visit; later loads in the same tab go straight in.
   var mode = storedMode(), scene = entered() ? "room" : "hall", intro = scene === "hall" ? HALL_INTRO : introFor(mode);
-  this.state = { scene: scene, mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, sayN: 0, focusId: null, book: -1, station: "now", vw: 1440, vh: 900 };
+  this.state = { scene: scene, mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, sayN: 0, focusId: null, book: -1, station: "now", place: -1, vw: 1440, vh: 900 };
   this.raf = 0; this.tw = 0; this.last = null;
   this.fluffing = false; this.builtFor = null; this.brushed = false; this.paintedHover = null;
   this.renderedMode = null; this.renderedCam = null;
@@ -1128,7 +1156,8 @@ function Room(root) {
   this.canvas = $("room");
   this.dom = {
     action: $("action"), shown: $("say-shown"), caret: $("caret"), live: $("say-live"),
-    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact") },
+    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map") },
+    atlas: $("atlas"), placeTitle: $("place-title"), placeText: $("place-text"),
     bookKicker: $("book-kicker"), bookTitle: $("book-title"), bookText: $("book-text"), bookPrev: $("book-prev"), bookNext: $("book-next"), needle: $("needle"),
     kicker: $("station-kicker"), title: $("station-title"), text: $("station-text"),
     themeColor: document.querySelector('meta[name="theme-color"]')
@@ -1228,6 +1257,17 @@ function Room(root) {
   this.dom.bookNext.addEventListener("click", function () {
     if (self.state.book >= BOOKS.length - 1) self.act("contact");
     else self.setState({ book: self.state.book + 1 });
+  });
+
+  // Map panel: a button per country (and one for everywhere) picks which pins stand out.
+  this.placeEls = [];
+  var placesEl = $("places");
+  [-1].concat(PLACES.map(function (c, i) { return i; })).forEach(function (i) {
+    var b = el("button", "pbtn place", i < 0 ? "All" : PLACES[i][0]);
+    b.type = "button";
+    b.addEventListener("click", function () { self.setState({ place: i }); });
+    placesEl.appendChild(b);
+    self.placeEls.push(b);
   });
 
   // Receiver panel: station buttons.
@@ -1381,6 +1421,43 @@ Room.prototype.act = function (id) {
     this.opener = opener;
     if (this.kbd) this.dom.panels[id].focus({ preventScroll: true });
   }
+};
+
+// The map close-up: paper-blue ocean with a graticule every 15 degrees, sand land with a darker coast, and a pin
+// per place. A picked country's pins stand out and the rest fade back.
+Room.prototype.drawAtlas = function (pick) {
+  var A = ATLAS, W = A.w, H = A.h, cv = this.dom.atlas, x, y;
+  if (!this.atlasMask) {
+    var m = new Uint8Array(W * H);
+    A.rle.split("|").forEach(function (row, yy) {
+      var xx = 0;
+      for (var i = 0; i < row.length; i += 2) {
+        var n = parseInt(row.substr(i, 2), 36);
+        if ((i / 2) % 2) m.fill(1, yy * W + xx, yy * W + xx + n);
+        xx += n;
+      }
+    });
+    this.atlasMask = m;
+  }
+  var mask = this.atlasMask, ctx = cv.getContext("2d"), img = ctx.createImageData(W, H), px = img.data;
+  var OCN = [150, 186, 196], OCNL = [164, 198, 206], LND = [226, 210, 160], LNDD = [196, 176, 124];
+  var land = function (xx, yy) { return xx >= 0 && yy >= 0 && xx < W && yy < H && mask[yy * W + xx] === 1; };
+  var put = function (xx, yy, c) { if (xx < 0 || yy < 0 || xx >= W || yy >= H) return; var o = (yy * W + xx) * 4; px[o] = c[0]; px[o + 1] = c[1]; px[o + 2] = c[2]; px[o + 3] = 255; };
+  for (y = 0; y < H; y++) for (x = 0; x < W; x++) {
+    if (land(x, y)) put(x, y, land(x - 1, y) && land(x + 1, y) && land(x, y - 1) && land(x, y + 1) ? LND : LNDD);
+    else put(x, y, (x + A.lon0 * A.k) % (15 * A.k) === 0 || (A.lat0 * A.k - y) % (15 * A.k) === 0 ? OCNL : OCN);
+  }
+  var pin = function (p, big) {
+    var px0 = Math.round((p[2] - A.lon0) * A.k), py0 = Math.round((A.lat0 - p[1]) * A.k);
+    if (big) {
+      for (var yy = -2; yy <= 2; yy++) for (var xx = -2; xx <= 2; xx++) if (Math.abs(xx) + Math.abs(yy) < 4) put(px0 + xx, py0 + yy, Math.abs(xx) === 2 || Math.abs(yy) === 2 || Math.abs(xx) + Math.abs(yy) === 3 ? [90, 24, 20] : [226, 62, 50]);
+      put(px0 - 1, py0 - 1, [250, 170, 150]);
+    } else if (pick >= 0) put(px0, py0, [170, 96, 84]);
+    else { put(px0, py0, [214, 52, 44]); put(px0 + 1, py0, [214, 52, 44]); put(px0, py0 + 1, [214, 52, 44]); put(px0 + 1, py0 + 1, [120, 30, 26]); }
+  };
+  PLACES.forEach(function (c, i) { if (i !== pick) c[1].forEach(function (p) { pin(p, false); }); });
+  if (pick >= 0) PLACES[pick][1].forEach(function (p) { pin(p, true); });
+  ctx.putImageData(img, 0, 0);
 };
 
 // Walk to another room in the apartment: a quick fade, then the new room from its overview.
@@ -1721,6 +1798,13 @@ Room.prototype.render = function () {
   setText(d.bookNext, s.book < 0 ? "Start →" : (last ? "Next?" : "Next →"));
   if (last) setAttr(d.bookNext, "aria-label", "Next? Open the Rolodex"); else d.bookNext.removeAttribute("aria-label");
 
+  if (open === "map") {
+    this.placeEls.forEach(function (b, k) { setAttr(b, "aria-pressed", k - 1 === s.place ? "true" : "false"); });
+    var pc = PLACES[s.place], total = PLACES.reduce(function (n, c) { return n + c[1].length; }, 0);
+    setText(d.placeTitle, pc ? pc[0] : "Everywhere");
+    setText(d.placeText, pc ? pc[1].map(function (p) { return p[0]; }).join(" · ") : total + " places.");
+    if (this.drawnPlace !== s.place) { this.drawAtlas(s.place); this.drawnPlace = s.place; }
+  }
   if (!PANELS.radio) return; // the receiver's panel is parked; skip updating it
   var st = STATIONS[s.station];
   for (var key in this.stationEls) setAttr(this.stationEls[key], "aria-pressed", s.station === key ? "true" : "false");
