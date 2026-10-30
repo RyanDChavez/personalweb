@@ -790,6 +790,7 @@ function makeBedroom(mode) {
   for (var wy = ROOF + 4; wy < GY1 - 10; wy += 15) for (var wx = GX0 + 4; wx < GX1 - 8; wx += 13) {
     var lit = night && r() < 0.55, TR = night ? [70, 64, 60] : [214, 206, 192];
     rect(wx - 1, wy - 1, 9, 12, TR, true); rect(wx, wy, 7, 10, lit ? [244, 206, 128] : (night ? [20, 22, 30] : [80, 104, 118]), true); rect(wx, wy + 5, 7, 1, TR, true);
+    rect(wx - 2, wy + 11, 11, 1, night ? [84, 78, 74] : [232, 226, 214], true); // stone sill
   }
   rect(127, GY0, 2, GY1 - GY0, C.teak);
   rect(93, 70, 69, 3, C.teakL);
@@ -1660,26 +1661,63 @@ function drawScreen(col, emis, obj, f) {
 }
 function screenKey(f) { return f.lines.join("/") + (f.cur ? "|" + f.cur.join(",") : ""); }
 
+// Pigeons out the bedroom window: three on the parapet across the street and one on a window sill. Now and then one
+// pecks at the ledge, and one turns around; at night they sleep with their heads tucked. Sprites face right:
+// h head, n green neck, k beak, b body, w wing, t tail, f feet.
+var PIGEONS = [
+  { x: 213, y: 25, dir: 1, per: 5300, ph: 0 }, { x: 221, y: 25, dir: -1, per: 7100, ph: 2100 },
+  { x: 248, y: 25, dir: 1, per: 6100, ph: 3900, turns: true }, { x: 253, y: 42, dir: -1, per: 8300, ph: 1200 }
+];
+var PIGEON_POSES = {
+  stand: ["...hh..", "...nhk.", ".bbbn..", "twwbb..", "..f.f.."],
+  peck: [".......", ".......", ".bbbnh.", "twwbnhh", "..f.fk."],
+  sleep: [".......", ".......", "...hh..", ".bbbnh.", "twwbbb."]
+};
+var PIGEON_INK = { h: [96, 104, 124], n: [88, 142, 118], k: [58, 54, 54], b: [150, 156, 170], w: [186, 190, 200], t: [70, 74, 86], f: [204, 100, 104] };
+function pigeonFrame(t, still, night) {
+  return PIGEONS.map(function (pg) {
+    if (night) return ["sleep", pg.dir];
+    if (still) return ["stand", pg.dir];
+    var u = (t + pg.ph) % pg.per, lap = Math.floor((t + pg.ph) / pg.per);
+    return [u < 450 || (u > 700 && u < 1050) ? "peck" : "stand", pg.turns && lap % 4 >= 2 ? -pg.dir : pg.dir];
+  });
+}
+function drawPigeons(col, emis, obj, poses, night) {
+  poses.forEach(function (ps, i) {
+    var pg = PIGEONS[i], rows = PIGEON_POSES[ps[0]];
+    for (var y = 0; y < 5; y++) for (var x = 0; x < 7; x++) {
+      var ch = rows[y][x];
+      if (ch === ".") continue;
+      var c = PIGEON_INK[ch], k = (pg.y + y) * SW + pg.x + (ps[1] > 0 ? x : 6 - x);
+      col[k * 3] = night ? c[0] * 0.3 : c[0]; col[k * 3 + 1] = night ? c[1] * 0.3 : c[1]; col[k * 3 + 2] = night ? c[2] * 0.34 : c[2];
+      emis[k] = 1; obj[k] = OBJ.bwindow;
+    }
+  });
+}
+function pigeonKey(poses) { return poses.map(function (ps) { return ps.join(""); }).join("/"); }
+
 Room.prototype.bedroomImage = function (hv) {
   var mode = this.mode();
   if (this.bedFor !== mode) { this.bed = makeBedroom(mode); this.bedLight = makeBedroomLight(mode); this.bedFor = mode; }
   var B = this.buf;
   B.col.set(this.bed.col); B.emis.set(this.bed.emis); B.obj.set(this.bed.obj);
-  var still = reducedMotion(), f = screenFrame(performance.now() % SCREEN.loop, still);
+  var still = reducedMotion(), now = performance.now(), f = screenFrame(now % SCREEN.loop, still), pf = pigeonFrame(now, still, mode === "dark");
   drawScreen(B.col, B.emis, B.obj, f);
-  this.screenShown = screenKey(f);
+  drawPigeons(B.col, B.emis, B.obj, pf, mode === "dark");
+  this.screenShown = screenKey(f) + "#" + pigeonKey(pf);
   if (!still) this.watchScreen();
   return composite(B.col, B.emis, B.obj, this.bedLight, hv, B.img);
 };
 
-// While the bedroom is on screen, check the computer every 100ms and repaint only when its screen changes.
+// While the bedroom is on screen, check the computer and the pigeons every 100ms and repaint only when one changes.
 Room.prototype.watchScreen = function () {
   var self = this;
   if (this.screenTimer) return;
   this.screenTimer = setTimeout(function () {
     self.screenTimer = 0;
     if (self.state.scene !== "bedroom" || document.hidden) return;
-    if (screenKey(screenFrame(performance.now() % SCREEN.loop, false)) !== self.screenShown) self.kick();
+    var now = performance.now();
+    if (screenKey(screenFrame(now % SCREEN.loop, false)) + "#" + pigeonKey(pigeonFrame(now, false, self.mode() === "dark")) !== self.screenShown) self.kick();
     else self.watchScreen();
   }, 100);
 };
