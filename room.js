@@ -1375,7 +1375,7 @@ var HOTS = [
   { id: "plant", name: "the snake plant", verb: "Water", x: 0, y: 96, w: 24, h: 80 },
   { id: "door", scene: "hall", name: "the door", verb: "Open", x: 128, y: 30, w: 64, h: 120 },
   { id: "bell", scene: "hall", name: "the doorbell", verb: "Ring", x: 203, y: 74, w: 21, h: 30 },
-  { id: "bwindow", scene: "bedroom", name: "the window", verb: "Look out", x: 204, y: 16, w: 69, h: 58 },
+  { id: "bwindow", scene: "bedroom", name: "the window", verb: "Open", x: 204, y: 16, w: 69, h: 58 },
   { id: "map", scene: "bedroom", name: "the map", verb: "Look at", x: 78, y: 8, w: 116, h: 48 },
   { id: "bshelf", scene: "bedroom", name: "the bookshelf", verb: "Browse", x: 6, y: 26, w: 50, h: 106 },
   { id: "bass", scene: "bedroom", name: "the bass", verb: "Play", x: 56, y: 70, w: 21, h: 64 },
@@ -2122,6 +2122,35 @@ Room.prototype.act = function (id) {
     this.kick();
     return;
   }
+  if (id === "bwindow") {
+    var nowW = performance.now(), inside = this.bird && birdAt(this.bird, nowW, false);
+    this.winOpen = !this.winOpen;
+    if (this.winOpen && !night && !this.bird) this.bird = { t0: nowW + 1400 };
+    if (!this.winOpen && this.bird) { if (inside) this.bird.leaveAt = nowW; else this.bird = null; }
+    this.setState({ zone: ZONE_FOR.bwindow, open: null, focusId: id });
+    this.say(this.winOpen ? (night ? "You open the window. It's quiet out." : "You open the window. Street noise drifts in.") : (inside ? "You shoo the pigeon out and close the window." : "You close the window."));
+    this.kick();
+    return;
+  }
+  if (id === "bed") {
+    var nowB = performance.now(), bird = this.bird && birdAt(this.bird, nowB, false);
+    this.setState({ zone: ZONE_FOR.bed, open: null, focusId: id });
+    if (bird && bird.landed) { this.bird.leaveAt = nowB; this.say("The pigeon flaps back out the window."); this.kick(); return; }
+    var next = night ? "light" : "dark", wake = next === "dark" ? "You wake up from a long nap. It's evening." : "You wake up. It's morning.";
+    if (reducedMotion()) { storeMode(next); this.setState({ mode: next }); this.say(wake); return; }
+    this.say("You lie down on the bed. Z z z…");
+    var st = this.stage;
+    clearTimeout(this.sleepT);
+    this.sleepT = setTimeout(function () {
+      st.classList.add("fading");
+      self.sleepT = setTimeout(function () {
+        storeMode(next); self.setState({ mode: next });
+        st.classList.remove("fading");
+        self.say(wake);
+      }, 900);
+    }, 1500);
+    return;
+  }
   if (id === "chair") {
     var nowS = performance.now();
     this.spins = this.lastSpin && nowS - this.lastSpin < 12000 ? this.spins + 1 : 0;
@@ -2152,13 +2181,11 @@ Room.prototype.act = function (id) {
     radio: "The receiver's broken. It won't turn on.",
     contact: "You open the Rolodex to Ryan's card.",
     // bedroom
-    bwindow: night ? "Across the street, a few windows are lit." : "Across the street, a brick building.",
     bshelf: "Every book Ryan owns, sorted by what it's about.",
     desk: "A mid-century walnut desk. There's half-drunk coffee and a notebook with cursive scrawled notes written hastily.",
     apple: "An old computer. The cursor's blinking, but nothing's loaded yet.",
     dchair: "A wooden desk chair, pushed in.",
     bass: "A black Fender Jazz Bass on its stand. It's got plenty of dings picked up on the road.",
-    bed: "The bed's made, under a green flower quilt.",
     map: "A world map with a pin in every city Ryan has been to.",
     // kitchen
     fridge: "You open the fridge. Leftovers, mostly.",
@@ -2399,7 +2426,7 @@ Room.prototype.hallImage = function (hv) {
 // The burner under the Dutch oven, t ms after it was turned on: a blue flame, steam off the lid, and after a while the
 // lid rattles. Left on, it boils over: foam runs down the pot, smoke rolls up and the smoke alarm blinks.
 var BOIL = 18000;
-function stoveFrame(t, still) { var boil = t >= BOIL; return { t: still ? 2000 : t, rattle: !still && t > 6000 && Math.floor(t / 160) % 3 === 0, boil: boil, blink: boil && Math.floor(t / 400) % 2 === 0 }; }
+function stoveFrame(t, still) { var boil = !still && t >= BOIL; return { t: still ? 2000 : t, rattle: !still && t > 6000 && Math.floor(t / 160) % 3 === 0, boil: boil, blink: boil && Math.floor(t / 400) % 2 === 0 }; }
 function stoveKey(f) { return f ? Math.floor(f.t / 120) + (f.rattle ? "r" : "") + (f.boil ? "b" : "") + (f.blink ? "!" : "") : ""; }
 function drawStove(col, emis, obj, f) {
   var put = function (x, y, c, e, a) {
@@ -2507,6 +2534,57 @@ function drawPigeons(col, emis, obj, poses, night) {
 }
 function pigeonKey(poses) { return poses.map(function (ps) { return ps.join(""); }).join("/"); }
 
+// The bedroom window's lower sash: down (a meeting rail across the middle), or pushed up, its bottom rail halfway.
+function drawSash(col, emis, obj, open) {
+  var T = C.teak, TL = C.teakL, put = function (x, y, c) { var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 0; obj[i] = OBJ.bwindow; };
+  [open ? [27, 48] : [44]].forEach(function (rows) { rows.forEach(function (ry) { for (var x = 210; x < 267; x++) { put(x, ry, TL); put(x, ry + 1, T); } }); });
+}
+
+// A pigeon that flies in through the open bedroom window, lands on the bed and struts and pecks about on the quilt,
+// then flies back out when shooed (or bored, after half a minute). Facing right; flipped when walking left.
+var BIRD = {
+  up: ["...ww...........", "....ww..........", "....www.........", ".....wwd...hhh..", "..tt..wwbbbhkhBB", "tttbbbbbbbbnnn..", "...bbbbbbbbb...."],
+  down: ["................", "...........hhh..", "..tt.bbbbbbhkhBB", "tttbbwwwbbbnnn..", "....wwwdw.......", ".....www........", "......ww........"],
+  stand: ["...........hhh..", "..........hhkhh.", "..........hhhhBB", "...........nnn..", "......wwwwbnnn..", "....wwwwwwwbbb..", "..twwddwwwwbbb..", "tttwwwwwbbbbbb..",
+    "ttt.bbbbbbbbb...", ".....bbbbbbb....", ".......f..f.....", "......ff.ff....."],
+  peck: ["................", "................", "................", "......wwwwbb....", "....wwwwwwbbnn..", "..twwddwwwbbnnn.", "tttwwwwwbbbbnhh.", "ttt.bbbbbbbb.hkh",
+    ".....bbbbbbb.hhB", ".............BB.", ".......f..f.....", "......ff.ff....."]
+};
+var BIRD_INK = { h: [96, 104, 124], n: [88, 142, 118], k: [30, 28, 28], b: [150, 156, 170], w: [186, 190, 200], d: [104, 108, 122], t: [70, 74, 86], f: [204, 100, 104], B: [70, 64, 64] };
+var BIRD_IN = 1600, BIRD_STAY = 30000, BIRD_OUT = 1200;
+function birdAt(b, now, still) {
+  if (!b || now < b.t0) return null;
+  var t = now - b.t0, leaveAt = b.leaveAt != null ? b.leaveAt - b.t0 : BIRD_IN + BIRD_STAY;
+  var onBed = function (tt) {
+    var tw = Math.max(0, tt - BIRD_IN), walked = Math.floor(tw / 2800) * 2000 + Math.min(tw % 2800, 2000), u = (walked / 4000) % 2;
+    return { x: 244 + Math.round(24 * (1 - Math.abs(u - 1))), y: 121, dir: u < 1 ? 1 : -1, pecking: tw % 2800 >= 2000, tw: tw };
+  };
+  if (t >= leaveAt) {
+    var p = (t - leaveAt) / BIRD_OUT, from = leaveAt < BIRD_IN ? { x: 240, y: 52 } : onBed(leaveAt);
+    if (still || p >= 1) return null;
+    return { x: Math.round(from.x + (234 - from.x) * p), y: Math.round(from.y + (30 - from.y) * p - Math.sin(p * Math.PI) * 6), dir: -1, pose: Math.floor(t / 110) % 2 ? "up" : "down", flying: true };
+  }
+  if (t < BIRD_IN && !still) {
+    var q = t / BIRD_IN;
+    return { x: Math.round(236 + 8 * q), y: Math.round(48 + (121 - 48) * q - Math.sin(q * Math.PI) * 12), dir: 1, pose: Math.floor(t / 110) % 2 ? "up" : "down", flying: true };
+  }
+  var w = onBed(still ? BIRD_IN : t);
+  return { x: w.x, y: w.y, dir: w.dir, pose: w.pecking && Math.floor(w.tw / 200) % 2 ? "peck" : "stand", landed: true };
+}
+function birdKey(f) { return f ? f.x + "," + f.y + f.pose + f.dir : ""; }
+function drawBird(col, emis, obj, f) {
+  var rows = BIRD[f.pose], h = rows.length, w = rows[0].length;
+  rows.forEach(function (row, ry) {
+    for (var k = 0; k < w; k++) {
+      var ch = row[k]; if (ch === ".") continue;
+      var x = f.dir > 0 ? f.x - 8 + k : f.x + 7 - k, y = f.y - h + 1 + ry;
+      if (x < 0 || y < 0 || x >= SW || y >= SH) continue;
+      var c = BIRD_INK[ch], i = y * SW + x;
+      col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 0; obj[i] = OBJ.bed;
+    }
+  });
+}
+
 Room.prototype.bedroomImage = function (hv) {
   var mode = this.mode();
   if (this.bedFor !== mode) { this.bed = makeBedroom(mode); this.bedLight = makeBedroomLight(mode); this.bedFor = mode; }
@@ -2515,7 +2593,13 @@ Room.prototype.bedroomImage = function (hv) {
   var still = reducedMotion(), now = performance.now(), f = screenFrame(now % SCREEN.loop, still), pf = pigeonFrame(now, still, mode === "dark");
   drawScreen(B.col, B.emis, B.obj, f);
   drawPigeons(B.col, B.emis, B.obj, pf, mode === "dark");
-  this.screenShown = screenKey(f) + "#" + pigeonKey(pf);
+  drawSash(B.col, B.emis, B.obj, !!this.winOpen);
+  var bf = birdAt(this.bird, now, still);
+  if (bf) {
+    drawBird(B.col, B.emis, B.obj, bf);
+    if (bf.landed && !this.bird.landed) { this.bird.landed = true; if (this.state.scene === "bedroom") this.say("A pigeon flies in and lands on the bed."); }
+  } else if (this.bird && now > this.bird.t0 + 100) this.bird = null;
+  this.screenShown = screenKey(f) + "#" + pigeonKey(pf) + "#" + birdKey(bf);
   if (!still) this.watchScreen();
   return composite(B.col, B.emis, B.obj, this.bedLight, hv, B.img);
 };
@@ -2528,7 +2612,7 @@ Room.prototype.watchScreen = function () {
     self.screenTimer = 0;
     if (self.state.scene !== "bedroom" || document.hidden) return;
     var now = performance.now();
-    if (screenKey(screenFrame(now % SCREEN.loop, false)) + "#" + pigeonKey(pigeonFrame(now, false, self.mode() === "dark")) !== self.screenShown) self.kick();
+    if (screenKey(screenFrame(now % SCREEN.loop, false)) + "#" + pigeonKey(pigeonFrame(now, false, self.mode() === "dark")) + "#" + birdKey(birdAt(self.bird, now, false)) !== self.screenShown) self.kick();
     else self.watchScreen();
   }, 100);
 };
