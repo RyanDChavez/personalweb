@@ -199,12 +199,7 @@ function makeScene(mode) {
     put(ccx + Math.round(Math.cos(ta) * 7), ccy + Math.round(Math.sin(ta) * 7), INK);
     if (quarter) put(ccx + Math.round(Math.cos(ta) * 6), ccy + Math.round(Math.sin(ta) * 6), INK);
   }
-  function hand(ang, len, c) { for (var k = 0; k <= len * 2; k++) put(ccx + Math.cos(ang) * k / 2, ccy + Math.sin(ang) * k / 2, c); }
-  hand(-Math.PI / 2 + (10.15 / 12) * Math.PI * 2, 4.5, INK);
-  hand(-Math.PI / 2 + (9 / 60) * Math.PI * 2, 7, INK);
-  hand(-Math.PI / 2 + (31 / 60) * Math.PI * 2, 6, SEC);
-  put(ccx - Math.round(Math.cos(-Math.PI / 2 + (31 / 60) * Math.PI * 2) * 2), ccy - Math.round(Math.sin(-Math.PI / 2 + (31 / 60) * Math.PI * 2) * 2), SEC);
-  put(ccx, ccy, SEC);
+  // (the hands are drawn at the visitor's time on every paint: drawClock)
 
   // ---- portrait: a stylized midcentury-poster Ryan ----
   cur = OBJ.portrait;
@@ -367,6 +362,24 @@ function makeLight(mode) {
     A[i] = a; G[i] = g;
   }
   return mode === "dark" ? { A: A, G: G, at: [0.84, 0.92, 1.08], gt: [1.24, 1.02, 0.72] } : { A: A, G: G, at: [1, 1, 1], gt: [1.1, 1.04, 0.84] };
+}
+
+// The wall clock's hands, at the visitor's own time: hour and minute in black, the yellow second hand ticking (left
+// off with reduced motion, when the clock only moves once a minute).
+var CLOCK = { x: 178, y: 34 };
+function drawClock(put, setCur, now, still) {
+  var INK = [34, 34, 32], SEC = [242, 190, 36], h = now.getHours() % 12, m = now.getMinutes(), sec = now.getSeconds();
+  var hand = function (turn, len, c) { var a = -Math.PI / 2 + turn * Math.PI * 2; for (var k = 0; k <= len * 2; k++) put(CLOCK.x + Math.cos(a) * k / 2, CLOCK.y + Math.sin(a) * k / 2, c); };
+  setCur(OBJ.clock);
+  hand((h + m / 60) / 12, 4.5, INK);
+  hand((m + sec / 60) / 60, 7, INK);
+  if (!still) {
+    var a = -Math.PI / 2 + sec / 60 * Math.PI * 2;
+    hand(sec / 60, 6, SEC);
+    put(CLOCK.x - Math.round(Math.cos(a) * 2), CLOCK.y - Math.round(Math.sin(a) * 2), SEC);
+  }
+  put(CLOCK.x, CLOCK.y, SEC);
+  setCur(0);
 }
 
 function drawFront(put, setCur, rdxOpen) {
@@ -627,7 +640,7 @@ function drawDoor(h, col, emis, obj, p, peek) {
   }
 }
 
-// ---- the bedroom (behind the apartment flag): window across the street, ladder bookshelf, mid-century desk with a
+// ---- the bedroom: window across the street, ladder bookshelf, mid-century desk with a
 // green banker's lamp, wooden desk chair, and a black Fender Jazz Bass on its stand ----
 var BFLOOR = 132;
 
@@ -1052,7 +1065,7 @@ function makeBedroomLight(mode) {
   return mode === "dark" ? { A: A, G: G, at: [0.84, 0.92, 1.08], gt: [1.22, 1.06, 0.72] } : { A: A, G: G, at: [1, 1, 1], gt: [1.1, 1.04, 0.84] };
 }
 
-// ---- the kitchen (behind the kitchen flag): a mint fridge, a white range with Ryan's red Dutch oven, the sink
+// ---- the kitchen: a mint fridge, a white range with Ryan's red Dutch oven, the sink
 // under a window, walnut cabinets, and Ryan's coffee bar cart with the Oakland Chinatown print above it ----
 var KFLOOR = 132;
 
@@ -1691,18 +1704,6 @@ var HALL_INTRO = "You're at Ryan's front door.";
 var BEDROOM_INTRO = "You step into Ryan's bedroom.";
 var KITCHEN_INTRO = "You step into the kitchen.";
 
-// The bedroom and the walk between rooms, released. ?apartment=0 hides them again for the tab (?apartment=1 brings
-// them back).
-var FLAGS = { apartment: true, kitchen: false };
-try {
-  var flagParam = /[?&]apartment=([01])/.exec(location.search);
-  if (flagParam) { if (flagParam[1] === "0") sessionStorage.setItem("flag-apartment", "0"); else sessionStorage.removeItem("flag-apartment"); }
-  if (sessionStorage.getItem("flag-apartment") === "0") FLAGS.apartment = false;
-  // The kitchen isn't released yet: try it with ?kitchen=1 (sticks for the tab; ?kitchen=0 turns it off).
-  var kitParam = /[?&]kitchen=([01])/.exec(location.search);
-  if (kitParam) { if (kitParam[1] === "1") sessionStorage.setItem("flag-kitchen", "1"); else sessionStorage.removeItem("flag-kitchen"); }
-  if (sessionStorage.getItem("flag-kitchen") === "1") FLAGS.kitchen = true;
-} catch (e) {}
 function entered() { try { return sessionStorage.getItem("entered") === "1"; } catch (e) { return false; } }
 
 function introFor(m) {
@@ -1785,50 +1786,46 @@ function Room(root) {
   // HUD inventory: the accessible / mobile way around the room.
   this.invEls = [];
   var inv = $("inv");
-  // Getting around the apartment (behind the flag): a little floor plan beside the menu. The front door opens into
+  // Getting around the apartment: a little floor plan beside the menu. The front door opens into
   // the living room in the middle, with the kitchen through a doorway on the left and the bedroom on the right. Tap a
   // room to walk there; tap the one you're in to step back out of a close-up.
   this.tabEls = [];
-  if (FLAGS.apartment) {
-    var plan = el("nav", "plan" + (FLAGS.kitchen ? "" : " plan-two"));
-    plan.setAttribute("aria-label", "Floor plan");
-    (FLAGS.kitchen ? [["kitchen", "Kitchen"]] : []).concat([["room", "Living room"], ["bedroom", "Bedroom"]]).forEach(function (d) {
-      var b = el("button", "plan-room plan-" + (d[0] === "room" ? "living" : d[0]));
-      b.type = "button";
-      b.appendChild(el("span", null, d[1]));
-      b.addEventListener("click", function () { if (self.state.scene === d[0]) self.back(); else self.goTo(d[0]); });
-      plan.appendChild(b);
-      self.tabEls.push({ scene: d[0], el: b });
-    });
-    var door = el("span", "plan-door-front");
-    door.setAttribute("aria-hidden", "true");
-    plan.appendChild(door);
-    inv.parentNode.insertBefore(plan, inv);
-    var sw = el("button", "pbtn daynight");
-    sw.type = "button"; sw.setAttribute("role", "switch"); sw.setAttribute("aria-label", "Night");
-    sw.addEventListener("click", function () { self.act({ room: "lamp", bedroom: "blamp", kitchen: "klights" }[self.state.scene]); });
-    root.querySelector(".narrator").appendChild(sw);
-    this.dayNight = sw;
-    this.tabsEl = plan;
-    root.classList.add("has-plan");
-  }
+  var plan = el("nav", "plan");
+  plan.setAttribute("aria-label", "Floor plan");
+  [["kitchen", "Kitchen"], ["room", "Living room"], ["bedroom", "Bedroom"]].forEach(function (d) {
+    var b = el("button", "plan-room plan-" + (d[0] === "room" ? "living" : d[0]));
+    b.type = "button";
+    b.appendChild(el("span", null, d[1]));
+    b.addEventListener("click", function () { if (self.state.scene === d[0]) self.back(); else self.goTo(d[0]); });
+    plan.appendChild(b);
+    self.tabEls.push({ scene: d[0], el: b });
+  });
+  var door = el("span", "plan-door-front");
+  door.setAttribute("aria-hidden", "true");
+  plan.appendChild(door);
+  inv.parentNode.insertBefore(plan, inv);
+  var sw = el("button", "pbtn daynight");
+  sw.type = "button"; sw.setAttribute("role", "switch"); sw.setAttribute("aria-label", "Night");
+  sw.addEventListener("click", function () { self.act({ room: "lamp", bedroom: "blamp", kitchen: "klights" }[self.state.scene]); });
+  root.querySelector(".narrator").appendChild(sw);
+  this.dayNight = sw;
+  this.tabsEl = plan;
+  root.classList.add("has-plan");
   var addInv = function (scene, id, label, onClick, cls) {
-    if (FLAGS.apartment && (id === "room" || id === "lamp" || id === "blamp" || id === "klights")) return;
-    if (FLAGS.apartment && id === "fluff") label = "Rug";
     var b = el("button", "pbtn inv-btn" + (cls ? " " + cls : ""), label);
     b.type = "button";
     b.addEventListener("click", onClick);
     inv.appendChild(b);
     self.invEls.push({ id: id, el: b, scene: scene });
   };
-  [["shelf", "About me"], ["radio", "Radio"], ["contact", "Contact"], ["window", "Window"], ["chair", "Chair"], ["lamp", "Lamp"], ["fluff", "Fluff rug"], ["room", "Room"]].forEach(function (d) {
-    addInv("room", d[0], d[1], d[0] === "fluff" ? self.fluff : (d[0] === "room" ? self.back : function () { self.act(d[0]); }));
+  [["shelf", "About me"], ["radio", "Radio"], ["contact", "Contact"], ["window", "Window"], ["chair", "Chair"], ["fluff", "Rug"]].forEach(function (d) {
+    addInv("room", d[0], d[1], d[0] === "fluff" ? self.fluff : function () { self.act(d[0]); });
   });
-  [["desk", "Desk"], ["apple", "Computer"], ["bshelf", "Books"], ["bass", "Bass"], ["bed", "Bed"], ["map", "Map"], ["blamp", "Lamp"], ["room", "Room"]].forEach(function (d) {
-    addInv("bedroom", d[0], d[1], d[0] === "room" ? self.back : function () { self.act(d[0]); });
+  [["desk", "Desk"], ["apple", "Computer"], ["bshelf", "Books"], ["bass", "Bass"], ["bed", "Bed"], ["map", "Map"]].forEach(function (d) {
+    addInv("bedroom", d[0], d[1], function () { self.act(d[0]); });
   });
-  [["fridge", "Fridge"], ["stove", "Stove"], ["sink", "Sink"], ["coffee", "Coffee"], ["fruit", "Fruit"], ["recipes", "Recipes"], ["klights", "Lights"], ["room", "Room"]].forEach(function (d) {
-    addInv("kitchen", d[0], d[1], d[0] === "room" ? self.back : function () { self.act(d[0]); });
+  [["fridge", "Fridge"], ["stove", "Stove"], ["sink", "Sink"], ["coffee", "Coffee"], ["fruit", "Fruit"], ["recipes", "Recipes"]].forEach(function (d) {
+    addInv("kitchen", d[0], d[1], function () { self.act(d[0]); });
   });
   [["bell", "Ring the bell"], ["door", "Open the door"]].forEach(function (d) {
     addInv("hall", d[0], d[1], function () { self.enter(d[0] === "bell"); }, "inv-hall");
@@ -1994,7 +1991,7 @@ function Room(root) {
   // Remember whether the visitor is on the keyboard, for focus handling around panels.
   document.addEventListener("keydown", function () { self.kbd = true; }, true);
   // The computer screen pauses while the tab is hidden; pick it back up on return.
-  document.addEventListener("visibilitychange", function () { if (!document.hidden && self.state.scene === "bedroom") self.kick(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && (self.state.scene === "bedroom" || self.state.scene === "room")) self.kick(); });
   document.addEventListener("pointerdown", function () { self.kbd = false; }, true);
 
   // A mouse click or tap shouldn't leave a button focused: a later key press (like Esc) would make the browser
@@ -2075,7 +2072,7 @@ Room.prototype.act = function (id) {
       : "The Hudson and the Palisades, from the northwest Bronx. The George Washington Bridge is to the south.")
       + (night ? " The cacti on the sill look sleepy." : " The cacti on the sill look happy.")
       + (this.plane ? " A plane is on its way down to Newark." : ""),
-    clock: "The clock says 10:09. It's actually " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ".",
+    clock: "The clock says " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ". It's right.",
     record: "You put a record on.",
     portrait: "A poster of Ryan.",
     chair: "You sit in the swivel chair and spin around once.",
@@ -2408,6 +2405,17 @@ Room.prototype.watchScreen = function () {
   }, 100);
 };
 
+// While the living room is on screen, repaint on the next tick of the clock (each second, or each minute with reduced
+// motion).
+Room.prototype.watchClock = function (still) {
+  var self = this, now = Date.now();
+  if (this.clockTimer) return;
+  this.clockTimer = setTimeout(function () {
+    self.clockTimer = 0;
+    if (self.state.scene === "room" && !document.hidden) self.kick();
+  }, (still ? 60000 - now % 60000 : 1000 - now % 1000) + 20);
+};
+
 Room.prototype.roomImage = function (hv) {
   var mode = this.mode();
   if (this.builtFor !== mode) { this.scene = makeScene(mode); this.light = makeLight(mode); this.builtFor = mode; }
@@ -2432,6 +2440,9 @@ Room.prototype.roomImage = function (hv) {
     }
   }
   if (this.planeX != null) drawPlane(this.planeX, mode === "dark", col, emis, obj);
+  var still = reducedMotion();
+  drawClock(put, setCur, new Date(), still);
+  this.watchClock(still);
   drawFront(put, setCur, this.state.open === "contact");
   return composite(col, emis, obj, this.light, hv, B.img);
 };
@@ -2533,7 +2544,7 @@ Room.prototype.render = function () {
   var hov = HOTS.filter(function (h) { return h.id === s.hover; })[0];
   setText(d.action, hov
     ? (isLamp(hov.id) ? lampVerb : hov.verb) + " " + hov.name
-    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? (this.tabsEl ? "Looking closer · tap outside it to step back" : "Looking closer · click Room to step back") : (s.scene === "bedroom" ? "Walk around the bedroom" : (s.scene === "kitchen" ? "Walk around the kitchen" : "Walk around the room")))));
+    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · tap outside it to step back" : (s.scene === "bedroom" ? "Walk around the bedroom" : (s.scene === "kitchen" ? "Walk around the kitchen" : "Walk around the room")))));
   setText(d.shown, s.say.slice(0, s.n));
   setText(d.caret, s.n < s.say.length ? "▌" : "");
   // A trailing no-break space on alternate lines makes a repeated line still count as new for screen readers.
@@ -2546,7 +2557,7 @@ Room.prototype.render = function () {
     v.el.classList.toggle("on", !!on);
   });
 
-  if (this.tabsEl) {
+  {
     this.tabsEl.hidden = hall; this.dayNight.hidden = hall;
     setAttr(this.dayNight, "aria-checked", mode === "dark" ? "true" : "false");
     setText(this.dayNight, mode === "dark" ? "☾ Night" : "☀ Day");
