@@ -2070,7 +2070,7 @@ Room.prototype.act = function (id) {
     stove: "A red Dutch oven sits on the stove.",
     sink: "The dishes are done.",
     kwindow: night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.",
-    fruit: "A bowl of bananas and apples.",
+    fruit: "You take an apple. The bananas are a day or two from banana bread.",
     recipes: "A recipe box, with a faded printout tucked in the front.",
     coffee: "Ryan's coffee setup: an espresso machine, a grinder full of beans and a drip brewer.",
     kprint: "A print of storefronts in Oakland's Chinatown."
