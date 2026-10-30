@@ -768,24 +768,33 @@ function makeBedroom(mode) {
   var BK = [[51, 66, 50], [201, 166, 70], [138, 90, 52], [74, 106, 82], [176, 60, 44], [233, 221, 184], [31, 42, 30], [62, 38, 20], [226, 196, 72], [70, 120, 140], [240, 236, 226], [150, 70, 96]];
   function railL(yy) { return Math.round(104 - (yy - 28) * 0.04); }
   function railR(yy) { return Math.round(146 + (yy - 28) * 0.04); }
-  function books(base, x0, x1, hmin, hmax) {
-    var xx = x0;
-    while (xx < x1) {
-      var w = 2 + Math.floor(r() * 2), h = hmin + Math.floor(r() * (hmax - hmin));
-      if (xx + w > x1) break;
-      var bc = BK[Math.floor(r() * BK.length)];
-      rect(xx, base - h, w, h, bc);
-      if (r() < 0.6) put(xx, base - h + 2 + Math.floor(r() * 3), bc === BK[5] || bc === BK[10] ? [60, 60, 60] : C.goldL);
-      xx += w + (r() < 0.05 ? 1 : 0);
+  // packed tight: spines edge to edge, a stack lying flat at one end, and more books laid flat across the tops
+  // wherever the row dips
+  var spine = function (bc, x0, y0) { if (r() < 0.6) put(x0, y0, bc === BK[5] || bc === BK[10] ? [60, 60, 60] : C.goldL); };
+  var flat = function (x0, y0, w) { var bc = BK[Math.floor(r() * BK.length)]; rect(x0, y0, w, 2, bc); put(x0 + 1 + Math.floor(r() * (w - 2)), y0, bc === BK[5] || bc === BK[10] ? [60, 60, 60] : C.goldL); };
+  function books(base, room, stackLeft) {
+    var x0 = 107, x1 = 143, sw = 9, vx0 = stackLeft ? x0 + sw : x0, vx1 = stackLeft ? x1 : x1 - sw, xx = vx0, hs = [];
+    while (xx < vx1) {
+      var w = Math.min(vx1 - xx, 2 + Math.floor(r() * 2)), h = room - 5 + Math.floor(r() * 5), bc = BK[Math.floor(r() * BK.length)];
+      if (vx1 - xx - w === 1) w++;
+      rect(xx, base - h, w, h, bc); spine(bc, xx, base - h + 2 + Math.floor(r() * 3));
+      for (var k = 0; k < w; k++) hs.push([xx + k, h]);
+      xx += w;
+    }
+    // the flat stack fills its end of the shelf nearly to the shelf above
+    var sx = stackLeft ? x0 : x1 - sw, sy = base;
+    while (base - sy + 2 <= room - 2) { var ww = sw - Math.floor(r() * 2); sy -= 2; flat(sx + (stackLeft ? 0 : sw - ww), sy, ww); }
+    // books laid across the tops of shorter runs
+    for (var i = 0; i + 8 <= hs.length; i += 9 + Math.floor(r() * 5)) {
+      var mh = 0; for (k = i; k < i + 8; k++) mh = Math.max(mh, hs[k][1]);
+      for (var ty = base - mh - 2; ty >= base - room; ty -= 2) flat(hs[i][0], ty, 8);
     }
   }
-  books(48, 107, 128, 11, 17);
-  rect(130, 36, 12, 12, [30, 30, 32]); rect(131, 37, 10, 10, [200, 90, 60]); rect(134, 40, 4, 4, [240, 230, 200]);
-  books(70, 107, 143, 10, 16);
-  books(92, 107, 128, 11, 17);
-  rect(132, 86, 7, 6, [226, 216, 190]); rect(132, 86, 7, 1, [244, 238, 220]);
-  [[131, 85], [133, 84], [135, 83], [137, 84], [139, 85], [140, 87], [141, 89], [130, 87], [129, 89], [140, 91], [141, 93]].forEach(function (p, k) { put(p[0], p[1], k % 2 ? [92, 150, 80] : [62, 118, 60]); });
-  books(114, 107, 143, 10, 15);
+  books(48, 19, false);
+  books(70, 18, true);
+  books(92, 18, false);
+  books(114, 18, true);
+  books(BFLOOR - 1, 13, false); // and a row on the floor under the bottom shelf
   for (y = 28; y < BFLOOR; y++) { var lx = railL(y), rx = railR(y); put(lx, y, WALL2); put(lx + 1, y, WAL); put(rx - 1, y, WAL); put(rx, y, WALD); }
   [48, 70, 92, 114].forEach(function (sy) { for (x = railL(sy) + 2; x < railR(sy) - 1; x++) { put(x, sy, WALL2); put(x, sy + 1, WAL); put(x, sy + 2, WALD); } });
 
