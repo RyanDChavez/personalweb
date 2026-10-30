@@ -759,14 +759,14 @@ function makeBedroom(mode) {
   rect(189, 97, 30, 1, COL); rect(188, 98, 32, 3, CO); rect(188, 100, 32, 1, COD); put(188, 97, CO); put(219, 97, CO);
 
   ox = -223; // next to the bookshelf
-  // black Fender Jazz Bass on a tubular stand: offset body (longer upper horn on the left), tortoise pickguard,
-  // chrome control plate, rosewood board on a maple neck, four tuners down one side of the headstock
+  // black Fender Jazz Bass on a tubular stand (after Ryan's): offset body (longer upper horn on the left), white
+  // pickguard, chrome bridge and control plate, maple neck and fretboard with black block inlays, four tuners down one side
   cur = OBJ.bass;
   var STD = [40, 40, 44], STDL = [84, 84, 90];
   rect(289, 52, 1, 72, STD); rect(286, 50, 7, 2, STD); put(286, 49, STD); put(292, 49, STD);
   for (i = 0; i < 12; i++) { put(286 - i * 0.7, 124 + i, STD); put(292 + i * 0.7, 124 + i, STD); put(289, 124 + i, i < 6 ? STDL : STD); }
   rect(284, 122, 11, 1, STD);
-  var BLK = [22, 22, 24], BLKL = [84, 84, 92], TORT = [120, 60, 38], TORTD = [72, 36, 22], CHR = [196, 196, 202], RW = [74, 44, 30], MPL = [214, 174, 112];
+  var BLK = [22, 22, 24], BLKL = [84, 84, 92], GRD = [238, 238, 232], GRDD = [210, 210, 204], CHR = [196, 196, 202], MPL = [222, 186, 124], MPLD = [186, 146, 88], INLAY = [24, 24, 26];
   var BX = 278, BY = 97;
   var SPANS = [[[3, 4]], [[2, 5], [16, 17]], [[2, 6], [15, 18]], [[2, 7], [14, 18]], [[2, 8], [13, 19]], [[2, 19]], [[2, 19]], [[3, 19]], [[3, 18]], [[4, 18]], [[4, 18]], [[3, 19]], [[2, 20]], [[1, 20]],
     [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 20]], [[2, 20]], [[2, 19]], [[3, 18]], [[5, 16]], [[8, 13]]];
@@ -774,7 +774,7 @@ function makeBedroom(mode) {
     row.forEach(function (sp) {
       for (var cx = sp[0]; cx <= sp[1]; cx++) {
         var c = cx === sp[0] ? BLKL : BLK;
-        if (cx !== sp[0] && cx !== sp[1] && ry >= 4 && ry <= 16 && cx >= 3 && cx <= 17 && (ry <= 11 || cx <= 9)) c = (cx + ry) % 3 === 0 ? TORTD : TORT;
+        if (cx > sp[0] + 1 && cx < sp[1] - 1 && ry >= 5 && ry <= 19 && cx >= 4 && cx <= (ry <= 11 ? 15 : 12)) c = cx === 4 || ry === 19 ? GRDD : GRD;
         put(BX + cx, BY + ry, c);
       }
     });
@@ -783,9 +783,9 @@ function makeBedroom(mode) {
   rect(BX + 6, BY + 9, 9, 2, [34, 34, 36]); [7, 9, 11, 13].forEach(function (cx) { put(BX + cx, BY + 9, [176, 176, 182]); });
   rect(BX + 7, BY + 16, 9, 2, [34, 34, 36]); [8, 10, 12, 14].forEach(function (cx) { put(BX + cx, BY + 16, [176, 176, 182]); });
   rect(BX + 7, BY + 21, 8, 2, CHR);
-  rect(288, 38, 3, 66, RW); rect(288, 38, 1, 66, MPL);
-  for (y = 41; y < 102; y += 4) rect(289, y, 2, 1, [150, 130, 110]);
-  [51, 59, 67, 79].forEach(function (py) { put(290, py, [236, 232, 220]); });
+  rect(288, 38, 3, 66, MPL); rect(290, 38, 1, 66, MPLD);
+  for (y = 41; y < 102; y += 4) rect(288, y, 3, 1, [176, 140, 86]);
+  [3, 5, 7, 9, 12, 15].forEach(function (n) { rect(288, 38 + 4 * (n - 1) + 1, 3, 2, INLAY); });
   rect(288, 37, 3, 1, [236, 230, 210]);
   rect(288, 28, 5, 9, MPL); rect(289, 26, 4, 2, MPL); put(292, 25, MPL); rect(288, 28, 1, 9, [182, 140, 84]);
   [28, 31, 34, 37].forEach(function (py) { put(287, py, CHR); put(286, py, CHR); });
