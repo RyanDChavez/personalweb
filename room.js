@@ -1217,10 +1217,18 @@ function makeKitchen(mode) {
   rect(22, 29, 14, 2, CHR); rect(23, 29, 4, 1, [232, 234, 238]);
   rect(4, 120, 50, 7, MTD); for (x = 8; x < 50; x += 3) rect(x, 122, 2, 3, [96, 120, 110]);
   rect(6, 127, 4, 4, [40, 40, 44]); rect(48, 127, 4, 4, [40, 40, 44]);
-  // a few magnets: a Dodgers one, a postcard, a little red one
-  disc(16, 70, 3, [26, 84, 164]); put(15, 70, [240, 240, 236]); put(16, 69, [240, 240, 236]); put(17, 70, [240, 240, 236]);
-  rect(26, 66, 12, 9, [240, 234, 216]); rect(27, 67, 10, 5, [110, 160, 196]); rect(27, 70, 10, 2, [214, 190, 120]); put(31, 65, [200, 60, 50]);
-  rect(14, 84, 3, 3, [200, 60, 50]);
+  // two yellow sticky notes with a few scribbled lines, and a couple of postcards
+  var sticky = function (sx, sy) {
+    rect(sx, sy, 8, 8, [246, 216, 84]); rect(sx, sy, 8, 1, [226, 192, 60]); put(sx + 7, sy + 7, [214, 182, 58]);
+    [[2, 5], [4, 4], [6, 3]].forEach(function (ln) { rect(sx + 1, sy + ln[0], ln[1], 1, [120, 112, 96]); });
+  };
+  sticky(12, 34); sticky(30, 84);
+  // a beach: sky, sea, sand, in a white border
+  rect(9, 66, 13, 9, [244, 240, 228]); rect(10, 67, 11, 3, [150, 196, 222]); rect(10, 70, 11, 2, [62, 128, 170]); rect(10, 72, 11, 2, [226, 202, 140]);
+  // a city: red roofs under a blue sky, overlapping the first
+  rect(21, 69, 13, 9, [244, 240, 228]); rect(22, 70, 11, 3, [170, 204, 226]); rect(22, 73, 11, 4, [214, 196, 168]);
+  [[22, 3], [26, 2], [29, 4]].forEach(function (rf) { rect(rf[0], 72, rf[1], 2, [192, 84, 56]); });
+  rect(22, 76, 11, 1, [150, 132, 110]);
 
   // Ryan's bar cart, after his: a walnut tray on a black steel frame; under it a rack of wine glasses hanging upside
   // down, a wine rack of bottles lying on their sides, and a bottom shelf of liquor
