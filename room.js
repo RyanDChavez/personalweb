@@ -837,11 +837,12 @@ function makeBedroom(mode) {
   cur = OBJ.desk;
   var DW = [154, 98, 54], DWL = [186, 128, 76], DWD = [108, 66, 34];
   // legs: a steady 2px wide, splaying out just two pixels over their length (fewer steps reads cleaner), tapering
-  // at the foot; the back pair is darker, inset and shorter
-  for (i = 0; i < 25; i++) {
-    var lo = (i / 10) | 0;
-    if (i < 21) { put(172 - lo, 107 + i, DWD); put(251 + lo, 107 + i, DWD); }
-    if (i < 22) { put(164 - lo, 107 + i, DW); put(165 - lo, 107 + i, DWD); put(258 + lo, 107 + i, DW); put(259 + lo, 107 + i, DWD); }
+  // at the foot; the desk stands out from the wall, so the back pair (darker, inset) reaches the floor just past the
+  // baseboard and the front pair comes down onto the rug
+  for (i = 0; i < 33; i++) {
+    var lo = (i / 12) | 0;
+    if (i < 28) { put(172 - lo, 107 + i, DWD); put(251 + lo, 107 + i, DWD); }
+    if (i < 30) { put(164 - lo, 107 + i, DW); put(165 - lo, 107 + i, DWD); put(258 + lo, 107 + i, DW); put(259 + lo, 107 + i, DWD); }
     else { put(164 - lo, 107 + i, DW); put(259 + lo, 107 + i, DW); }
   }
   rect(160, 96, 104, 1, DWL); rect(160, 97, 104, 1, DW); rect(160, 98, 104, 1, DWD);
@@ -1037,7 +1038,7 @@ var HOTS = [
   { id: "bshelf", scene: "bedroom", name: "the bookshelf", verb: "Browse", x: 6, y: 26, w: 50, h: 106 },
   { id: "bass", scene: "bedroom", name: "the bass", verb: "Play", x: 56, y: 70, w: 21, h: 64 },
   { id: "bed", scene: "bedroom", name: "the bed", verb: "Lie down on", x: 187, y: 78, w: 114, h: 98 },
-  { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 80, y: 86, w: 108, h: 46 },
+  { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 80, y: 86, w: 108, h: 54 },
   { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 108, y: 96, w: 36, h: 41 },
   { id: "apple", scene: "bedroom", name: "the computer", verb: "Use", x: 84, y: 56, w: 41, h: 41 },
   { id: "nlamp", scene: "bedroom", name: "the bedside lamp", verb: "Turn on", x: 298, y: 85, w: 18, h: 27 },
