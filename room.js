@@ -230,7 +230,7 @@ function makeScene(mode) {
     "bbbbbbbbbhHhhhhhhHhhhhhhaaaaaaaaa",
     "bbbbbbbbbhhhHhhhhhhHhhhhaaaaaaaaa",
     "bbbbbbbbbhhhlhHhhhhhlHhhaaaaaaaaa",
-    "bbbbbbbbbhhbllhhhhhllbhhaaaaaaaaa",
+    "bbbbbbbbbhhhllhhhhhllhhhaaaaaaaaa",
     "bbbbbbbbbhhlllllhlllllhhaaaaaaaaa",
     "bbbbbbbbbhhlllllllllllhhaaaaaaaaa",
     "bbbbbbbbbhhlllllllllllhhaaaaaaaaa",
