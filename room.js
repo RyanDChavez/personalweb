@@ -825,27 +825,20 @@ function makeBedroom(mode) {
   var BK = [[51, 66, 50], [201, 166, 70], [138, 90, 52], [74, 106, 82], [176, 60, 44], [233, 221, 184], [31, 42, 30], [62, 38, 20], [226, 196, 72], [70, 120, 140], [240, 236, 226], [150, 70, 96]];
   function railL(yy) { return Math.round(104 - (yy - 28) * 0.04); }
   function railR(yy) { return Math.round(146 + (yy - 28) * 0.04); }
-  // packed tight: spines edge to edge, a stack lying flat at one end, and more books laid flat across the tops
-  // wherever the row dips
+  // packed tight: spines edge to edge and a stack lying flat at one end
   var spine = function (bc, x0, y0) { if (r() < 0.6) put(x0, y0, bc === BK[5] || bc === BK[10] ? [60, 60, 60] : C.goldL); };
   var flat = function (x0, y0, w) { var bc = BK[Math.floor(r() * BK.length)]; rect(x0, y0, w, 2, bc); put(x0 + 1 + Math.floor(r() * (w - 2)), y0, bc === BK[5] || bc === BK[10] ? [60, 60, 60] : C.goldL); };
   function books(base, room, stackLeft, noStack) {
-    var x0 = 107, x1 = 143, sw = 9, vx0 = stackLeft ? x0 + sw : x0, vx1 = stackLeft ? x1 : x1 - sw, xx = vx0, hs = [];
+    var x0 = 107, x1 = 143, sw = 9, vx0 = stackLeft ? x0 + sw : x0, vx1 = stackLeft ? x1 : x1 - sw, xx = vx0;
     while (xx < vx1) {
       var w = Math.min(vx1 - xx, 2 + Math.floor(r() * 2)), h = room - 5 + Math.floor(r() * 5), bc = BK[Math.floor(r() * BK.length)];
       if (vx1 - xx - w === 1) w++;
       rect(xx, base - h, w, h, bc); spine(bc, xx, base - h + 2 + Math.floor(r() * 3));
-      for (var k = 0; k < w; k++) hs.push([xx + k, h]);
       xx += w;
     }
     // the flat stack fills its end of the shelf nearly to the shelf above
     var sx = stackLeft ? x0 : x1 - sw, sy = base;
     while (!noStack && base - sy + 2 <= room - 2) { var ww = sw - Math.floor(r() * 2); sy -= 2; flat(sx + (stackLeft ? 0 : sw - ww), sy, ww); }
-    // books laid across the tops of shorter runs
-    for (var i = 0; i + 8 <= hs.length; i += 9 + Math.floor(r() * 5)) {
-      var mh = 0; for (k = i; k < i + 8; k++) mh = Math.max(mh, hs[k][1]);
-      for (var ty = base - mh - 2; ty >= base - room; ty -= 2) flat(hs[i][0], ty, 8);
-    }
   }
   books(48, 19, false, true);
   // a Princeton crest on a walnut plaque at the end of the top shelf: orange shield, black chevron, white open book
