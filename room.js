@@ -1792,17 +1792,20 @@ function Room(root) {
   this.tabEls = [];
   var plan = el("nav", "plan");
   plan.setAttribute("aria-label", "Floor plan");
-  [["kitchen", "Kitchen"], ["room", "Living room"], ["bedroom", "Bedroom"]].forEach(function (d) {
-    var b = el("button", "plan-room plan-" + (d[0] === "room" ? "living" : d[0]));
+  // Each room's window sits in its top wall where it is in the scene (the scenes all face that wall): [left, width]
+  // as a share of the room's width.
+  [["kitchen", "Kitchen", [46, 19]], ["room", "Living room", [4, 27]], ["bedroom", "Bedroom", [64, 21]]].forEach(function (d) {
+    var b = el("button", "plan-room plan-" + (d[0] === "room" ? "living" : d[0])), win = el("span", "plan-win");
     b.type = "button";
-    b.appendChild(el("span", null, d[1]));
+    b.appendChild(el("span", "plan-label", d[1]));
+    win.setAttribute("aria-hidden", "true");
+    win.style.left = d[2][0] + "%"; win.style.width = d[2][1] + "%";
+    b.appendChild(win);
     b.addEventListener("click", function () { if (self.state.scene === d[0]) self.back(); else self.goTo(d[0]); });
     plan.appendChild(b);
     self.tabEls.push({ scene: d[0], el: b });
   });
-  var door = el("span", "plan-door-front");
-  door.setAttribute("aria-hidden", "true");
-  plan.appendChild(door);
+  ["plan-door-front", "plan-swing"].forEach(function (k) { var dr = el("span", k); dr.setAttribute("aria-hidden", "true"); plan.appendChild(dr); });
   inv.parentNode.insertBefore(plan, inv);
   var sw = el("button", "pbtn daynight");
   sw.type = "button"; sw.setAttribute("role", "switch"); sw.setAttribute("aria-label", "Night");
