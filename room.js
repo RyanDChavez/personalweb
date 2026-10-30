@@ -19,7 +19,7 @@ var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122,
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
 // Object ids painted into the scene, used for in-scene highlights.
-var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21 };
+var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21, nlamp: 22 };
 
 function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
@@ -801,12 +801,14 @@ function makeBedroom(mode) {
   rect(174, 119, 21, 1, PND); put(184, 115, [120, 84, 44]); put(184, 123, [120, 84, 44]);
   rect(173, 129, 2, 3, PND); rect(194, 129, 2, 3, PND);
   rect(174, 108, 8, 2, [70, 120, 140]); rect(174, 106, 9, 2, [233, 221, 184]); rect(174, 104, 7, 2, [176, 60, 44]);
-  // the task lamp leans left, toward the bed
+  // the task lamp leans left, toward the bed; it switches the light like the banker's lamp
+  cur = OBJ.nlamp;
   var TL = [30, 30, 32], TLL = [84, 84, 90];
   rect(185, 107, 8, 3, TL); rect(186, 107, 6, 1, TLL);
   line(188, 106, 193, 96, TL); line(193, 96, 186, 90, TL); put(193, 96, TLL);
   rect(183, 88, 4, 1, TL); rect(182, 89, 5, 1, TL); rect(181, 90, 5, 1, TL); rect(180, 91, 5, 1, TLL);
   rect(180, 92, 4, 1, night ? [255, 232, 170] : [90, 90, 96], night);
+  cur = 0;
 
   ox = 111;
   // the bed: pine plank headboard, pillows (two white, a gray one, the bird pillow), and a quilt of green and
@@ -902,6 +904,7 @@ var HOTS = [
   { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 80, y: 86, w: 108, h: 46 },
   { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 108, y: 96, w: 36, h: 41 },
   { id: "apple", scene: "bedroom", name: "the Apple II", verb: "Use", x: 84, y: 56, w: 41, h: 41 },
+  { id: "nlamp", scene: "bedroom", name: "the bedside lamp", verb: "Turn on", x: 298, y: 85, w: 18, h: 27 },
   { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 152, y: 78, w: 26, h: 19 }
 ];
 
@@ -1235,8 +1238,8 @@ Room.prototype.say = function (text) {
 
 Room.prototype.act = function (id) {
   var night = this.mode() === "dark";
-  if (id === "lamp" || id === "blamp") {
-    var next = night ? "light" : "dark", which = id === "blamp" ? "the banker's lamp" : "the lamp";
+  if (id === "lamp" || id === "blamp" || id === "nlamp") {
+    var next = night ? "light" : "dark", which = id === "blamp" ? "the banker's lamp" : (id === "nlamp" ? "the bedside lamp" : "the lamp");
     storeMode(next);
     this.setState({ mode: next });
     this.say(next === "dark" ? "You turn on " + which + "." : "You turn off " + which + ".");
@@ -1524,7 +1527,7 @@ Room.prototype.render = function () {
   }
 
   var lampVerb = mode === "dark" ? "Turn off" : "Turn on";
-  var hall = s.scene === "hall", isLamp = function (id) { return id === "lamp" || id === "blamp"; };
+  var hall = s.scene === "hall", isLamp = function (id) { return id === "lamp" || id === "blamp" || id === "nlamp"; };
   this.stage.classList.toggle("in-hall", hall);
   this.stage.classList.toggle("in-bedroom", s.scene === "bedroom");
   HOTS.forEach(function (h) {
