@@ -1098,7 +1098,7 @@ var ZONES = {
 };
 var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
-var PANELS = { shelf: 1, contact: 1, map: 1 };
+var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1 };
 
 // The shelf reads left to right, oldest first: [spine, height, color, ink, kicker, title, paragraph]
 var BOOKS = [
@@ -1112,6 +1112,254 @@ var BOOKS = [
   ["Conduit", 150, "#8A5A34", "#F7EEE0", "New York · 2025–now", "Conduit Financial", "Now I’m a Product Manager at Conduit Financial, back in fintech and into crypto. We built a multi-bank and stablecoin USD money-movement API for cross-border payments from zero to one in four months, and I’ve shipped 86 pull requests of production code myself."]
 ];
 var SHELF_INTRO = ["Oldest first", "Start on the left", ""];
+
+// The bedroom bookshelf: what's actually on Ryan's shelf, in shelf order. [title, author, genre, details]
+var GENRES = ["Fiction", "Sci-fi & Fantasy", "History", "Politics & Law", "Philosophy", "Memoir", "Business & Tech", "Cooking", "Odds & Ends", "Reference", "Magazines"];
+var LIBRARY = [
+  ["Main Currents of Marxism", "Leszek Kołakowski", 4, ""],
+  ["Selected Writings", "Karl Marx", 4, "2 copies"],
+  ["Debt: The First 5,000 Years", "David Graeber", 6, ""],
+  ["On Nationality", "David Miller", 3, ""],
+  ["Two Treatises of Government", "John Locke", 4, ""],
+  ["Gorgias", "Plato", 4, ""],
+  ["On Liberty, Utilitarianism and Other Essays", "John Stuart Mill", 4, ""],
+  ["Inventing the People", "Edmund S. Morgan", 2, ""],
+  ["Imagined Communities", "Benedict Anderson", 3, ""],
+  ["Continuous Discovery Habits", "Teresa Torres", 6, ""],
+  ["The Basic Political Writings", "Jean-Jacques Rousseau", 4, "Second edition · 2 copies"],
+  ["Multicultural Citizenship", "Will Kymlicka", 3, ""],
+  ["An Atlas of Extinct Countries", "Gideon Defoe", 2, ""],
+  ["Citizenship and Immigration", "Christian Joppke", 3, ""],
+  ["The Great Debate", "Yuval Levin", 4, ""],
+  ["Leviathan", "Thomas Hobbes", 4, ""],
+  ["Coercion, Capital, and European States", "Charles Tilly", 2, ""],
+  ["Manufacturing Consent", "Edward S. Herman & Noam Chomsky", 3, ""],
+  ["The Chapo Guide to Revolution", "Chapo Trap House", 3, ""],
+  ["¡No Pasarán!", "Matt Christman & Chris Wade", 2, ""],
+  ["A Theory of Justice", "John Rawls", 4, "Revised edition"],
+  ["Citizenship", "Dimitry Kochenov", 3, ""],
+  ["The Prince", "Niccolò Machiavelli", 4, ""],
+  ["A New Structural Transformation of the Public Sphere and Deliberative Politics", "Jürgen Habermas", 3, ""],
+  ["Theory and Practice", "Jürgen Habermas", 4, ""],
+  ["The Structural Transformation of the Public Sphere", "Jürgen Habermas", 3, ""],
+  ["Legitimation Crisis", "Jürgen Habermas", 4, ""],
+  ["John Dewey: The Reconstruction of the Democratic Life", "Jerome Nathanson", 4, ""],
+  ["Aliens in Medieval Law: The Origins of Modern Citizenship", "Keechang Kim", 3, ""],
+  ["Dictionary of Legal Terms", "Steven H. Gifis", 9, ""],
+  ["The Canon of American Legal Thought", "David Kennedy & William W. Fisher III", 3, ""],
+  ["Globalists", "Quinn Slobodian", 3, ""],
+  ["The Nature of the Judicial Process", "Benjamin N. Cardozo", 3, ""],
+  ["The Histories", "Herodotus", 2, ""],
+  ["The Complete Plays of Aeschylus", "Aeschylus", 0, "Gilbert Murray (translator)"],
+  ["The Peloponnesian War", "Thucydides", 2, ""],
+  ["Five Great Dialogues", "Plato", 4, ""],
+  ["Studies in the History of Kano", "Bawuro M. Barkindo", 2, ""],
+  ["And Home Was Kariakoo", "M. G. Vassanji", 5, ""],
+  ["Performing the Nation", "Kelly M. Askew", 3, ""],
+  ["Let the People Speak: Tanzania Down the Road to Neo-Liberalism", "Issa G. Shivji", 3, ""],
+  ["Beyond Ujamaa in Tanzania", "Goran Hyden", 3, ""],
+  ["Silent Empowerment of the Compatriots", "Gabriel Ruhumbika", 0, "2 copies"],
+  ["Tanzania under Mwalimu Nyerere: Reflections on an African Statesman", "Godfrey Mwakikagile", 2, ""],
+  ["Africa’s Liberation: The Legacy of Nyerere", "Chambi Chachage & Annar Cassam", 2, ""],
+  ["Essays on Socialism", "Julius K. Nyerere", 3, ""],
+  ["Cultured States", "Andrew Ivaska", 2, ""],
+  ["African Socialism in Postcolonial Tanzania", "Priya Lal", 2, ""],
+  ["Digital Democracy, Analogue Politics", "Nanjala Nyabola", 3, ""],
+  ["A Moonless, Starless Sky", "Alexis Okeowo", 3, ""],
+  ["African Health Leaders", "Francis Omaswa & Nigel Crisp", 3, ""],
+  ["Understanding Contemporary Africa", "April A. Gordon & Donald L. Gordon", 3, "Fifth edition"],
+  ["Women Waging War and Peace", "Sandra I. Cheldelin & Maneshka Eliatamby", 3, ""],
+  ["King Leopold’s Ghost", "Adam Hochschild", 2, ""],
+  ["Long Walk to Freedom", "Nelson Mandela", 5, ""],
+  ["Across Boundaries", "Mamphela Ramphele", 5, ""],
+  ["Women of Phokeng", "Belinda Bozzoli", 3, "Mmantho Nkotsoe (collaborator)"],
+  ["Young Warriors", "Monique Marks", 3, "2 copies"],
+  ["A Man of the People", "Chinua Achebe", 0, ""],
+  ["Disgrace", "J. M. Coetzee", 0, "2 copies"],
+  ["Born a Crime", "Trevor Noah", 5, ""],
+  ["A Concise History of South Africa", "Robert Ross", 2, "Second edition"],
+  ["Things Fall Apart", "Chinua Achebe", 0, ""],
+  ["Country of My Skull", "Antjie Krog", 5, ""],
+  ["A History of South Africa", "Leonard Thompson", 2, "Lynn Berat (revision and update) · Fourth edition"],
+  ["Native Nostalgia", "Jacob Dlamini", 5, ""],
+  ["Period Pain", "Kopano Matlwa", 0, ""],
+  ["The History of African Cities South of the Sahara", "Catherine Coquery-Vidrovitch", 2, ""],
+  ["A Black Corps d’Élite", "Richard Hill & Peter Hogg", 2, ""],
+  ["The Secret War in Mexico", "Friedrich Katz", 2, ""],
+  ["Victorian Anthropology", "George W. Stocking", 3, ""],
+  ["The Jakarta Method", "Vincent Bevins", 2, ""],
+  ["This Realm of England: 1399–1688", "Lacey Baldwin Smith", 2, "Eighth edition"],
+  ["The Gnostic Gospels", "Elaine Pagels", 4, ""],
+  ["Confessions", "Saint Augustine", 5, ""],
+  ["Collected Works of Kahlil Gibran", "Kahlil Gibran", 0, ""],
+  ["All the President’s Men", "Carl Bernstein & Bob Woodward", 2, ""],
+  ["The Pact", "Steven M. Gillon", 2, ""],
+  ["Empty Pleasures: The Story of Artificial Sweeteners from Saccharin to Splenda", "Carolyn de la Peña", 2, ""],
+  ["My Beloved World", "Sonia Sotomayor", 5, ""],
+  ["Dark Money", "Jane Mayer", 3, ""],
+  ["Crisis of the House Divided", "Harry V. Jaffa", 2, ""],
+  ["Narrative of the Life of Frederick Douglass", "Frederick Douglass", 5, ""],
+  ["Democracy in America and Two Essays on America", "Alexis de Tocqueville", 3, ""],
+  ["101 Things You Didn’t Know About the Civil War", "Thomas Reed Turner", 2, ""],
+  ["California", "John Mack Faragher", 2, ""],
+  ["Hillbilly Elegy", "J. D. Vance", 5, ""],
+  ["The Presidency of George W. Bush", "Julian E. Zelizer", 2, ""],
+  ["The 9/11 Commission Report with Related Documents", "National Commission on Terrorist Attacks Upon the United States", 2, "Ernest R. May (abridgment and introduction)"],
+  ["Jerry Falwell and the Rise of the Religious Right", "Matthew Avery Sutton", 2, ""],
+  ["Fault Lines: A History of the United States Since 1974", "Kevin M. Kruse & Julian E. Zelizer", 2, ""],
+  ["The Scientist in American Industry", "Simon Marcson", 3, ""],
+  ["Sweetness and Power", "Sidney W. Mintz", 3, ""],
+  ["What the Anti-Federalists Were For", "Herbert J. Storing", 3, ""],
+  ["Walden", "Henry David Thoreau", 4, ""],
+  ["Andrew Jackson: Symbol for an Age", "John William Ward", 2, ""],
+  ["Memoirs, Volume One: Year of Decisions", "Harry S. Truman", 5, ""],
+  ["Memoirs, Volume Two: Years of Trial and Hope", "Harry S. Truman", 5, ""],
+  ["A War for the Soul of America", "Andrew Hartman", 2, ""],
+  ["The Truths We Hold", "Kamala Harris", 5, ""],
+  ["Winner-Take-All Politics", "Jacob S. Hacker & Paul Pierson", 3, ""],
+  ["Drink Cultura: Chicanismo", "José Antonio Burciaga", 8, ""],
+  ["The Good Die Young: The Verdict on Henry Kissinger", "René Rojas, Bhaskar Sunkara & Jonah Walters", 2, ""],
+  ["Coolies and Cane", "Moon-Ho Jung", 2, ""],
+  ["The Political Culture of the American Whigs", "Daniel Walker Howe", 2, ""],
+  ["Conservatives in Power: The Reagan Years, 1981–1989", "Julian E. Zelizer", 2, ""],
+  ["The Tragedy of American Diplomacy", "William Appleman Williams", 2, ""],
+  ["Music Is History", "Questlove", 8, ""],
+  ["The 60s: The Story of a Decade", "The New Yorker", 2, ""],
+  ["The Seventies: The Great Shift in American Culture, Society, and Politics", "Bruce J. Schulman", 2, ""],
+  ["Raising Cane in the ’Glades", "Gail M. Hollander", 2, ""],
+  ["The Great Divergence", "Timothy Noah", 6, ""],
+  ["The Daily Show (The Book): An Oral History", "Chris Smith", 8, ""],
+  ["1000 Record Covers", "Michael Ochs", 8, ""],
+  ["Designing Data-Intensive Applications", "Martin Kleppmann & Chris Riccomini", 6, "Second edition"],
+  ["Why Nothing Works: Who Killed Progress—and How to Bring It Back", "Marc J. Dunkelman", 3, ""],
+  ["The Fort Bragg Cartel", "Seth Harp", 3, ""],
+  ["Case in Point: Complete Case Interview Preparation", "Marc Cosentino", 6, ""],
+  ["Case Interview Secrets", "Victor Cheng", 6, ""],
+  ["The Personal MBA", "Josh Kaufman", 6, ""],
+  ["The Anatomy of the Swipe", "Ahmed Siddiqui", 6, ""],
+  ["Factory Man", "Beth Macy", 6, ""],
+  ["Foto z misiem", "Barbara Caillot-Dubus & Aleksandra Karkowska", 8, ""],
+  ["The Master and Margarita", "Mikhail Bulgakov", 0, ""],
+  ["Plays and Petersburg Tales", "Nikolai Gogol", 0, ""],
+  ["Netochka Nezvanova", "Fyodor Dostoevsky", 0, ""],
+  ["Crime and Punishment", "Fyodor Dostoevsky", 0, ""],
+  ["Demons", "Fyodor Dostoevsky", 0, ""],
+  ["Poor Folk and Other Stories", "Fyodor Dostoevsky", 0, ""],
+  ["The Idiot", "Fyodor Dostoevsky", 0, ""],
+  ["Notes from Underground and The Double", "Fyodor Dostoevsky", 0, ""],
+  ["Memoirs from the House of the Dead", "Fyodor Dostoevsky", 0, ""],
+  ["The Brothers Karamazov", "Fyodor Dostoevsky", 0, "2 copies"],
+  ["The Sympathizer", "Viet Thanh Nguyen", 0, ""],
+  ["A Wild Sheep Chase", "Haruki Murakami", 0, ""],
+  ["Ulysses", "James Joyce", 0, ""],
+  ["Kiswahili / Swahili: A Foundation for Speaking, Reading, and Writing", "Thomas J. Hinnebusch & Sarah M. Mirza", 9, "Adelheid U. Stein (illustrations)"],
+  ["Benito Cereno", "Herman Melville", 0, ""],
+  ["The Little Book of Economics: How the Economy Works in the Real World", "Greg Ip", 6, "Revised and updated"],
+  ["Lost Lambs", "Madeline Cash", 0, ""],
+  ["Love Is an Algorithm", "Laura Brooke Robson", 0, ""],
+  ["Into the Blue", "Emma Brodie", 0, ""],
+  ["Porcupines", "Fran Fabrizi", 0, ""],
+  ["IRL", "Tommy Pico", 0, ""],
+  ["The Buffalo Hunter Hunter", "Stephen Graham Jones", 0, ""],
+  ["Project Hail Mary", "Andy Weir", 1, ""],
+  ["The New Robert’s Rules of Order", "John Sherman", 9, ""],
+  ["The Devil’s Dictionary", "Ambrose Bierce", 8, ""],
+  ["Writing Tools: 55 Essential Strategies for Every Writer", "Roy Peter Clark", 8, ""],
+  ["The Bronx Nobody Knows: An Urban Walking Guide", "William B. Helmreich", 8, ""],
+  ["All the Queens Houses", "Rafael Herrin-Ferri", 8, ""],
+  ["The One World Schoolhouse", "Salman Khan", 3, ""],
+  ["Whistling Vivaldi", "Claude M. Steele", 3, ""],
+  ["Rights, Rules, Responsibilities", "Princeton University", 9, "2015 edition"],
+  ["Hedge", "Nicolas Colin", 6, ""],
+  ["The Hobbit", "J. R. R. Tolkien", 1, ""],
+  ["One L", "Scott Turow", 5, ""],
+  ["The Norman Shield", "Sigma Chi", 9, "2015–2017"],
+  ["What If?", "Randall Munroe", 8, ""],
+  ["Somewhere in Between", "Sean C. Pirkle", 5, ""],
+  ["The Light at the End of the World", "Siddhartha Deb", 1, ""],
+  ["Red and Green: Five Decades of the Indian Maoist Movement", "Manoranjan Mohanty", 2, ""],
+  ["India Since Independence", "Bipan Chandra, Mridula Mukherjee & Aditya Mukherjee", 2, ""],
+  ["India After Gandhi", "Ramachandra Guha", 2, ""],
+  ["Top 100 Cartoons", "The New Yorker / The Cartoon Bank", 8, ""],
+  ["Letters from a Nut", "Ted L. Nancy", 8, ""],
+  ["All Together Now", "Gill Hornby", 0, ""],
+  ["The Incendiaries", "R. O. Kwon", 0, ""],
+  ["Interior Chinatown", "Charles Yu", 0, ""],
+  ["Mr. Penumbra’s 24-Hour Bookstore", "Robin Sloan", 0, ""],
+  ["The Road", "Cormac McCarthy", 1, ""],
+  ["Delicate Edible Birds", "Lauren Groff", 0, ""],
+  ["Trinity", "Leon Uris", 0, ""],
+  ["Angela’s Ashes", "Frank McCourt", 5, ""],
+  ["Dear Dickhead", "Virginie Despentes", 0, ""],
+  ["How to Suffer Outside", "Diana Helmuth", 8, ""],
+  ["The Art of Human-Computer Interface Design", "Brenda Laurel", 6, ""],
+  ["The Design of Web APIs", "Arnaud Lauret", 6, "Second edition"],
+  ["The Royal Road to Health; or, The Secret of Health Without Drugs", "Chas. A. Tyrrell", 8, "37th edition"],
+  ["A History of America in 100 Maps", "Susan Schulten", 2, ""],
+  ["Swahili-English Dictionary", "Charles William Rechenbach", 9, ""],
+  ["More Is More", "Molly Baz", 7, ""],
+  ["Holiday Traditions: Let’s Bake", "Ryan’s mom", 7, ""],
+  ["Dobre Dobre: Baking from Poland and Beyond", "Laurel Kratochvila", 7, "Malgosia Minta (photography)"],
+  ["The Congressional Club Cook Book", "The Congressional Club", 7, ""],
+  ["Pierogi", "Zuza Zak", 7, ""],
+  ["We Are La Cocina", "Caleb Zigas & Leticia Landa", 7, ""],
+  ["Le Cordon Bleu Complete Cooking Techniques", "Jeni Wright & Eric Treuille", 7, ""],
+  ["The Classic Barbecue and Grill Cookbook", "Marlena Spieler", 7, ""],
+  ["Pure Delicious", "Heather Christo", 7, ""],
+  ["Joy of Cooking", "Irma S. Rombauer, Marion Rombauer Becker & Ethan Becker", 7, ""],
+  ["Kuchnia wegetariańska", "Jenny Stacey", 7, "Jolanta Idźkowska (Polish translation)"],
+  ["Circe", "Madeline Miller", 1, ""],
+  ["The Letters and Other Writings", "Abelard & Heloise", 4, ""],
+  ["Nerve", "Eva Holland", 8, ""],
+  ["The Philosophy of History", "G. W. F. Hegel", 4, ""],
+  ["The Americanization of Edward Bok: An Autobiography", "Edward Bok", 5, ""],
+  ["Law and the Sacred", "Austin Sarat, Lawrence Douglas & Martha Merrill Umphrey", 3, ""],
+  ["Rejection", "Tony Tulathimutte", 0, ""],
+  ["Paradise Bronx", "Ian Frazier", 2, ""],
+  ["Klara and the Sun", "Kazuo Ishiguro", 1, ""],
+  ["There There", "Tommy Orange", 0, ""],
+  ["Invisible Man", "Ralph Ellison", 0, ""],
+  ["Three Junes", "Julia Glass", 0, ""],
+  ["Peaces", "Helen Oyeyemi", 0, ""],
+  ["Priestdaddy", "Patricia Lockwood", 5, ""],
+  ["Infinite Home", "Kathleen Alcott", 0, ""],
+  ["Let’s Explore Diabetes with Owls", "David Sedaris", 8, ""],
+  ["This Side of Paradise", "F. Scott Fitzgerald", 0, ""],
+  ["Leave the World Behind", "Rumaan Alam", 0, ""],
+  ["A Psalm for the Wild-Built", "Becky Chambers", 1, ""],
+  ["1001 Ideas That Changed the Way We Think", "Robert Arp", 9, ""],
+  ["Heart of Darkness", "Joseph Conrad", 0, ""],
+  ["Freedom Is an Endless Meeting", "Francesca Polletta", 3, ""],
+  ["A Modern Method for Guitar: 1–2–3 Complete", "William Leavitt", 9, ""],
+  ["Chord Chemistry", "Ted Greene", 9, ""],
+  ["The Improvisor’s Bass Method", "Chuck Sher", 9, ""],
+  ["Thinking in Systems", "Donella H. Meadows", 6, ""],
+  ["Decode and Conquer", "Lewis C. Lin", 6, ""],
+  ["Cracking the PM Interview", "Gayle Laakmann McDowell & Jackie Bavaro", 6, ""],
+  ["System Design Interview, Volume 2", "Alex Xu & Sahn Lam", 6, ""],
+  ["System Design Interview", "Alex Xu", 6, ""],
+  ["Inspired: How to Create Tech Products Customers Love", "Marty Cagan", 6, "Second edition"],
+  ["Lean Analytics: Use Data to Build a Better Startup Faster", "Alistair Croll & Ben Yoskovitz", 6, ""],
+  ["The Mom Test", "Rob Fitzpatrick", 6, ""],
+  ["First Year Polish", "Oscar E. Swan", 9, ""],
+  ["Company Men", "Sean Delehanty", 6, ""],
+  ["Free Gifts", "Alyssa Battistoni", 3, ""],
+  ["The Last Wish", "Andrzej Sapkowski", 1, "The Witcher #1"],
+  ["Sword of Destiny", "Andrzej Sapkowski", 1, "The Witcher #2"],
+  ["Blood of Elves", "Andrzej Sapkowski", 1, "The Witcher #3"],
+  ["The Time of Contempt", "Andrzej Sapkowski", 1, "The Witcher #4"],
+  ["Baptism of Fire", "Andrzej Sapkowski", 1, "The Witcher #5"],
+  ["The Tower of Swallows", "Andrzej Sapkowski", 1, "The Witcher #6"],
+  ["The Lady of the Lake", "Andrzej Sapkowski", 1, "The Witcher #7"],
+  ["Season of Storms", "Andrzej Sapkowski", 1, "The Witcher #8"],
+  ["Crossroads of Ravens", "Andrzej Sapkowski", 1, "The Witcher #9"],
+  ["Wool", "Hugh Howey", 1, "Silo #1"],
+  ["Shift", "Hugh Howey", 1, "Silo #2"],
+  ["Dust", "Hugh Howey", 1, "Silo #3"],
+  ["Jacobin", "", 10, "Subscription"],
+  ["n+1", "", 10, "Subscription"],
+  ["Electra", "", 10, "Subscription"]
+];
 
 var STATIONS = {
   before: { label: "Before", needle: 10, kicker: "Before", title: "Teaching, an NGO, a band", text: "I've taught, worked at an NGO and toured with a band." },
@@ -1172,7 +1420,7 @@ function Room(root) {
   var $ = function (id) { return root.querySelector("#" + id); };
   // Start at the front door once per visit; later loads in the same tab go straight in.
   var mode = storedMode(), scene = entered() ? "room" : "hall", intro = scene === "hall" ? HALL_INTRO : introFor(mode);
-  this.state = { scene: scene, mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, sayN: 0, focusId: null, book: -1, station: "now", place: -1, vw: 1440, vh: 900 };
+  this.state = { scene: scene, mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, sayN: 0, focusId: null, book: -1, station: "now", place: -1, genre: 0, pick: -1, vw: 1440, vh: 900 };
   this.raf = 0; this.tw = 0; this.last = null;
   this.fluffing = false; this.builtFor = null; this.brushed = false; this.paintedHover = null;
   this.renderedMode = null; this.renderedCam = null;
@@ -1193,7 +1441,8 @@ function Room(root) {
   this.canvas = $("room");
   this.dom = {
     action: $("action"), shown: $("say-shown"), caret: $("caret"), live: $("say-live"),
-    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map") },
+    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map"), bshelf: $("panel-bshelf") },
+    libShelf: $("lib-shelf"), libKicker: $("lib-kicker"), libTitle: $("lib-title"), libText: $("lib-text"), libPrev: $("lib-prev"), libNext: $("lib-next"),
     atlas: $("atlas"), atlasWrap: $("atlas-wrap"), atlasTip: $("atlas-tip"), placeTitle: $("place-title"), placeText: $("place-text"), placePrev: $("place-prev"), placeNext: $("place-next"),
     bookKicker: $("book-kicker"), bookTitle: $("book-title"), bookText: $("book-text"), bookPrev: $("book-prev"), bookNext: $("book-next"), needle: $("needle"),
     kicker: $("station-kicker"), title: $("station-title"), text: $("station-text"),
@@ -1295,6 +1544,25 @@ function Room(root) {
     if (self.state.book >= BOOKS.length - 1) self.act("contact");
     else self.setState({ book: self.state.book + 1 });
   });
+
+  // Bedroom bookshelf: one genre on the shelf at a time; pick a spine to read it, or step through.
+  this.genreEls = GENRES.map(function (g, i) {
+    var b = el("button", "pbtn genre");
+    b.type = "button";
+    b.appendChild(el("span", null, g));
+    b.appendChild(el("span", "genre-n", String(LIBRARY.filter(function (bk) { return bk[2] === i; }).length)));
+    b.addEventListener("click", function () { self.setState({ genre: i, pick: -1 }); });
+    $("genres").appendChild(b);
+    return b;
+  });
+  var stepPick = function (dir) {
+    self.setState(function (st) {
+      var ids = self.genreIds(st.genre), at = ids.indexOf(st.pick) + dir;
+      return at >= 0 && at < ids.length ? { pick: ids[at] } : null;
+    });
+  };
+  this.dom.libPrev.addEventListener("click", function () { stepPick(-1); });
+  this.dom.libNext.addEventListener("click", function () { stepPick(1); });
 
   // Map panel: step through the countries (everywhere comes first and between laps), or click a pin on the map.
   var stepPlace = function (dir) { self.setState(function (st) { return { place: (st.place + 1 + dir + PLACES.length + 1) % (PLACES.length + 1) - 1 }; }); };
@@ -1488,7 +1756,7 @@ Room.prototype.act = function (id) {
     contact: "You open the Rolodex to Ryan's card.",
     // bedroom: placeholder copy
     bwindow: night ? "Across the street, a few windows are lit." : "Across the street, a brick building.",
-    bshelf: "More books. The full catalog will live here.",
+    bshelf: "You look over the bookshelf.",
     desk: "A mid-century walnut desk. There's half-drunk coffee and a notebook with cursive scrawled notes written hastily.",
     apple: "The computer says HELLO. The software projects will boot up here.",
     dchair: "A wooden desk chair, pushed in.",
@@ -1503,6 +1771,36 @@ Room.prototype.act = function (id) {
     this.opener = opener;
     if (this.kbd) this.dom.panels[id].focus({ preventScroll: true });
   }
+};
+
+// The books in a genre, as indexes into LIBRARY.
+Room.prototype.genreIds = function (g) {
+  var ids = [];
+  LIBRARY.forEach(function (bk, i) { if (bk[2] === g) ids.push(i); });
+  return ids;
+};
+
+// Put a genre's spines on the shelf. Each book gets its own height, width and cloth from its place in the catalog.
+var SPINES = [["#3E2614", "#F4EBDD"], ["#8C1515", "#FFF4E6"], ["#334232", "#EEF0E2"], ["#4B3F72", "#EEE8FA"], ["#C9A646", "#1D251C"], ["#1F3A5A", "#EDF2F7"],
+  ["#9A4E2A", "#FFF4E6"], ["#E8DFC8", "#2A2420"], ["#4A6A52", "#F4F4EA"], ["#22201E", "#E8E2D4"], ["#B5432A", "#FBEDE2"], ["#6E9CB8", "#14202A"], ["#D9C27A", "#2A2010"]];
+Room.prototype.shelveGenre = function (g) {
+  var self = this, shelf = this.dom.libShelf;
+  shelf.textContent = "";
+  this.spineEls = {};
+  this.genreIds(g).forEach(function (i) {
+    var bk = LIBRARY[i], r = rng(i * 7919 + 17), c = SPINES[Math.floor(r() * SPINES.length)];
+    var b = el("button", "pbtn lib-spine"), face = el("span", "lib-face"), label = el("span", null, bk[0].split(":")[0]);
+    b.type = "button";
+    b.style.width = (22 + Math.floor(r() * 4) * 3) + "px";
+    face.style.height = (74 + Math.floor(r() * 27)) + "%";
+    face.style.background = c[0]; face.style.color = c[1];
+    b.setAttribute("aria-label", bk[0] + (bk[1] ? ", " + bk[1] : ""));
+    face.appendChild(label); b.appendChild(face);
+    b.addEventListener("click", function () { self.setState({ pick: i }); });
+    shelf.appendChild(b);
+    self.spineEls[i] = b;
+  });
+  this.shelved = g;
 };
 
 // Map pixel for a place.
@@ -1913,6 +2211,25 @@ Room.prototype.render = function () {
   setText(d.bookNext, s.book < 0 ? "Start →" : (last ? "Next?" : "Next →"));
   if (last) setAttr(d.bookNext, "aria-label", "Next? Open the Rolodex"); else d.bookNext.removeAttribute("aria-label");
 
+  if (open === "bshelf") {
+    if (this.shelved !== s.genre) this.shelveGenre(s.genre);
+    this.genreEls.forEach(function (b, i) { setAttr(b, "aria-pressed", s.genre === i ? "true" : "false"); });
+    for (var sid in this.spineEls) setAttr(this.spineEls[sid], "aria-pressed", s.pick === +sid ? "true" : "false");
+    var ids = this.genreIds(s.genre), at = ids.indexOf(s.pick), pk = LIBRARY[s.pick], sh = d.libShelf;
+    // on a phone the shelf scrolls sideways: keep the picked spine in view
+    if (this.shownPick !== s.pick) {
+      var sp = this.spineEls[s.pick];
+      if (sp && sh.scrollWidth > sh.clientWidth) sh.scrollLeft = sp.offsetLeft - sh.offsetLeft - (sh.clientWidth - sp.offsetWidth) / 2;
+      if (s.pick < 0) sh.scrollLeft = 0;
+      this.shownPick = s.pick;
+    }
+    setText(d.libKicker, pk ? pk[1] : "");
+    setText(d.libTitle, pk ? pk[0] : GENRES[s.genre]);
+    setText(d.libText, pk ? pk[3] : ids.length + (s.genre === 10 ? " magazines." : " books."));
+    d.libPrev.disabled = at <= 0;
+    d.libNext.disabled = at >= ids.length - 1;
+    setText(d.libNext, at < 0 ? "Start →" : "Next →");
+  }
   if (open === "map") {
     var pc = PLACES[s.place], total = PLACES.reduce(function (n, c) { return n + c[1].length; }, 0);
     var nameAt = function (i) { i = (i + 1 + PLACES.length + 1) % (PLACES.length + 1) - 1; return i < 0 ? "Everywhere" : PLACES[i][0]; };

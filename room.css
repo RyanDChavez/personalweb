@@ -121,6 +121,32 @@ body { margin: 0; background: #1C251B; }
   .atlas { width: auto; height: 220px; max-width: none; image-rendering: auto; border-width: 4px; }
 }
 
+/* bedroom bookshelf: genre tabs over rows of spines, each row on a plank */
+.lib-body { gap: 14px; }
+.genres { display: flex; flex-wrap: wrap; gap: 6px; }
+.genre { min-height: 40px; padding: 0 10px; display: flex; align-items: center; gap: 8px; background: var(--hud); color: var(--hudInk); border: 0; font-family: Silkscreen, monospace; font-size: 11px; }
+.genre-n { color: var(--gold); }
+.genre[aria-pressed="true"] { background: var(--gold); color: #1D251C; }
+.genre[aria-pressed="true"] .genre-n { color: #1D251C; }
+.lib-shelf {
+  --row: 190px; --gap: 16px;
+  display: flex; flex-wrap: wrap; gap: var(--gap) 3px; padding: 0 10px var(--gap);
+  background: repeating-linear-gradient(180deg, transparent 0 var(--row), #8A5A34 var(--row) calc(var(--row) + 10px), #5E3A1E calc(var(--row) + 10px) calc(var(--row) + var(--gap)));
+}
+.lib-spine { flex: 0 0 auto; height: var(--row); padding: 0; border: 0; background: none; display: flex; align-items: flex-end; }
+.lib-face { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: inset -4px 0 0 rgba(0, 0, 0, 0.2); }
+.lib-face span { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Silkscreen, monospace; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-height: calc(100% - 10px); }
+.lib-spine[aria-pressed="true"] .lib-face { transform: translateY(-10px); outline: 3px solid var(--gold); }
+@media (hover: hover) { .lib-spine:hover { transform: none; } .lib-spine:hover .lib-face { transform: translateY(-6px); } }
+@media (max-width: 759px) {
+  .genres { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -18px; padding: 0 18px; }
+  .genres::-webkit-scrollbar { display: none; }
+  .genre { flex: none; }
+  /* one row that scrolls sideways, so the picked book's details stay in view */
+  .lib-shelf { --row: 150px; flex-wrap: nowrap; overflow-x: auto; margin: 0 -18px; padding: 12px 18px var(--gap); background-position: 0 12px; background-attachment: local; scrollbar-width: thin; scrollbar-color: var(--hudLine) var(--panel); }
+  .lib-shelf::after { content: ""; flex: 0 0 8px; }
+}
+
 /* Rolodex */
 .contact-body { padding-bottom: 24px; gap: 14px; }
 .rolodex { position: relative; padding-top: 22px; }
