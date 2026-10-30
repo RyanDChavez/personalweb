@@ -1298,6 +1298,25 @@ function Room(root) {
   };
   atlas.addEventListener("pointermove", function (e) { if (e.pointerType === "mouse") showTip(nearest(e, 10)); });
   atlas.addEventListener("pointerleave", function () { showTip(null); });
+  // On a phone the map scrolls sideways; its native scroll bar is hidden for a chunky one of our own under the map,
+  // which follows the scroll and can be dragged or tapped.
+  var wrap = this.dom.atlasWrap, bar = $("atlas-bar"), thumb = bar.firstElementChild;
+  this.syncAtlasBar = function () {
+    var sw = wrap.scrollWidth, cw = wrap.clientWidth;
+    bar.hidden = sw <= cw + 1;
+    if (bar.hidden) return;
+    var tw = cw / sw * 100;
+    thumb.style.width = tw.toFixed(2) + "%";
+    thumb.style.left = (wrap.scrollLeft / (sw - cw) * (100 - tw)).toFixed(2) + "%";
+  };
+  wrap.addEventListener("scroll", this.syncAtlasBar, { passive: true });
+  var dragBar = function (e) {
+    var rc = bar.getBoundingClientRect(), tw = thumb.offsetWidth, f = (e.clientX - rc.left - tw / 2) / Math.max(1, rc.width - tw);
+    wrap.scrollLeft = Math.max(0, Math.min(1, f)) * (wrap.scrollWidth - wrap.clientWidth);
+  };
+  bar.addEventListener("pointerdown", function (e) { bar.setPointerCapture(e.pointerId); dragBar(e); });
+  bar.addEventListener("pointermove", function (e) { if (bar.hasPointerCapture(e.pointerId)) dragBar(e); });
+
   atlas.addEventListener("click", function (e) {
     var hit = nearest(e, 16);
     if (hit) { self.setState({ place: hit.country }); showTip(hit); }
@@ -1895,6 +1914,7 @@ Room.prototype.render = function () {
         wrap.scrollLeft = mid * d.atlas.clientWidth / ATLAS.w - wrap.clientWidth / 2;
       }
     }
+    this.syncAtlasBar();
   }
   if (!PANELS.radio) return; // the receiver's panel is parked; skip updating it
   var st = STATIONS[s.station];
