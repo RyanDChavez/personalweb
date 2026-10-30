@@ -19,7 +19,7 @@ var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122,
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
 // Object ids painted into the scene, used for in-scene highlights.
-var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19 };
+var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20 };
 
 function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
@@ -711,10 +711,27 @@ function makeBedroom(mode) {
   rect(162, 99, 100, 8, DW); rect(162, 106, 100, 1, DWD); rect(211, 100, 1, 6, DWD);
   for (y = 100; y < 106; y++) for (x = 163; x < 261; x++) if (x !== 211 && (x * 7 + y * 3) % 13 === 0) put(x, y, [140, 88, 48]);
   put(186, 102, [214, 180, 120]); put(236, 102, [214, 180, 120]); put(186, 103, [150, 112, 60]); put(236, 103, [150, 112, 60]);
-  // on the desk: a short stack of books, a notebook and a mug (the left half stays clear for a computer later)
-  [[166, 93, 12, 2, [176, 60, 44]], [167, 91, 10, 2, [70, 120, 140]], [166, 89, 11, 2, [233, 221, 184]]].forEach(function (b) { rect(b[0], b[1], b[2], b[3], b[4]); });
-  rect(200, 94, 14, 2, [240, 236, 226]); rect(200, 95, 14, 1, [200, 196, 186]); put(206, 94, [176, 60, 44]);
+  // on the desk: a notebook and a mug
+  rect(205, 94, 13, 2, [240, 236, 226]); rect(205, 95, 13, 1, [200, 196, 186]); put(211, 94, [176, 60, 44]);
   rect(220, 90, 5, 6, [226, 216, 190]); put(225, 92, [226, 216, 190]); put(226, 93, [226, 216, 190]); rect(221, 90, 3, 1, [90, 60, 40]);
+
+  // Apple II: beige case with its built-in keyboard and rainbow logo, a Disk II drive on top, and a monitor with a
+  // green phosphor screen showing the ] prompt
+  cur = OBJ.apple;
+  var BG = [214, 202, 170], BGL = [234, 224, 196], BGD = [168, 154, 122], KEY = [86, 72, 60];
+  rect(163, 85, 39, 11, BG); rect(165, 85, 35, 1, BGL); rect(163, 95, 39, 1, BGD); rect(201, 86, 1, 9, BGD); rect(163, 86, 1, 9, BGL);
+  for (x = 166; x < 199; x += 2) { put(x, 89, KEY); put(x + 1, 91, KEY); }
+  rect(176, 93, 13, 1, KEY);
+  [[166, [98, 178, 80]], [167, [244, 200, 64]], [168, [236, 128, 48]], [169, [214, 64, 64]], [170, [150, 80, 160]], [171, [64, 140, 206]]].forEach(function (p) { put(p[0], 86, p[1]); });
+  rect(169, 80, 27, 5, BG); rect(169, 80, 27, 1, BGL); rect(173, 82, 14, 1, [44, 40, 36]); rect(190, 81, 3, 3, BGD); put(191, 82, [200, 60, 50], night);
+  rect(167, 58, 31, 22, [204, 194, 166]); rect(167, 58, 31, 1, BGL); rect(167, 58, 1, 22, BGL); rect(197, 59, 1, 21, BGD); rect(167, 79, 31, 1, BGD);
+  rect(170, 61, 25, 15, [12, 26, 16], true);
+  var PH = [70, 222, 112], PHD = [40, 150, 76];
+  [[63, 4, 14], [66, 4, 18], [69, 4, 9]].forEach(function (ln) { for (x = 172; x < 172 + ln[2]; x++) if ((x * 5 + ln[0]) % 7 !== 0) put(x, ln[0], (x * 3) % 5 === 0 ? PHD : PH, true); });
+  put(173, 72, PH, true); put(173, 73, PH, true); put(173, 74, PH, true); put(172, 72, PH, true); put(172, 74, PH, true);
+  rect(175, 72, 2, 3, PH, true);
+  put(170, 61, [204, 194, 166]); put(194, 61, [204, 194, 166]); put(170, 75, [204, 194, 166]); put(194, 75, [204, 194, 166]);
+  put(194, 77, [90, 200, 110], true);
 
   // green banker's lamp: brass base and stem, green glass shade
   cur = OBJ.blamp;
@@ -780,6 +797,8 @@ function makeBedroomLight(mode) {
       a = 0.28;
       var dx = x - 243, dy = y - 92, d = Math.sqrt(dx * dx + dy * dy * 1.6);
       g = Math.pow(Math.max(0, 1 - d / 78), 1.6) * 0.95;
+      var sx = x - 182, sy = y - 69, sd = Math.sqrt(sx * sx + sy * sy * 1.4);
+      g += Math.max(0, 1 - sd / 30) * 0.35;
       g = q(Math.min(1.2, g), 6, b);
     } else {
       a = q(1.0 - 0.12 * (x / SW), 12, b);
@@ -807,6 +826,7 @@ var HOTS = [
   { id: "bshelf", scene: "bedroom", name: "the bookshelf", verb: "Browse", x: 99, y: 26, w: 52, h: 106 },
   { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 158, y: 86, w: 108, h: 46 },
   { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 186, y: 96, w: 36, h: 41 },
+  { id: "apple", scene: "bedroom", name: "the Apple II", verb: "Use", x: 162, y: 56, w: 41, h: 41 },
   { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 230, y: 78, w: 26, h: 19 },
   { id: "bass", scene: "bedroom", name: "the bass", verb: "Play", x: 275, y: 24, w: 30, h: 112 }
 ];
@@ -830,7 +850,7 @@ var ZONES = {
   desk: { x: 150, y: 72, w: 124, h: 66 },
   bass: { x: 258, y: 20, w: 62, h: 120 }
 };
-var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", bass: "bass" };
+var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
 var PANELS = { shelf: 1, contact: 1 };
 
@@ -994,7 +1014,7 @@ function Room(root) {
   [["shelf", "About me"], ["radio", "Radio"], ["contact", "Contact"], ["window", "Window"], ["chair", "Chair"], ["lamp", "Lamp"], ["fluff", "Fluff rug"], ["room", "Room"]].forEach(function (d) {
     addInv("room", d[0], d[1], d[0] === "fluff" ? self.fluff : (d[0] === "room" ? self.back : function () { self.act(d[0]); }));
   });
-  [["desk", "Desk"], ["bshelf", "Books"], ["bass", "Bass"], ["bwindow", "Window"], ["blamp", "Lamp"], ["room", "Room"]].forEach(function (d) {
+  [["desk", "Desk"], ["apple", "Apple II"], ["bshelf", "Books"], ["bass", "Bass"], ["bwindow", "Window"], ["blamp", "Lamp"], ["room", "Room"]].forEach(function (d) {
     addInv("bedroom", d[0], d[1], d[0] === "room" ? self.back : function () { self.act(d[0]); });
   });
   [["bell", "Ring the bell"], ["door", "Open the door"]].forEach(function (d) {
@@ -1165,6 +1185,7 @@ Room.prototype.act = function (id) {
     bwindow: night ? "Across the street, a few windows are lit." : "Across the street, a brick building.",
     bshelf: "More books. The full catalog will live here.",
     desk: "A mid-century walnut desk. The projects will live here.",
+    apple: "An Apple II, blinking at the ] prompt. The software projects will boot up here.",
     dchair: "A wooden desk chair, pushed in.",
     bass: "A black Fender Jazz Bass on its stand."
   };
