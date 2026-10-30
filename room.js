@@ -1437,7 +1437,7 @@ Room.prototype.act = function (id) {
     desk: "A mid-century walnut desk. The projects will live here.",
     apple: "The computer says HELLO. The software projects will boot up here.",
     dchair: "A wooden desk chair, pushed in.",
-    bass: "A black Fender Jazz Bass on its stand.",
+    bass: "A black Fender Jazz Bass on its stand. It's got plenty of dings picked up on the road.",
     bed: "The bed's made, under a green flower quilt.",
     map: "A world map with pins in Arcadia, San Francisco, Austin, Princeton, New York and Kampala."
   };
@@ -1841,7 +1841,7 @@ Room.prototype.render = function () {
     var pc = PLACES[s.place], total = PLACES.reduce(function (n, c) { return n + c[1].length; }, 0);
     var nameAt = function (i) { i = (i + 1 + PLACES.length + 1) % (PLACES.length + 1) - 1; return i < 0 ? "Everywhere" : PLACES[i][0]; };
     setText(d.placePrev, "← " + nameAt(s.place - 1)); setText(d.placeNext, nameAt(s.place + 1) + " →");
-    setText(d.placeTitle, pc ? pc[0] : "Everywhere");
+    setText(d.placeTitle, pc ? pc[0] : "Places Ryan has been");
     setText(d.placeText, pc ? pc[1].map(function (p) { return p[0]; }).join(" · ") : total + " places.");
     if (this.drawnPlace !== s.place) {
       this.drawAtlas(s.place); this.drawnPlace = s.place;
