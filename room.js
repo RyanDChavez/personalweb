@@ -1262,17 +1262,23 @@ function makeKitchen(mode) {
   }
   rect(270, 60, 12, 1, INKL);
 
-  // string lights down the side of the cart, in every color, lit at night; little white ones wound around the frame
-  cur = OBJ.klights;
-  var BUL = [[232, 60, 60], [80, 200, 96], [244, 160, 60], [80, 140, 230], [240, 110, 170]];
-  for (y = 18; y < 106; y++) put(307 + Math.round(Math.sin(y / 6) * 1.2), y, [40, 64, 44]);
-  for (i = 0, y = 21; y < 104; y += 6, i++) {
-    var bxx = 307 + Math.round(Math.sin(y / 6) * 1.2) + (i % 2 ? 1 : -1), bc = BUL[i % BUL.length];
-    put(bxx, y, night ? bc : mix(bc, [120, 116, 108], 0.55), night); put(bxx, y + 1, night ? mix(bc, [255, 255, 255], 0.4) : mix(bc, [120, 116, 108], 0.6), night);
-  }
+  // string lights draped around the cart in every color: in loops under the tray, across the glass rack, and down
+  // the legs; lit at night (they switch the kitchen between day and night)
   cur = OBJ.coffee;
-  for (x = 253; x < 304; x += 6) put(x, 100 + (x % 4 === 1 ? 1 : 0), night ? [255, 240, 196] : [200, 196, 184], night);
-  for (y = 112; y < 128; y += 5) { put(250 + (y % 2), y, night ? [255, 240, 196] : [200, 196, 184], night); }
+  var BUL = [[232, 60, 60], [80, 200, 96], [244, 160, 60], [80, 140, 230], [240, 110, 170]], WIRE = [40, 64, 44], nb = 0;
+  var bulb = function (bx, by) {
+    var bc = BUL[nb++ % BUL.length];
+    put(bx, by, night ? bc : mix(bc, [120, 116, 108], 0.55), night); put(bx, by + 1, night ? mix(bc, [255, 255, 255], 0.4) : mix(bc, [120, 116, 108], 0.6), night);
+  };
+  [[98, 4, 3], [109, 3, 4]].forEach(function (sw) {
+    // a swag from leg to leg: sw[1] loops, sagging sw[2] pixels
+    for (x = 251; x < 304; x++) {
+      var t = (x - 251) / 53 * sw[1], sag = Math.round(Math.sin((t - Math.floor(t)) * Math.PI) * sw[2]);
+      put(x, sw[0] + 1 + sag, WIRE);
+      if ((x - 251) % 5 === 2) bulb(x, sw[0] + 2 + sag);
+    }
+  });
+  for (y = 100; y < 128; y++) { put(249 + (y % 6 < 3 ? 0 : 1), y, WIRE); put(305 - (y % 6 < 3 ? 0 : 1), y, WIRE); if (y % 6 === 1) { bulb(248, y); bulb(306, y + 3); } }
   cur = 0; ox = 0;
   return { col: col, emis: emis, obj: obj };
 }
@@ -1288,7 +1294,7 @@ function makeKitchenLight(mode) {
         var fall = Math.max(0, 1 - (y - 50) / 50);
         if ((x >= 100 && x < 248) || (x >= 58 && x < 102)) g += 0.55 * fall + 0.25;
       }
-      var lx = x - 307, ly = y - 62, ld = Math.sqrt(lx * lx * 0.8 + ly * ly * 0.25);
+      var lx = x - 277, ly = y - 108, ld = Math.sqrt(lx * lx * 0.45 + ly * ly * 0.7);
       g += Math.pow(Math.max(0, 1 - ld / 46), 1.5) * 0.6;
       var cx = x - 178, cy = y - 132, cd = Math.sqrt(cx * cx * 0.4 + cy * cy * 2);
       g += Math.max(0, 1 - cd / 70) * 0.25;
@@ -1333,8 +1339,7 @@ var HOTS = [
   { id: "coffee", scene: "kitchen", name: "the coffee setup", verb: "Make coffee at", x: 248, y: 64, w: 58, h: 68 },
   { id: "sink", scene: "kitchen", name: "the sink", verb: "Use", x: 157, y: 78, w: 42, h: 18 },
   { id: "fruit", scene: "kitchen", name: "the fruit bowl", verb: "Look at", x: 112, y: 77, w: 26, h: 17 },
-  { id: "recipes", scene: "kitchen", name: "the recipe box", verb: "Open", x: 211, y: 79, w: 20, h: 14 },
-  { id: "klights", scene: "kitchen", name: "the string lights", verb: "Turn on", x: 305, y: 16, w: 6, h: 92 }
+  { id: "recipes", scene: "kitchen", name: "the recipe box", verb: "Open", x: 211, y: 79, w: 20, h: 14 }
 ];
 
 // Camera zones: the part of the room each object zooms to.
