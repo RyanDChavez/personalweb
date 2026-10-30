@@ -383,7 +383,7 @@ function drawClock(put, setCur, now, still) {
 }
 
 // fx: the chair's spin (cos of its turn, 1 when still), the plant's stage (0 fine, 1-2 watered, 3-4 drooping, 5 dead)
-// and the watering can's pour (0..1, or -1).
+// the watering can's pour (0..1, or -1) and a new plant's leaves growing in (0..1, 1 when grown).
 function drawFront(put, setCur, rdxOpen, fx) {
   var x, y, i, flat = put;
   function rect(rx, ry, w, h, c) { for (var j = ry; j < ry + h; j++) for (var k = rx; k < rx + w; k++) put(k, j, c); }
@@ -526,9 +526,9 @@ function drawFront(put, setCur, rdxOpen, fx) {
   var tint = function (c) { return amt ? mix(c, sick, amt) : c; };
   var LEAF = tint([40, 74, 48]), BAND = tint([86, 124, 78]), EDGE = tint([214, 198, 92]);
   [[6, 30, -4], [17, 28, 4], [9, 40, -2], [14, 36, 2], [12, 46, 0]].forEach(function (bl, n) {
-    var side = bl[2] ? (bl[2] < 0 ? -1 : 1) : -1;
-    for (var j = 0; j < bl[1]; j++) {
-      var f = j / bl[1], lx = bl[0] + Math.round(bl[2] * f + side * droop * f * f * bl[1] * 0.6), ly = 143 - Math.round(j * (1 - droop * 0.45 * f));
+    var side = bl[2] ? (bl[2] < 0 ? -1 : 1) : -1, len = Math.round(bl[1] * fx.grow);
+    for (var j = bl[1] - len; j < bl[1]; j++) {
+      var jj = j - (bl[1] - len), f = j / bl[1], lx = bl[0] + Math.round(bl[2] * f + side * droop * f * f * bl[1] * 0.6), ly = 143 - Math.round(jj * (1 - droop * 0.45 * f));
       var w = j < bl[1] * 0.7 ? 3 : (j < bl[1] * 0.9 ? 2 : 1);
       for (var k = 0; k < w; k++) put(lx + k - 1, ly, w > 1 && k === w - 1 ? EDGE : ((j + n * 2) % 6 < 2 ? BAND : LEAF));
     }
@@ -2098,14 +2098,23 @@ Room.prototype.plantStage = function () {
   return Math.min(5, this.plant.n);
 };
 var PLANT_LINES = ["You water the snake plant.", "You water it again. The soil's soaked.", "The leaves are starting to droop. Snake plants like to be ignored.",
-  "The leaves are going yellow and flopping over.", "You drowned the snake plant."];
+  "The leaves are going yellow and flopping over.", "You drowned the snake plant. Tap it to swap in a new one."];
 var SPIN_LINES = ["You sit in the swivel chair and give it a spin.", "You spin again.", "You're dizzy."];
 
 Room.prototype.act = function (id) {
   var night = this.mode() === "dark", self = this;
   if (id === "plant") {
     var stage = this.plantStage();
-    if (stage >= 5) { this.setState({ zone: ZONE_FOR.plant, open: null, focusId: id }); this.say("The snake plant is dead. Ryan will get a new one tomorrow."); return; }
+    if (stage >= 5) {
+      // a dead plant gets swapped for a new one, which grows into the pot
+      this.plant.n = 0;
+      try { localStorage.setItem("plant", JSON.stringify(this.plant)); } catch (e) {}
+      if (!reducedMotion()) this.regrow = { t0: performance.now() };
+      this.setState({ zone: ZONE_FOR.plant, open: null, focusId: id });
+      this.say("You swap in a new snake plant. Go easy on the water this time.");
+      this.kick();
+      return;
+    }
     this.plant.n++;
     try { localStorage.setItem("plant", JSON.stringify(this.plant)); } catch (e) {}
     if (!reducedMotion()) this.watering = { t0: performance.now() };
@@ -2364,9 +2373,9 @@ Room.prototype.frame = function () {
     var key = px == null ? null : px + ":" + planeBlink();
     if (key !== this.planeKey) { this.planeKey = key; this.planeX = px; if (this.state.scene === "room") this.dirty = true; }
   }
-  if (this.spin || this.watering) this.dirty = true;
+  if (this.spin || this.watering || this.regrow) this.dirty = true;
   if (this.dirty) { this.dirty = false; this.paint(); }
-  if (this.fluffing || this.plane || this.door || this.spin || this.watering) this.tick();
+  if (this.fluffing || this.plane || this.door || this.spin || this.watering || this.regrow) this.tick();
 };
 
 // Every so often a plane crosses the window, heading southwest and down toward Newark.
@@ -2659,7 +2668,9 @@ Room.prototype.roomImage = function (hv) {
   var chair = 1, pour = -1;
   if (sp) { var pp = Math.min(1, (now - sp.t0) / 1500); chair = Math.cos(Math.PI * 2 * 3 * (1 - Math.pow(1 - pp, 3))); if (pp >= 1) { this.spin = null; chair = 1; } }
   if (wt) { pour = (now - wt.t0) / 1100; if (pour >= 1) { this.watering = null; pour = -1; } }
-  drawFront(put, setCur, this.state.open === "contact", { chair: Math.round(chair * 12) / 12 || 0.08, plant: this.plantStage(), pour: pour });
+  var grow = 1, rg = this.regrow;
+  if (rg) { grow = Math.min(1, (now - rg.t0) / 900); if (grow >= 1) this.regrow = null; grow = 1 - Math.pow(1 - grow, 2); }
+  drawFront(put, setCur, this.state.open === "contact", { chair: Math.round(chair * 12) / 12 || 0.08, plant: this.plantStage(), pour: pour, grow: grow });
   return composite(col, emis, obj, this.light, hv, B.img);
 };
 
@@ -2748,18 +2759,20 @@ Room.prototype.render = function () {
 
   var lampVerb = mode === "dark" ? "Turn off" : "Turn on";
   var hall = s.scene === "hall", isLamp = function (id) { return id === "lamp" || id === "blamp" || id === "nlamp" || id === "klights"; };
+  var deadPlant = this.plantStage() >= 5, winOpen = this.winOpen;
+  var verbOf = function (h) { return isLamp(h.id) ? lampVerb : (h.id === "plant" && deadPlant ? "Replace" : (h.id === "bwindow" && winOpen ? "Close" : h.verb)); };
   this.stage.classList.toggle("in-hall", hall);
   this.stage.classList.toggle("in-bedroom", s.scene === "bedroom");
   this.stage.classList.toggle("in-kitchen", s.scene === "kitchen");
   HOTS.forEach(function (h) {
     var b = this.hotEls[h.id];
     b.hidden = (h.scene || "room") !== s.scene;
-    setAttr(b, "aria-label", (isLamp(h.id) ? lampVerb : h.verb) + " " + h.name);
+    setAttr(b, "aria-label", verbOf(h) + " " + h.name);
   }, this);
 
   var hov = HOTS.filter(function (h) { return h.id === s.hover; })[0];
   setText(d.action, hov
-    ? (isLamp(hov.id) ? lampVerb : hov.verb) + " " + hov.name
+    ? verbOf(hov) + " " + hov.name
     : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · tap outside it to step back" : (s.scene === "bedroom" ? "Walk around the bedroom" : (s.scene === "kitchen" ? "Walk around the kitchen" : "Walk around the room")))));
   setText(d.shown, s.say.slice(0, s.n));
   setText(d.caret, s.n < s.say.length ? "▌" : "");
