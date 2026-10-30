@@ -1654,32 +1654,16 @@ Room.prototype.hallImage = function (hv) {
   return composite(col, emis, obj, this.hallLight, hv, B.img);
 };
 
-// The computer's screen runs a little loop: "]RUN" types out, it prints HELLO, scrolls, and the cursor blinks at a fresh
-// prompt. Tiny 3x5 letters, two lines; with reduced motion it holds the last frame.
-var SCREEN = { x: 92, y: 61, w: 25, h: 15, loop: 6500 };
-var SCREEN_GLYPHS = { "]": ["110", "010", "010", "010", "110"], R: ["110", "101", "110", "101", "101"], U: ["101", "101", "101", "101", "111"], N: ["101", "111", "111", "101", "101"],
-  H: ["101", "101", "111", "101", "101"], E: ["111", "100", "110", "100", "111"], L: ["100", "100", "100", "100", "111"], O: ["010", "101", "101", "101", "010"] };
-function screenFrame(t, still) {
-  if (still) return { lines: ["HELLO", "]"], cur: [1, 1] };
-  var blink = Math.floor(t / 300) % 2 === 0;
-  if (t < 1200) { var n = t < 450 ? 0 : Math.min(3, 1 + Math.floor((t - 450) / 220)); return { lines: ["]" + "RUN".slice(0, n)], cur: blink ? [0, 1 + n] : null }; }
-  if (t < 1500) return { lines: ["]RUN"], cur: null };
-  if (t < 2300) return { lines: ["]RUN", "HELLO"], cur: null };
-  return { lines: ["HELLO", "]"], cur: blink ? [1, 1] : null };
-}
+// The computer's screen is a blank prompt: just the block cursor blinking in the corner (steady with reduced motion).
+var SCREEN = { x: 92, y: 61, w: 25, h: 15, loop: 600 };
+function screenFrame(t, still) { return { cur: still || t < 300 }; }
 function drawScreen(col, emis, obj, f) {
   var S = SCREEN, BGS = [12, 26, 16], PH = [70, 222, 112];
   var px = function (x, y, c) { var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 1; obj[i] = OBJ.apple; };
   for (var y = 0; y < S.h; y++) for (var x = 0; x < S.w; x++) if (!((x === 0 || x === S.w - 1) && (y === 0 || y === S.h - 1))) px(S.x + x, S.y + y, BGS);
-  f.lines.forEach(function (ln, li) {
-    for (var ci = 0; ci < ln.length; ci++) {
-      var g = SCREEN_GLYPHS[ln[ci]];
-      for (var gy = 0; gy < 5; gy++) for (var gx = 0; gx < 3; gx++) if (g[gy][gx] === "1") px(S.x + 2 + ci * 4 + gx, S.y + 2 + li * 6 + gy, PH);
-    }
-  });
-  if (f.cur) for (var cy = 0; cy < 5; cy++) for (var cx = 0; cx < 3; cx++) px(S.x + 2 + f.cur[1] * 4 + cx, S.y + 2 + f.cur[0] * 6 + cy, PH);
+  if (f.cur) for (var cy = 0; cy < 5; cy++) for (var cx = 0; cx < 3; cx++) px(S.x + 2 + cx, S.y + 2 + cy, PH);
 }
-function screenKey(f) { return f.lines.join("/") + (f.cur ? "|" + f.cur.join(",") : ""); }
+function screenKey(f) { return f.cur ? "1" : "0"; }
 
 // Pigeons out the bedroom window: three on the parapet across the street and one on a window sill. Now and then one
 // pecks at the ledge, and one turns around; at night they sleep with their heads tucked. Sprites face right:
