@@ -91,6 +91,21 @@ body { margin: 0; background: #1C251B; }
 .kicker { font-family: Silkscreen, monospace; font-size: 12px; letter-spacing: 0.05em; color: var(--panelMuted); }
 .station-title { font-family: 'Pixelify Sans', monospace; font-weight: 700; font-size: 24px; line-height: 1.2; }
 
+/* world map */
+.panel-wide { left: 24px; width: auto; }
+.atlas { display: block; width: 100%; height: auto; image-rendering: pixelated; border: 6px solid #784C2A; box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3); background: #96BAC4; }
+@media (max-width: 759px) { .atlas { image-rendering: auto; border-width: 4px; } }
+.map-side { display: flex; flex-direction: column; gap: 14px; }
+@media (min-width: 1000px) {
+  .map-body { flex-direction: row; align-items: flex-start; }
+  .atlas { flex: 1 1 auto; min-width: 0; }
+  .map-side { flex: 0 0 272px; }
+}
+.place-out { display: flex; flex-direction: column; gap: 6px; min-height: 64px; }
+.places { display: flex; flex-wrap: wrap; gap: 6px; }
+.place { min-height: 36px; padding: 0 9px; background: var(--hud); color: var(--hudInk); border: 0; font-family: Silkscreen, monospace; font-size: 11px; }
+.place[aria-pressed="true"] { background: var(--gold); color: #1D251C; }
+
 /* Rolodex */
 .contact-body { padding-bottom: 24px; gap: 14px; }
 .rolodex { position: relative; padding-top: 22px; }
