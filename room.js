@@ -1281,7 +1281,7 @@ Room.prototype.setState = function (patch) {
   for (var k in patch) if (this.state[k] !== patch[k]) { this.state[k] = patch[k]; changed = true; }
   if (!changed) return;
   this.render();
-  if (this.builtFor !== this.mode() || this.paintedHover !== this.state.hover || this.paintedScene !== this.state.scene || this.paintedRdx !== (this.state.open === "contact")) this.kick();
+  if (this.paintedMode !== this.mode() || this.paintedHover !== this.state.hover || this.paintedScene !== this.state.scene || this.paintedRdx !== (this.state.open === "contact")) this.kick();
 };
 
 Room.prototype.say = function (text) {
@@ -1458,7 +1458,7 @@ Room.prototype.brush = function (e) {
 Room.prototype.paint = function () {
   var hv = this.state.hover ? OBJ[this.state.hover] : 0;
   var sc = this.state.scene, img = sc === "hall" ? this.hallImage(hv) : (sc === "bedroom" ? this.bedroomImage(hv) : this.roomImage(hv));
-  this.paintedHover = this.state.hover; this.paintedScene = this.state.scene; this.paintedRdx = this.state.open === "contact";
+  this.paintedHover = this.state.hover; this.paintedScene = this.state.scene; this.paintedMode = this.mode(); this.paintedRdx = this.state.open === "contact";
   this.canvas.getContext("2d").putImageData(img, 0, 0);
 };
 
