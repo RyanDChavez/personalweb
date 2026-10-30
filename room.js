@@ -1402,7 +1402,7 @@ function storedMode() {
 function storeMode(m) { try { sessionStorage.setItem(THEME_KEY, m); } catch (e) {} }
 
 var HALL_INTRO = "You're at Ryan's front door.";
-var BEDROOM_INTRO = "Ryan's bedroom. Have a look around."; // placeholder copy
+var BEDROOM_INTRO = "You step into Ryan's bedroom.";
 
 // The bedroom and the walk between rooms, released. ?apartment=0 hides them again for the tab (?apartment=1 brings
 // them back).
@@ -1775,15 +1775,15 @@ Room.prototype.act = function (id) {
     shelf: "The bookshelf appears to be a kind of archive of Ryan's life.",
     radio: "The receiver's broken. It won't turn on.",
     contact: "You open the Rolodex to Ryan's card.",
-    // bedroom: placeholder copy
+    // bedroom
     bwindow: night ? "Across the street, a few windows are lit." : "Across the street, a brick building.",
-    bshelf: "You look over the bookshelf.",
+    bshelf: "Every book Ryan owns, sorted by what it's about.",
     desk: "A mid-century walnut desk. There's half-drunk coffee and a notebook with cursive scrawled notes written hastily.",
-    apple: "The computer says HELLO. The software projects will boot up here.",
+    apple: "An old computer. The cursor's blinking, but nothing's loaded yet.",
     dchair: "A wooden desk chair, pushed in.",
     bass: "A black Fender Jazz Bass on its stand. It's got plenty of dings picked up on the road.",
     bed: "The bed's made, under a green flower quilt.",
-    map: "A world map with pins in Arcadia, San Francisco, Austin, Princeton, New York and Kampala."
+    map: "A world map with a pin in every city Ryan has been to."
   };
   var opener = document.activeElement;
   this.setState({ zone: ZONE_FOR[id] || null, open: PANELS[id] ? id : null, focusId: id });
