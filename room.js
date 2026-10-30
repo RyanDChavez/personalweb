@@ -849,8 +849,10 @@ function makeBedroom(mode) {
   rect(162, 99, 100, 8, DW); rect(162, 106, 100, 1, DWD); rect(211, 100, 1, 6, DWD);
   for (y = 100; y < 106; y++) for (x = 163; x < 261; x++) if (x !== 211 && (x * 7 + y * 3) % 13 === 0) put(x, y, [140, 88, 48]);
   put(186, 102, [214, 180, 120]); put(236, 102, [214, 180, 120]); put(186, 103, [150, 112, 60]); put(236, 103, [150, 112, 60]);
-  // on the desk: a notebook and a mug
-  rect(205, 94, 13, 2, [240, 236, 226]); rect(205, 95, 13, 1, [200, 196, 186]); put(211, 94, [176, 60, 44]);
+  // on the desk: an open notebook of scrawled notes, and a mug of coffee
+  rect(204, 92, 15, 4, [240, 236, 226]); rect(204, 95, 15, 1, [200, 196, 186]); rect(211, 92, 1, 4, [176, 168, 154]);
+  // two lines of hurried writing across each page
+  ["-.--.---.-.--.", "--.-.--..---.-"].forEach(function (ln, li) { for (var k = 0; k < ln.length; k++) if (ln[k] === "-" && 205 + k + (k > 5 ? 1 : 0) !== 211 && 205 + k + (k > 5 ? 1 : 0) < 218) put(205 + k + (k > 5 ? 1 : 0), 92 + li * 2, [96, 104, 140]); });
   rect(220, 90, 5, 6, [226, 216, 190]); put(225, 92, [226, 216, 190]); put(226, 93, [226, 216, 190]); rect(221, 90, 3, 1, [90, 60, 40]);
 
   // Apple II: beige case with its built-in keyboard and rainbow logo, a Disk II drive on top, and a monitor with a
@@ -1459,7 +1461,7 @@ Room.prototype.act = function (id) {
     // bedroom: placeholder copy
     bwindow: night ? "Across the street, a few windows are lit." : "Across the street, a brick building.",
     bshelf: "More books. The full catalog will live here.",
-    desk: "A mid-century walnut desk. The projects will live here.",
+    desk: "A mid-century walnut desk. There's half-drunk coffee and a notebook with cursive scrawled notes written hastily.",
     apple: "The computer says HELLO. The software projects will boot up here.",
     dchair: "A wooden desk chair, pushed in.",
     bass: "A black Fender Jazz Bass on its stand. It's got plenty of dings picked up on the road.",
