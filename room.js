@@ -705,10 +705,12 @@ function makeBedroom(mode) {
   // mid-century walnut desk: thin top, two-drawer apron, splayed tapered legs
   cur = OBJ.desk;
   var DW = [154, 98, 54], DWL = [186, 128, 76], DWD = [108, 66, 34];
-  for (i = 0; i < 20; i++) { put(172, 107 + i, DWD); put(251, 107 + i, DWD); }
+  // legs: a steady 2px wide, splaying out just two pixels over their length (fewer steps reads cleaner), tapering
+  // at the foot; the back pair is darker, inset and shorter
   for (i = 0; i < 25; i++) {
-    var lo = (i / 6) | 0;
-    if (i < 22) { put(164 - lo, 107 + i, DWL); put(165 - lo, 107 + i, DW); put(258 + lo, 107 + i, DW); put(259 + lo, 107 + i, DWD); }
+    var lo = (i / 10) | 0;
+    if (i < 21) { put(172 - lo, 107 + i, DWD); put(251 + lo, 107 + i, DWD); }
+    if (i < 22) { put(164 - lo, 107 + i, DW); put(165 - lo, 107 + i, DWD); put(258 + lo, 107 + i, DW); put(259 + lo, 107 + i, DWD); }
     else { put(164 - lo, 107 + i, DW); put(259 + lo, 107 + i, DW); }
   }
   rect(160, 96, 104, 1, DWL); rect(160, 97, 104, 1, DW); rect(160, 98, 104, 1, DWD);
@@ -753,7 +755,7 @@ function makeBedroom(mode) {
   cur = OBJ.dchair;
   var CO = [184, 132, 80], COL = [212, 160, 104], COD = [134, 92, 52];
   for (i = 0; i < 18; i++) { put(197, 115 + i, COD); put(211, 115 + i, COD); }
-  for (i = 0; i < 22; i++) { var co = (i / 7) | 0; put(192 - co, 115 + i, COL); put(193 - co, 115 + i, CO); put(215 + co, 115 + i, CO); put(216 + co, 115 + i, COD); }
+  for (i = 0; i < 22; i++) { var co = (i / 11) | 0; put(192 - co, 115 + i, CO); put(193 - co, 115 + i, COD); put(215 + co, 115 + i, CO); put(216 + co, 115 + i, COD); }
   rect(190, 112, 28, 3, CO); rect(190, 112, 28, 1, COL); rect(190, 114, 28, 1, COD);
   rect(193, 101, 2, 11, CO); rect(213, 101, 2, 11, COD);
   [199, 204, 209].forEach(function (sx) { rect(sx, 101, 1, 11, CO); });
@@ -832,7 +834,18 @@ function makeBedroom(mode) {
     for (x = xl; x <= xr; x++) put(x, y, shade(quilt((x - xl) / (xr - xl + 1) * NX, v), dk));
     if (y > YB + 3) for (var sx = 1; sx <= 3; sx++) { put(xl - sx, y, shade(quilt(0.3 + sx * 0.08, v), 0.7)); put(xr + sx, y, shade(quilt(3.7 - sx * 0.08, v), 0.7)); }
   }
-  rect(77, 167, 101, 3, PN); rect(77, 167, 101, 1, PNL); rect(79, 170, 2, 3, PND); rect(174, 170, 2, 3, PND);
+  // the navy waffle throw across the lower half, draped over the sides; the quilt still shows at the foot
+  var NV = [50, 72, 120], NVL = [76, 100, 152], NVD = [32, 48, 86];
+  for (y = 128; y <= 153; y++) {
+    var t2 = (y - YB) / (YF - YB), l2 = Math.round(90 - 10 * t2) - 3, r2 = Math.round(164 + 10 * t2) + 3;
+    for (x = l2; x <= r2; x++) {
+      var nc = y === 128 ? NVL : (y >= 152 ? NVD : ((x % 3 === 0 || y % 3 === 0) ? NVL : NV));
+      put(x, y, x < l2 + 3 || x > r2 - 3 ? shade(nc, 0.75) : nc);
+    }
+  }
+  // footboard rail and tapered pine legs at the foot corners
+  rect(77, 167, 101, 3, PN); rect(77, 167, 101, 1, PNL); rect(77, 169, 101, 1, PND);
+  for (i = 0; i < 6; i++) { var lw = i < 4 ? 3 : 2; rect(78, 170 + i, lw, 1, PN); put(78 + lw - 1, 170 + i, PND); rect(177 - lw, 170 + i, lw, 1, PN); put(176, 170 + i, PND); }
   var PW = [244, 242, 236], PWD = [212, 208, 198];
   var pillow = function (x0, y0, w, h, c, cd) { for (var yy = 0; yy < h; yy++) for (var xx = 0; xx < w; xx++) if (!((yy === 0 || yy === h - 1) && (xx === 0 || xx === w - 1))) put(x0 + xx, y0 + yy, yy >= h - 2 ? cd : c); };
   pillow(94, 99, 32, 10, PW, PWD); pillow(130, 99, 32, 10, PW, PWD);
