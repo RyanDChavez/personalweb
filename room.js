@@ -19,7 +19,7 @@ var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122,
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
 // Object ids painted into the scene, used for in-scene highlights.
-var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20 };
+var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21 };
 
 function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
@@ -633,7 +633,8 @@ var BFLOOR = 132;
 
 function makeBedroom(mode) {
   var col = new Uint8ClampedArray(SW * SH * 3), emis = new Uint8Array(SW * SH), obj = new Uint8Array(SW * SH), cur = 0;
-  function put(x, y, c, e) { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= SW || y >= SH) return; var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = e ? 1 : 0; obj[i] = cur; }
+  var ox = 0; // shifts a whole piece of furniture into place
+  function put(x, y, c, e) { x = Math.round(x + ox); y = Math.round(y); if (x < 0 || y < 0 || x >= SW || y >= SH) return; var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = e ? 1 : 0; obj[i] = cur; }
   function rect(x, y, w, h, c, e) { for (var j = y; j < y + h; j++) for (var i = x; i < x + w; i++) put(i, j, c, e); }
   function ellipse(cx, cy, rx, ry, fn) { for (var y = -ry; y <= ry; y++) for (var x = -rx; x <= rx; x++) if (x * x / (rx * rx) + y * y / (ry * ry) <= 1) fn(cx + x, cy + y, x, y); }
   var night = mode === "dark", x, y, i, r = rng(night ? 23 : 17);
@@ -653,24 +654,25 @@ function makeBedroom(mode) {
     }
   }
 
-  // window: across the street, a brick building (room at the bottom for the car later)
+  // window above the bed: across the street, a brick building (lit windows at night)
   cur = OBJ.bwindow;
-  rect(16, 20, 72, 78, C.teak);
-  var GX0 = 19, GX1 = 85, GY0 = 23, GY1 = 95, ROOF = 38;
-  for (y = GY0; y < GY1; y++) for (x = GX0; x < GX1; x++) put(x, y, night ? mix([10, 14, 30], [36, 32, 54], (y - GY0) / 20) : mix([136, 182, 204], [214, 224, 214], Math.min(1, (y - GY0) / 20)), true);
+  rect(96, 18, 63, 52, C.teak);
+  var GX0 = 99, GX1 = 156, GY0 = 21, GY1 = 67, ROOF = 32;
+  for (y = GY0; y < GY1; y++) for (x = GX0; x < GX1; x++) put(x, y, night ? mix([10, 14, 30], [36, 32, 54], (y - GY0) / 12) : mix([136, 182, 204], [214, 224, 214], Math.min(1, (y - GY0) / 12)), true);
   var BR = night ? [52, 30, 28] : [156, 82, 60], BRD = night ? [40, 24, 22] : [130, 66, 48], MORT = night ? [62, 52, 50] : [196, 176, 160];
   rect(GX0, ROOF - 2, GX1 - GX0, 2, night ? [40, 40, 44] : [112, 112, 114], true);
   for (y = ROOF; y < GY1; y++) for (x = GX0; x < GX1; x++) {
     var brow = ((y - ROOF) / 3) | 0, bo = brow % 2 ? 3 : 0;
     put(x, y, (y - ROOF) % 3 === 2 || (x + bo) % 6 === 0 ? MORT : ((x * 3 + brow) % 7 === 0 ? BRD : BR), true);
   }
-  for (var wy = ROOF + 5; wy < GY1 - 12; wy += 16) for (var wx = GX0 + 5; wx < GX1 - 8; wx += 14) {
+  for (var wy = ROOF + 4; wy < GY1 - 10; wy += 15) for (var wx = GX0 + 4; wx < GX1 - 8; wx += 13) {
     var lit = night && r() < 0.55, TR = night ? [70, 64, 60] : [214, 206, 192];
     rect(wx - 1, wy - 1, 9, 12, TR, true); rect(wx, wy, 7, 10, lit ? [244, 206, 128] : (night ? [20, 22, 30] : [80, 104, 118]), true); rect(wx, wy + 5, 7, 1, TR, true);
   }
-  rect(51, GY0, 2, GY1 - GY0, C.teak);
-  rect(13, 98, 78, 3, C.teakL);
+  rect(127, GY0, 2, GY1 - GY0, C.teak);
+  rect(93, 70, 69, 3, C.teakL);
 
+  ox = -94; // far left
   // ladder bookshelf, like the living room's but without the drawer cabinet: four shelves
   cur = OBJ.bshelf;
   var WAL = [132, 82, 44], WALL2 = [168, 112, 64], WALD = [88, 52, 26];
@@ -698,6 +700,7 @@ function makeBedroom(mode) {
   for (y = 28; y < BFLOOR; y++) { var lx = railL(y), rx = railR(y); put(lx, y, WALL2); put(lx + 1, y, WAL); put(rx - 1, y, WAL); put(rx, y, WALD); }
   [48, 70, 92, 114].forEach(function (sy) { for (x = railL(sy) + 2; x < railR(sy) - 1; x++) { put(x, sy, WALL2); put(x, sy + 1, WAL); put(x, sy + 2, WALD); } });
 
+  ox = 40; // desk, Apple II, lamps and chair on the right
   // mid-century walnut desk: thin top, two-drawer apron, splayed tapered legs
   cur = OBJ.desk;
   var DW = [154, 98, 54], DWL = [186, 128, 76], DWD = [108, 66, 34];
@@ -755,6 +758,7 @@ function makeBedroom(mode) {
   [199, 204, 209].forEach(function (sx) { rect(sx, 101, 1, 11, CO); });
   rect(189, 97, 30, 1, COL); rect(188, 98, 32, 3, CO); rect(188, 100, 32, 1, COD); put(188, 97, CO); put(219, 97, CO);
 
+  ox = -223; // next to the bookshelf
   // black Fender Jazz Bass on a tubular stand: offset body (longer upper horn on the left), tortoise pickguard,
   // chrome control plate, rosewood board on a maple neck, four tuners down one side of the headstock
   cur = OBJ.bass;
@@ -785,6 +789,57 @@ function makeBedroom(mode) {
   rect(288, 37, 3, 1, [236, 230, 210]);
   rect(288, 28, 5, 9, MPL); rect(289, 26, 4, 2, MPL); put(292, 25, MPL); rect(288, 28, 1, 9, [182, 140, 84]);
   [28, 31, 34, 37].forEach(function (py) { put(287, py, CHR); put(286, py, CHR); });
+  ox = 0;
+  function line(x0, y0, x1, y1, c, e) { var n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); for (var k = 0; k <= n; k++) put(x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n, c, e); }
+
+  // pine nightstand with two drawers, a black task lamp and a few books
+  cur = 0;
+  var PN = [212, 160, 98], PNL = [232, 186, 124], PND = [168, 118, 64];
+  rect(172, 110, 25, 2, PNL); rect(172, 112, 25, 17, PN); rect(172, 128, 25, 1, PND); rect(196, 112, 1, 16, PND);
+  rect(174, 119, 21, 1, PND); put(184, 115, [120, 84, 44]); put(184, 123, [120, 84, 44]);
+  rect(173, 129, 2, 3, PND); rect(194, 129, 2, 3, PND);
+  rect(187, 108, 8, 2, [70, 120, 140]); rect(186, 106, 9, 2, [233, 221, 184]); rect(188, 104, 7, 2, [176, 60, 44]);
+  var TL = [30, 30, 32], TLL = [84, 84, 90];
+  rect(176, 107, 8, 3, TL); rect(177, 107, 6, 1, TLL);
+  line(180, 106, 175, 96, TL); line(175, 96, 182, 90, TL); put(175, 96, TLL);
+  rect(182, 88, 4, 1, TL); rect(182, 89, 5, 1, TL); rect(183, 90, 5, 1, TL); rect(184, 91, 5, 1, TLL);
+  rect(185, 92, 4, 1, night ? [255, 232, 170] : [90, 90, 96], night);
+
+  // the bed: pine plank headboard, pillows (two white, a gray one, the bird pillow), and a quilt of green and
+  // white flower tiles on a blue grid, foreshortened so the tiles grow toward the foot of the bed
+  cur = OBJ.bed;
+  rect(86, 78, 83, 33, PN); rect(86, 78, 83, 2, PNL); rect(86, 80, 83, 1, PND);
+  for (x = 105; x < 166; x += 19) rect(x, 81, 1, 30, PND);
+  rect(86, 78, 3, 54, PN); rect(86, 78, 1, 54, PNL); rect(166, 78, 3, 54, PN); rect(168, 78, 1, 54, PND);
+  [[98, 88], [131, 95], [150, 84], [118, 85]].forEach(function (k) { put(k[0], k[1], PND); put(k[0] + 1, k[1], [190, 138, 80]); });
+  var QG = [96, 150, 108], QW = [236, 232, 218], QB = [44, 92, 186];
+  var quilt = function (u, v) {
+    var ti = Math.floor(u), tj = Math.floor(v), fu = u - ti, fv = v - tj;
+    if (fu < 0.07 || fv < 0.07) return QB;
+    var green = (ti + tj) % 2 === 0, bg = green ? QG : QW, fg = green ? QW : QG, cx = fu - 0.53;
+    var hy = fv - 0.27, head = cx * cx / 0.085 + hy * hy / 0.028 <= 1, hole = cx * cx / 0.016 + hy * hy / 0.005 <= 1;
+    var stem = Math.abs(cx) < 0.045 && fv > 0.4;
+    var leaf = (Math.abs(fv - 0.58) < 0.06 || Math.abs(fv - 0.8) < 0.06) && Math.abs(Math.abs(cx) - 0.17) < 0.11;
+    return (head && !hole) || stem || leaf ? fg : bg;
+  };
+  var shade = function (c, k) { return [c[0] * k, c[1] * k, c[2] * k]; };
+  var YB = 108, YF = 158, NX = 4, NY = 3.4;
+  for (y = YB; y <= 166; y++) {
+    var tt = Math.min(1, (y - YB) / (YF - YB)), xl = Math.round(90 - 10 * tt), xr = Math.round(164 + 10 * tt);
+    var v = y <= YF ? (y - YB) / (YF - YB) * NY : NY + (y - YF) / 9, dk = y <= YF ? 1 : 0.84;
+    for (x = xl; x <= xr; x++) put(x, y, shade(quilt((x - xl) / (xr - xl + 1) * NX, v), dk));
+    if (y > YB + 3) for (var sx = 1; sx <= 3; sx++) { put(xl - sx, y, shade(quilt(0.3 + sx * 0.08, v), 0.7)); put(xr + sx, y, shade(quilt(3.7 - sx * 0.08, v), 0.7)); }
+  }
+  rect(77, 167, 101, 3, PN); rect(77, 167, 101, 1, PNL); rect(79, 170, 2, 3, PND); rect(174, 170, 2, 3, PND);
+  var PW = [244, 242, 236], PWD = [212, 208, 198];
+  var pillow = function (x0, y0, w, h, c, cd) { for (var yy = 0; yy < h; yy++) for (var xx = 0; xx < w; xx++) if (!((yy === 0 || yy === h - 1) && (xx === 0 || xx === w - 1))) put(x0 + xx, y0 + yy, yy >= h - 2 ? cd : c); };
+  pillow(94, 99, 32, 10, PW, PWD); pillow(130, 99, 32, 10, PW, PWD);
+  pillow(119, 103, 20, 9, [150, 156, 164], [122, 128, 136]);
+  pillow(106, 106, 25, 13, [236, 230, 212], [204, 196, 176]);
+  rect(108, 113, 21, 1, [150, 146, 136]);
+  [[110, 110, [226, 190, 60], [70, 120, 160]], [115, 111, [70, 120, 160], [226, 190, 60]], [120, 110, [226, 190, 60], [40, 48, 60]], [125, 111, [40, 48, 60], [226, 190, 60]]].forEach(function (bd) {
+    rect(bd[0], bd[1], 3, 2, bd[2]); put(bd[0] + 1, bd[1] + 2, bd[3]); put(bd[0] + 3, bd[1], [214, 96, 70]);
+  });
   return { col: col, emis: emis, obj: obj };
 }
 
@@ -795,14 +850,16 @@ function makeBedroomLight(mode) {
     if (mode === "dark") {
       // the banker's lamp: a warm pool on the desk and the floor below it
       a = 0.28;
-      var dx = x - 243, dy = y - 92, d = Math.sqrt(dx * dx + dy * dy * 1.6);
+      var dx = x - 283, dy = y - 92, d = Math.sqrt(dx * dx + dy * dy * 1.6);
       g = Math.pow(Math.max(0, 1 - d / 78), 1.6) * 0.95;
-      var sx = x - 182, sy = y - 69, sd = Math.sqrt(sx * sx + sy * sy * 1.4);
+      var sx = x - 222, sy = y - 69, sd = Math.sqrt(sx * sx + sy * sy * 1.4);
       g += Math.max(0, 1 - sd / 30) * 0.35;
+      var nx = x - 187, ny = y - 100, nd = Math.sqrt(nx * nx + ny * ny * 1.5);
+      g += Math.pow(Math.max(0, 1 - nd / 30), 1.4) * 0.5; // the nightstand lamp
       g = q(Math.min(1.2, g), 6, b);
     } else {
       a = q(1.0 - 0.12 * (x / SW), 12, b);
-      if (y >= BFLOOR - 2) { var off = (y - BFLOOR) * 1.4, x0 = 30 + off, x1 = 90 + off, e = Math.min(x - x0, x1 - x); if (e > 0 && Math.abs(x - (56 + off)) > 1.2) g = e > 2 ? 0.24 : (b < e / 2 ? 0.24 : 0); }
+      if (y >= BFLOOR - 2) { var off = (y - BFLOOR) * 1.4, x0 = 112 + off, x1 = 168 + off, e = Math.min(x - x0, x1 - x); if (e > 0 && Math.abs(x - (140 + off)) > 1.2) g = e > 2 ? 0.24 : (b < e / 2 ? 0.24 : 0); }
     }
     A[i] = a; G[i] = g;
   }
@@ -822,13 +879,14 @@ var HOTS = [
   { id: "plant", name: "the snake plant", verb: "Water", x: 0, y: 96, w: 24, h: 80 },
   { id: "door", scene: "hall", name: "the door", verb: "Open", x: 128, y: 30, w: 64, h: 120 },
   { id: "bell", scene: "hall", name: "the doorbell", verb: "Ring", x: 203, y: 74, w: 21, h: 30 },
-  { id: "bwindow", scene: "bedroom", name: "the window", verb: "Look out", x: 13, y: 18, w: 80, h: 84 },
-  { id: "bshelf", scene: "bedroom", name: "the bookshelf", verb: "Browse", x: 99, y: 26, w: 52, h: 106 },
-  { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 158, y: 86, w: 108, h: 46 },
-  { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 186, y: 96, w: 36, h: 41 },
-  { id: "apple", scene: "bedroom", name: "the Apple II", verb: "Use", x: 162, y: 56, w: 41, h: 41 },
-  { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 230, y: 78, w: 26, h: 19 },
-  { id: "bass", scene: "bedroom", name: "the bass", verb: "Play", x: 275, y: 24, w: 30, h: 112 }
+  { id: "bwindow", scene: "bedroom", name: "the window", verb: "Look out", x: 93, y: 16, w: 69, h: 58 },
+  { id: "bshelf", scene: "bedroom", name: "the bookshelf", verb: "Browse", x: 6, y: 26, w: 50, h: 106 },
+  { id: "bass", scene: "bedroom", name: "the bass", verb: "Play", x: 52, y: 22, w: 28, h: 114 },
+  { id: "bed", scene: "bedroom", name: "the bed", verb: "Lie down on", x: 76, y: 78, w: 102, h: 95 },
+  { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 198, y: 86, w: 108, h: 46 },
+  { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 226, y: 96, w: 36, h: 41 },
+  { id: "apple", scene: "bedroom", name: "the Apple II", verb: "Use", x: 202, y: 56, w: 41, h: 41 },
+  { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 270, y: 78, w: 26, h: 19 }
 ];
 
 // Camera zones: the part of the room each object zooms to.
@@ -845,12 +903,13 @@ var ZONES = {
   // (framed just past the hinge, so the swung-open slab is off screen when the scenes swap)
   doorway: { x: HALL.DX + 3, y: HALL.DY, w: HALL.DW - 3, h: HALL.DH, cover: true },
   entry: { x: 116.5, y: 0, w: 91.5, h: 180, cover: true },
-  bwindow: { x: 6, y: 12, w: 96, h: 94 },
-  bshelf: { x: 92, y: 20, w: 66, h: 118 },
-  desk: { x: 150, y: 72, w: 124, h: 66 },
-  bass: { x: 258, y: 20, w: 62, h: 120 }
+  bwindow: { x: 82, y: 8, w: 92, h: 72 },
+  bshelf: { x: 0, y: 20, w: 64, h: 118 },
+  bass: { x: 36, y: 16, w: 60, h: 124 },
+  bed: { x: 68, y: 68, w: 120, h: 108 },
+  desk: { x: 190, y: 50, w: 130, h: 88 }
 };
-var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass" };
+var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
 var PANELS = { shelf: 1, contact: 1 };
 
@@ -1014,7 +1073,7 @@ function Room(root) {
   [["shelf", "About me"], ["radio", "Radio"], ["contact", "Contact"], ["window", "Window"], ["chair", "Chair"], ["lamp", "Lamp"], ["fluff", "Fluff rug"], ["room", "Room"]].forEach(function (d) {
     addInv("room", d[0], d[1], d[0] === "fluff" ? self.fluff : (d[0] === "room" ? self.back : function () { self.act(d[0]); }));
   });
-  [["desk", "Desk"], ["apple", "Apple II"], ["bshelf", "Books"], ["bass", "Bass"], ["bwindow", "Window"], ["blamp", "Lamp"], ["room", "Room"]].forEach(function (d) {
+  [["desk", "Desk"], ["apple", "Apple II"], ["bshelf", "Books"], ["bass", "Bass"], ["bed", "Bed"], ["bwindow", "Window"], ["blamp", "Lamp"], ["room", "Room"]].forEach(function (d) {
     addInv("bedroom", d[0], d[1], d[0] === "room" ? self.back : function () { self.act(d[0]); });
   });
   [["bell", "Ring the bell"], ["door", "Open the door"]].forEach(function (d) {
@@ -1187,7 +1246,8 @@ Room.prototype.act = function (id) {
     desk: "A mid-century walnut desk. The projects will live here.",
     apple: "An Apple II, blinking at the ] prompt. The software projects will boot up here.",
     dchair: "A wooden desk chair, pushed in.",
-    bass: "A black Fender Jazz Bass on its stand."
+    bass: "A black Fender Jazz Bass on its stand.",
+    bed: "The bed's made, under a green flower quilt."
   };
   var opener = document.activeElement;
   this.setState({ zone: ZONE_FOR[id] || null, open: PANELS[id] ? id : null, focusId: id });
