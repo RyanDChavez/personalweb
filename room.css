@@ -73,6 +73,7 @@ body { margin: 0; background: #1C251B; }
 /* bookshelf */
 .books { display: flex; align-items: flex-end; gap: 4px; padding: 0 10px; overflow-x: auto; }
 .spine { flex: 0 0 auto; width: 30px; padding: 0; border: 0; box-shadow: inset -4px 0 0 rgba(0, 0, 0, 0.2); display: flex; align-items: center; justify-content: center; }
+.spine-next { height: 140px; background: var(--panel); color: var(--panelMuted); border: 2px dashed var(--panelMuted); box-shadow: none; }
 .spine span { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Silkscreen, monospace; font-size: 10px; white-space: nowrap; }
 .plank { height: 10px; background: #8A5A34; box-shadow: 0 5px 0 #5E3A1E; }
 .book-read { display: flex; flex-direction: column; gap: 8px; min-height: 172px; }
