@@ -795,6 +795,29 @@ function makeBedroom(mode) {
   rect(127, GY0, 2, GY1 - GY0, C.teak);
   rect(93, 70, 69, 3, C.teakL);
 
+  ox = 0;
+  // a Dodgers pennant on the wall right of the window: blue felt, "Dodgers" in white script, a white band with
+  // tassels at the hanging edge, pinned with a brass tack
+  cur = 0;
+  var DB = [26, 84, 164], DBD = [18, 66, 136], FW = [240, 240, 236], FWD = [206, 206, 200];
+  var PL = 279, PR = 318, PT = 24, PB = 44, PM = (PT + PB) / 2;
+  for (x = PL; x <= PR; x++) {
+    var ph = (PB - PT) / 2 * (1 - (x - PL) / (PR - PL + 1));
+    for (y = Math.ceil(PM - ph); y <= Math.floor(PM + ph); y++) put(x, y, x < PL + 3 ? (y > PM + ph - 1 ? FWD : FW) : (y > PM + ph - 1 || (x * 5 + y * 3) % 17 === 0 ? DBD : DB));
+  }
+  for (y = PB + 1; y < PB + 6; y++) { put(PL, y, y % 2 ? FW : FWD); put(PL + 2, y + (y > PB + 4 ? -1 : 0), y % 2 ? FWD : FW); }
+  put(PL + 1, PT, [226, 190, 94]); put(PL + 1, PT - 1, [176, 140, 60]);
+  ["###........#...............",
+   "#..#.......#...............",
+   "#..#..#...##..##..##.##..##",
+   "#..#.#.#.#.#.#.#.###.#...#.",
+   "###...#...##..##.#...#..##.",
+   "...............#...........",
+   ".............##............"
+  ].forEach(function (row, ry) {
+    for (var k = 0; k < row.length; k++) if (row[k] === "#") put(PL + 5 + k, PT + 6 + ry, FW);
+  });
+
   ox = -94; // far left
   // ladder bookshelf, like the living room's but without the drawer cabinet: four shelves
   cur = OBJ.bshelf;
