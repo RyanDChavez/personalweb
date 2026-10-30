@@ -1158,6 +1158,8 @@ function makeKitchen(mode) {
   rect(216, 80, 3, 1, [214, 96, 72]); rect(221, 80, 3, 1, [78, 108, 176]); rect(224, 82, 2, 1, [214, 170, 90]);
   rect(213, 84, 16, 8, DW); rect(213, 84, 16, 1, DWL); rect(213, 91, 16, 1, DWD); rect(228, 85, 1, 6, DWD);
   rect(218, 87, 6, 3, C.gold); rect(219, 88, 4, 1, [244, 240, 228]);
+  // the faded printout, folded in thirds and tucked in at the front
+  rect(214, 78, 7, 6, [236, 230, 212]); rect(214, 80, 7, 1, [214, 206, 186]); put(215, 79, [176, 172, 162]); rect(216, 82, 4, 1, [176, 172, 162]); rect(220, 78, 1, 6, [214, 206, 186]);
 
   // the range: white enamel, backguard with a clock and four knobs, a black cooktop, oven window, chrome handle
   cur = OBJ.stove;
@@ -1366,12 +1368,12 @@ var ZONES = {
   stove: { x: 40, y: 56, w: 80, h: 80 },
   sink: { x: 136, y: 14, w: 84, h: 92 },
   fruit: { x: 100, y: 68, w: 52, h: 30 },
-  recipes: { x: 198, y: 70, w: 46, h: 28 },
+  recipes: { x: 176, y: 54, w: 92, h: 50 },
   coffee: { x: 240, y: 8, w: 72, h: 126 }
 };
 var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", fridge: "fridge", stove: "stove", sink: "sink", kwindow: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
-var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1 };
+var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1, recipes: 1 };
 
 // The shelf reads left to right, oldest first: [spine, height, color, ink, kicker, title, paragraph]
 var BOOKS = [
@@ -1726,7 +1728,7 @@ function Room(root) {
   this.canvas = $("room");
   this.dom = {
     action: $("action"), shown: $("say-shown"), caret: $("caret"), live: $("say-live"),
-    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map"), bshelf: $("panel-bshelf") },
+    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map"), bshelf: $("panel-bshelf"), recipes: $("panel-recipes") },
     libShelf: $("lib-shelf"), libKicker: $("lib-kicker"), libTitle: $("lib-title"), libText: $("lib-text"), libPrev: $("lib-prev"), libNext: $("lib-next"),
     atlas: $("atlas"), atlasWrap: $("atlas-wrap"), atlasTip: $("atlas-tip"), placeTitle: $("place-title"), placeText: $("place-text"), placePrev: $("place-prev"), placeNext: $("place-next"),
     bookKicker: $("book-kicker"), bookTitle: $("book-title"), bookText: $("book-text"), bookPrev: $("book-prev"), bookNext: $("book-next"), needle: $("needle"),
@@ -2069,7 +2071,7 @@ Room.prototype.act = function (id) {
     sink: "The dishes are done.",
     kwindow: night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.",
     fruit: "A bowl of bananas and apples.",
-    recipes: "A recipe box. The cards are still blank.",
+    recipes: "A recipe box, with a faded printout tucked in the front.",
     coffee: "Ryan's coffee setup: an espresso machine, a grinder full of beans and a drip brewer.",
     kprint: "A print of storefronts in Oakland's Chinatown."
   };
