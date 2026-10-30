@@ -203,24 +203,34 @@ body { margin: 0; background: #1C251B; }
 .inv-btn[hidden] { display: none; }
 /* At the door: two wide buttons over the same two rows, so the HUD keeps its height going in */
 .inv-hall { grid-column: 1 / -1; }
-/* Floor plan (apartment flag): the rooms as a little blueprint beside the menu, walls in between, doorways cut
-   through them, and the front door in the living room's bottom wall. The room you're in is outlined in gold. */
-.plan { position: relative; flex: 0 0 132px; min-height: 92px; background: #0E120D; border: 3px solid #0E120D; box-shadow: 0 0 0 2px var(--hudLine); }
+/* Floor plan (apartment flag): the rooms as a little blueprint beside the menu, walls between them with doorways cut
+   through, and the front door in the living room's bottom wall. Kitchen, living room, bedroom, left to right; the
+   room you're in is outlined in gold. */
+.plan { position: relative; flex: 0 0 172px; min-height: 86px; display: flex; gap: 3px; background: #0E120D; border: 3px solid #0E120D; box-shadow: 0 0 0 2px var(--hudLine); }
 .plan[hidden] { display: none; }
-.plan-room { position: absolute; padding: 0; border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.plan-room span { padding: 1px 4px; background: rgba(14, 18, 13, 0.82); color: var(--hudInk); font-family: Silkscreen, monospace; font-size: 9px; letter-spacing: 0.04em; white-space: nowrap; }
-.plan-bedroom { left: 0; top: 0; width: calc(50% - 2px); height: calc(44% - 2px); background: repeating-linear-gradient(90deg, #B08052 0 7px, #8A5E36 7px 8px); }
-.plan-kitchen { left: calc(50% + 1px); top: 0; width: calc(50% - 1px); height: calc(44% - 2px); background: conic-gradient(#3A5446 25%, #E4DCC4 0 50%, #3A5446 0 75%, #E4DCC4 0) 0 0 / 8px 8px; }
-.plan-two .plan-bedroom { width: 100%; }
-.plan-living { left: 0; top: 44%; width: 100%; height: 56%; background: radial-gradient(circle, #4F6A4B 1px, transparent 1.5px) 0 0 / 4px 4px, #2E3D2C; }
-.plan-door { position: absolute; height: 3px; width: 14px; background: #4F6A4B; pointer-events: none; }
-.plan-door-bedroom { left: 22%; top: calc(44% - 2px); }
-.plan-door-kitchen { left: 68%; top: calc(44% - 2px); }
-.plan-door-front { left: calc(50% - 8px); bottom: -3px; width: 16px; background: var(--gold); }
+.plan-room { position: relative; flex: 1 1 0; min-width: 0; padding: 0; border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.plan-room span { padding: 1px 3px; background: rgba(14, 18, 13, 0.82); color: var(--hudInk); font-family: Silkscreen, monospace; font-size: 9px; letter-spacing: 0.02em; text-align: center; line-height: 1.2; }
+.plan-living { flex-grow: 1.5; background: radial-gradient(circle, #4F6A4B 1px, transparent 1.5px) 0 0 / 4px 4px, #2E3D2C; }
+.plan-bedroom { background: repeating-linear-gradient(90deg, #B08052 0 7px, #8A5E36 7px 8px); }
+.plan-kitchen { background: conic-gradient(#3A5446 25%, #E4DCC4 0 50%, #3A5446 0 75%, #E4DCC4 0) 0 0 / 8px 8px; }
+/* doorways: a gap in each wall the living room shares, and the front door in its bottom wall */
+.plan-living::before, .plan-living::after { content: ""; position: absolute; top: calc(50% - 7px); width: 3px; height: 14px; background: #2E3D2C; }
+.plan-living::before { left: -3px; }
+.plan-living::after { right: -3px; }
+.plan-living:first-child::before { display: none; }
+.plan-door-front { position: absolute; bottom: -3px; left: calc(50% - 8px); width: 16px; height: 3px; background: var(--gold); pointer-events: none; }
 .plan-room.on { box-shadow: inset 0 0 0 2px var(--gold); }
 .plan-room.on span { background: var(--gold); color: #1D251C; }
 @media (hover: hover) { .plan-room:not(.on):hover { filter: brightness(1.18); } }
 .plan-room:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; z-index: 1; }
+/* the day/night switch in the narrator's corner */
+.narrator { position: relative; }
+.daynight { position: absolute; top: -4px; right: 0; min-height: 30px; padding: 0 10px; background: var(--invBg); color: var(--hudInk); border: 2px solid var(--hudLine); font-family: Silkscreen, monospace; font-size: 11px; }
+.daynight[aria-checked="true"] { color: var(--gold); }
+.daynight[hidden] { display: none; }
+.plan-two .plan-door-front { left: calc(30% - 8px); }
+.has-plan .action { padding-right: 100px; }
+.has-plan .inv { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 /* Fade between rooms */
 .fade { position: absolute; inset: 0; background: #0A0E0A; opacity: 0; pointer-events: none; transition: opacity 0.34s steps(4); }
 .fading .fade { opacity: 1; }
@@ -233,9 +243,10 @@ body { margin: 0; background: #1C251B; }
   .hud { left: 12px; right: 12px; bottom: 12px; padding: 10px 12px; }
   .narrator { flex-basis: 100%; min-height: 112px; }
   .say { font-size: 17px; }
-  /* the floor plan sits left of the buttons, which go three across */
-  .plan { flex-basis: 104px; }
-  .has-plan .inv { flex: 1 1 0; min-width: 0; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* the floor plan becomes a strip across the menu, its three rooms in a row, over the buttons */
+  .plan { flex-basis: 100%; min-height: 40px; }
+  .has-plan .inv { flex-basis: 100%; }
+  .has-plan .narrator { min-height: 92px; }
   /* An open panel gets the whole lower screen; it has its own way back. */
   .panel-open .hud { display: none; }
   .panel-open .panel { bottom: 12px; }
