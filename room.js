@@ -829,7 +829,7 @@ function makeBedroom(mode) {
   // wherever the row dips
   var spine = function (bc, x0, y0) { if (r() < 0.6) put(x0, y0, bc === BK[5] || bc === BK[10] ? [60, 60, 60] : C.goldL); };
   var flat = function (x0, y0, w) { var bc = BK[Math.floor(r() * BK.length)]; rect(x0, y0, w, 2, bc); put(x0 + 1 + Math.floor(r() * (w - 2)), y0, bc === BK[5] || bc === BK[10] ? [60, 60, 60] : C.goldL); };
-  function books(base, room, stackLeft) {
+  function books(base, room, stackLeft, noStack) {
     var x0 = 107, x1 = 143, sw = 9, vx0 = stackLeft ? x0 + sw : x0, vx1 = stackLeft ? x1 : x1 - sw, xx = vx0, hs = [];
     while (xx < vx1) {
       var w = Math.min(vx1 - xx, 2 + Math.floor(r() * 2)), h = room - 5 + Math.floor(r() * 5), bc = BK[Math.floor(r() * BK.length)];
@@ -840,14 +840,19 @@ function makeBedroom(mode) {
     }
     // the flat stack fills its end of the shelf nearly to the shelf above
     var sx = stackLeft ? x0 : x1 - sw, sy = base;
-    while (base - sy + 2 <= room - 2) { var ww = sw - Math.floor(r() * 2); sy -= 2; flat(sx + (stackLeft ? 0 : sw - ww), sy, ww); }
+    while (!noStack && base - sy + 2 <= room - 2) { var ww = sw - Math.floor(r() * 2); sy -= 2; flat(sx + (stackLeft ? 0 : sw - ww), sy, ww); }
     // books laid across the tops of shorter runs
     for (var i = 0; i + 8 <= hs.length; i += 9 + Math.floor(r() * 5)) {
       var mh = 0; for (k = i; k < i + 8; k++) mh = Math.max(mh, hs[k][1]);
       for (var ty = base - mh - 2; ty >= base - room; ty -= 2) flat(hs[i][0], ty, 8);
     }
   }
-  books(48, 19, false);
+  books(48, 19, false, true);
+  // a Princeton crest on a walnut plaque at the end of the top shelf: orange shield, black chevron, white open book
+  rect(133, 33, 11, 15, WALD); rect(134, 34, 9, 13, WAL);
+  ["KKKKKKKKK", "KOWWOWWOK", "KWWWWWWWK", "KOOOOOOOK", "KOOOKOOOK", "KOOKOKOOK", "KOKOOOKOK", "KKOOOOOKK", ".KOOOOOK.", "..KOOOK..", "...KKK..."].forEach(function (row, ry) {
+    for (var k = 0; k < 9; k++) if (row[k] !== ".") put(134 + k, 35 + ry, row[k] === "O" ? [232, 119, 34] : (row[k] === "K" ? [24, 22, 22] : [244, 240, 228]));
+  });
   books(70, 18, true);
   books(92, 18, false);
   books(114, 18, true);
