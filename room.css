@@ -204,7 +204,7 @@ body { margin: 0; background: #1C251B; }
 /* At the door: two wide buttons over the same two rows, so the HUD keeps its height going in */
 .inv-hall { grid-column: 1 / -1; }
 /* Floor plan: the rooms as a little blueprint beside the menu, walls between them with doorways cut
-   through toward the front, a window in each room's back wall where it is in the scene, and the front door (with
+   through toward the front, a window in the far wall of each room (the one its scene faces) where it is in the scene, and the front door (with
    its swing) in the living room's bottom wall. Kitchen, living room, bedroom, left to right; the
    room you're in is outlined in gold. */
 .plan { position: relative; flex: 0 0 172px; min-height: 86px; display: flex; gap: 3px; background: #0E120D; border: 3px solid #0E120D; box-shadow: 0 0 0 2px var(--hudLine); }
@@ -222,7 +222,11 @@ body { margin: 0; background: #1C251B; }
 .plan-door-front { position: absolute; bottom: -3px; left: calc(50% - 6px); width: 12px; height: 3px; background: var(--gold); pointer-events: none; }
 .plan-swing { position: absolute; bottom: 0; left: calc(50% - 6px); width: 11px; height: 11px; border-top: 1px dotted var(--gold); border-right: 1px solid var(--gold); border-top-right-radius: 11px; pointer-events: none; }
 /* windows: glass in the wall, pale blue with a sash line */
-.plan-win { position: absolute; top: -3px; height: 3px; background: linear-gradient(180deg, #EAF6FA 0 1px, #8EC3D6 1px 2px, #EAF6FA 2px); pointer-events: none; }
+.plan-win { position: absolute; pointer-events: none; }
+.plan-win-top { top: -3px; height: 3px; background: linear-gradient(180deg, #EAF6FA 0 1px, #8EC3D6 1px 2px, #EAF6FA 2px); }
+.plan-win-left, .plan-win-right { width: 3px; background: linear-gradient(90deg, #EAF6FA 0 1px, #8EC3D6 1px 2px, #EAF6FA 2px); }
+.plan-win-left { left: -3px; }
+.plan-win-right { right: -3px; }
 .plan-room.on { box-shadow: inset 0 0 0 2px var(--gold); }
 .plan-room.on .plan-label { background: var(--gold); color: #1D251C; }
 @media (hover: hover) { .plan-room:not(.on):hover { filter: brightness(1.18); } }

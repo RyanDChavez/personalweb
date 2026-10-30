@@ -1792,14 +1792,18 @@ function Room(root) {
   this.tabEls = [];
   var plan = el("nav", "plan");
   plan.setAttribute("aria-label", "Floor plan");
-  // Each room's window sits in its top wall where it is in the scene (the scenes all face that wall): [left, width]
-  // as a share of the room's width.
-  [["kitchen", "Kitchen", [46, 19]], ["room", "Living room", [4, 27]], ["bedroom", "Bedroom", [64, 21]]].forEach(function (d) {
+  // Each scene faces the way you walk in: the living room from the front door, so its far wall is the top one; the
+  // bedroom through the doorway on the right, so its far wall is its right one; the kitchen through the doorway on the
+  // left, so its left one. Each room's window sits in that far wall where it is in the scene: [wall, start, length]
+  // as a share of the wall, with the scene's left edge at the start (top for the bedroom, bottom for the kitchen).
+  [["kitchen", "Kitchen", ["left", 35, 19]], ["room", "Living room", ["top", 4, 27]], ["bedroom", "Bedroom", ["right", 64, 21]]].forEach(function (d) {
     var b = el("button", "plan-room plan-" + (d[0] === "room" ? "living" : d[0])), win = el("span", "plan-win");
     b.type = "button";
     b.appendChild(el("span", "plan-label", d[1]));
     win.setAttribute("aria-hidden", "true");
-    win.style.left = d[2][0] + "%"; win.style.width = d[2][1] + "%";
+    win.className = "plan-win plan-win-" + d[2][0];
+    if (d[2][0] === "top") { win.style.left = d[2][1] + "%"; win.style.width = d[2][2] + "%"; }
+    else { win.style.top = d[2][1] + "%"; win.style.height = d[2][2] + "%"; }
     b.appendChild(win);
     b.addEventListener("click", function () { if (self.state.scene === d[0]) self.back(); else self.goTo(d[0]); });
     plan.appendChild(b);
