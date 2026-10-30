@@ -382,9 +382,14 @@ function drawClock(put, setCur, now, still) {
   setCur(0);
 }
 
-function drawFront(put, setCur, rdxOpen) {
-  var x, y, i;
+// fx: the chair's spin (cos of its turn, 1 when still), the plant's stage (0 fine, 1-2 watered, 3-4 drooping, 5 dead)
+// and the watering can's pour (0..1, or -1).
+function drawFront(put, setCur, rdxOpen, fx) {
+  var x, y, i, flat = put;
   function rect(rx, ry, w, h, c) { for (var j = ry; j < ry + h; j++) for (var k = rx; k < rx + w; k++) put(k, j, c); }
+  // a spinning chair: the seat and back squash around the swivel as they turn, darker while their back is to you
+  var turn = fx.chair;
+  if (turn !== 1) put = function (px, py, c) { if (py >= 138) return flat(px, py, c); flat(238 + (px - 238) * turn, py, turn < 0 ? [c[0] * 0.72, c[1] * 0.72, c[2] * 0.72] : c); };
   setCur(OBJ.chair);
   // tufted orange corduroy swivel lounge chair on a chrome star base
   var OR = [214, 104, 40], ORL = [238, 140, 70], ORD = [168, 72, 28], ORX = [128, 52, 22];
@@ -418,6 +423,7 @@ function drawFront(put, setCur, rdxOpen) {
     for (var k = 0; k <= n; k++) { var t2 = k / n; put(238 + leg[0] * t2, 143 + leg[1] * t2, CH); put(238 + leg[0] * t2, 144 + leg[1] * t2, CHD); }
     put(238 + leg[0], 144 + leg[1], C.black);
   });
+  put = flat;
   setCur(0);
   // phone stand: a small midcentury chest in acacia, with an open cubby, two drawers
   // with dark knobs, and splayed tapered legs
@@ -511,14 +517,24 @@ function drawFront(put, setCur, rdxOpen) {
   }
   rect(1, 144, 22, 2, POTL); rect(1, 146, 22, 1, POTD);
   rect(4, 170, 2, 6, C.black); rect(18, 170, 2, 6, C.black);
-  // sword leaves: dark green with lighter cross-bands and a yellow edge, tapering to a point
-  var LEAF = [40, 74, 48], BAND = [86, 124, 78], EDGE = [214, 198, 92];
+  // soil: darker once it's been watered
+  rect(3, 143, 18, 1, fx.plant > 0 ? [50, 36, 26] : [96, 72, 48]);
+  // sword leaves: dark green with lighter cross-bands and a yellow edge, tapering to a point. Overwatered, they yellow
+  // and bend out until the tips flop; drowned, they're brown and lying over the rim.
+  var st = fx.plant, droop = st >= 5 ? 1.7 : (st >= 3 ? (st - 2) * 0.5 : 0);
+  var sick = st >= 5 ? [118, 84, 44] : [168, 150, 64], amt = st >= 5 ? 0.9 : (st === 4 ? 0.55 : (st === 3 ? 0.3 : 0));
+  var tint = function (c) { return amt ? mix(c, sick, amt) : c; };
+  var LEAF = tint([40, 74, 48]), BAND = tint([86, 124, 78]), EDGE = tint([214, 198, 92]);
   [[6, 30, -4], [17, 28, 4], [9, 40, -2], [14, 36, 2], [12, 46, 0]].forEach(function (bl, n) {
+    var side = bl[2] ? (bl[2] < 0 ? -1 : 1) : -1;
     for (var j = 0; j < bl[1]; j++) {
-      var lx = bl[0] + Math.round(bl[2] * j / bl[1]), w = j < bl[1] * 0.7 ? 3 : (j < bl[1] * 0.9 ? 2 : 1);
-      for (var k = 0; k < w; k++) put(lx + k - 1, 143 - j, w > 1 && k === w - 1 ? EDGE : ((j + n * 2) % 6 < 2 ? BAND : LEAF));
+      var f = j / bl[1], lx = bl[0] + Math.round(bl[2] * f + side * droop * f * f * bl[1] * 0.6), ly = 143 - Math.round(j * (1 - droop * 0.45 * f));
+      var w = j < bl[1] * 0.7 ? 3 : (j < bl[1] * 0.9 ? 2 : 1);
+      for (var k = 0; k < w; k++) put(lx + k - 1, ly, w > 1 && k === w - 1 ? EDGE : ((j + n * 2) % 6 < 2 ? BAND : LEAF));
     }
   });
+  // the watering can's pour: a few drops falling onto the soil
+  if (fx.pour >= 0) for (var d = 0; d < 5; d++) { var dy = 112 + ((fx.pour * 3 + d / 5) % 1) * 31; put(9 + (d * 3) % 7, dy, [140, 196, 236]); put(9 + (d * 3) % 7, dy + 1, [96, 160, 214]); }
   setCur(0);
 }
 
@@ -2072,8 +2088,40 @@ Room.prototype.say = function (text) {
   }, 24);
 };
 
+// The snake plant remembers how much it's been watered today (per visitor, until local midnight).
+function today() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+Room.prototype.plantStage = function () {
+  if (!this.plant) { var v = null; try { v = JSON.parse(localStorage.getItem("plant")); } catch (e) {} this.plant = v && v.day === today() ? v : { day: today(), n: 0 }; }
+  if (this.plant.day !== today()) this.plant = { day: today(), n: 0 };
+  return Math.min(5, this.plant.n);
+};
+var PLANT_LINES = ["You water the snake plant.", "You water it again. The soil's soaked.", "The leaves are starting to droop. Snake plants like to be ignored.",
+  "The leaves are going yellow and flopping over.", "You drowned the snake plant."];
+var SPIN_LINES = ["You sit in the swivel chair and give it a spin.", "You spin again.", "You're dizzy."];
+
 Room.prototype.act = function (id) {
-  var night = this.mode() === "dark";
+  var night = this.mode() === "dark", self = this;
+  if (id === "plant") {
+    var stage = this.plantStage();
+    if (stage >= 5) { this.setState({ zone: ZONE_FOR.plant, open: null, focusId: id }); this.say("The snake plant is dead. Ryan will get a new one tomorrow."); return; }
+    this.plant.n++;
+    try { localStorage.setItem("plant", JSON.stringify(this.plant)); } catch (e) {}
+    if (!reducedMotion()) this.watering = { t0: performance.now() };
+    this.setState({ zone: ZONE_FOR.plant, open: null, focusId: id });
+    this.say(PLANT_LINES[this.plant.n - 1]);
+    this.kick();
+    return;
+  }
+  if (id === "chair") {
+    var nowS = performance.now();
+    this.spins = this.lastSpin && nowS - this.lastSpin < 12000 ? this.spins + 1 : 0;
+    this.lastSpin = nowS;
+    if (!reducedMotion()) this.spin = { t0: nowS };
+    this.setState({ zone: ZONE_FOR.chair, open: null, focusId: id });
+    this.say(SPIN_LINES[Math.min(2, this.spins)]);
+    this.kick();
+    return;
+  }
   if (id === "lamp" || id === "blamp" || id === "nlamp" || id === "klights") {
     var next = night ? "light" : "dark", which = id === "blamp" ? "the banker's lamp" : (id === "nlamp" ? "the bedside lamp" : (id === "klights" ? "the string lights" : "the lamp"));
     storeMode(next);
@@ -2090,8 +2138,6 @@ Room.prototype.act = function (id) {
     clock: "The clock says " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ". It's right.",
     record: "You put a record on.",
     portrait: "A poster of Ryan.",
-    chair: "You sit in the swivel chair and spin around once.",
-    plant: "You water the snake plant.",
     shelf: "The bookshelf appears to be a kind of archive of Ryan's life.",
     radio: "The receiver's broken. It won't turn on.",
     contact: "You open the Rolodex to Ryan's card.",
@@ -2282,8 +2328,9 @@ Room.prototype.frame = function () {
     var key = px == null ? null : px + ":" + planeBlink();
     if (key !== this.planeKey) { this.planeKey = key; this.planeX = px; if (this.state.scene === "room") this.dirty = true; }
   }
+  if (this.spin || this.watering) this.dirty = true;
   if (this.dirty) { this.dirty = false; this.paint(); }
-  if (this.fluffing || this.plane || this.door) this.tick();
+  if (this.fluffing || this.plane || this.door || this.spin || this.watering) this.tick();
 };
 
 // Every so often a plane crosses the window, heading southwest and down toward Newark.
@@ -2458,7 +2505,11 @@ Room.prototype.roomImage = function (hv) {
   var still = reducedMotion();
   drawClock(put, setCur, new Date(), still);
   this.watchClock(still);
-  drawFront(put, setCur, this.state.open === "contact");
+  var now = performance.now(), sp = this.spin, wt = this.watering;
+  var chair = 1, pour = -1;
+  if (sp) { var pp = Math.min(1, (now - sp.t0) / 1500); chair = Math.cos(Math.PI * 2 * 3 * (1 - Math.pow(1 - pp, 3))); if (pp >= 1) { this.spin = null; chair = 1; } }
+  if (wt) { pour = (now - wt.t0) / 1100; if (pour >= 1) { this.watering = null; pour = -1; } }
+  drawFront(put, setCur, this.state.open === "contact", { chair: Math.round(chair * 12) / 12 || 0.08, plant: this.plantStage(), pour: pour });
   return composite(col, emis, obj, this.light, hv, B.img);
 };
 
