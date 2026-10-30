@@ -1404,13 +1404,13 @@ function storeMode(m) { try { sessionStorage.setItem(THEME_KEY, m); } catch (e) 
 var HALL_INTRO = "You're at Ryan's front door.";
 var BEDROOM_INTRO = "Ryan's bedroom. Have a look around."; // placeholder copy
 
-// Unreleased rooms sit behind this flag. Try them on the live site with ?apartment=1 (sticks for the tab; ?apartment=0
-// turns it off). Release by setting apartment to true.
-var FLAGS = { apartment: false };
+// The bedroom and the walk between rooms, released. ?apartment=0 hides them again for the tab (?apartment=1 brings
+// them back).
+var FLAGS = { apartment: true };
 try {
   var flagParam = /[?&]apartment=([01])/.exec(location.search);
-  if (flagParam) { if (flagParam[1] === "1") sessionStorage.setItem("flag-apartment", "1"); else sessionStorage.removeItem("flag-apartment"); }
-  if (sessionStorage.getItem("flag-apartment") === "1") FLAGS.apartment = true;
+  if (flagParam) { if (flagParam[1] === "0") sessionStorage.setItem("flag-apartment", "0"); else sessionStorage.removeItem("flag-apartment"); }
+  if (sessionStorage.getItem("flag-apartment") === "0") FLAGS.apartment = false;
 } catch (e) {}
 function entered() { try { return sessionStorage.getItem("entered") === "1"; } catch (e) { return false; } }
 
