@@ -776,7 +776,7 @@ function Room(root) {
   // HUD inventory: the accessible / mobile way around the room.
   this.invEls = [];
   var inv = $("inv");
-  [["shelf", "Books"], ["radio", "Radio"], ["contact", "Contact"], ["window", "Window"], ["chair", "Chair"], ["lamp", "Lamp"], ["fluff", "Fluff rug"], ["room", "Room"]].forEach(function (d) {
+  [["shelf", "About me"], ["radio", "Radio"], ["contact", "Contact"], ["window", "Window"], ["chair", "Chair"], ["lamp", "Lamp"], ["fluff", "Fluff rug"], ["room", "Room"]].forEach(function (d) {
     var b = el("button", "pbtn inv-btn", d[1]);
     b.type = "button";
     b.addEventListener("click", d[0] === "fluff" ? self.fluff : (d[0] === "room" ? self.back : function () { self.act(d[0]); }));
