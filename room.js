@@ -1785,20 +1785,24 @@ function Room(root) {
   // HUD inventory: the accessible / mobile way around the room.
   this.invEls = [];
   var inv = $("inv");
-  // Rooms in the apartment (behind the flag): a tab row at the top of the menu.
+  // Getting around the apartment (behind the flag): a little floor plan beside the menu. The living room runs across
+  // the bottom with the front door; the bedroom and the kitchen are through doorways above it. Tap a room to go.
   this.tabEls = [];
   if (FLAGS.apartment) {
-    var tabs = el("div", "room-tabs");
-    tabs.setAttribute("role", "group"); tabs.setAttribute("aria-label", "Rooms");
-    [["room", "Living room"], ["bedroom", "Bedroom"]].concat(FLAGS.kitchen ? [["kitchen", "Kitchen"]] : []).forEach(function (d) {
-      var b = el("button", "pbtn room-tab", d[1]);
+    var plan = el("nav", "plan" + (FLAGS.kitchen ? "" : " plan-two"));
+    plan.setAttribute("aria-label", "Floor plan");
+    [["bedroom", "Bedroom"]].concat(FLAGS.kitchen ? [["kitchen", "Kitchen"]] : []).concat([["room", "Living room"]]).forEach(function (d) {
+      var b = el("button", "plan-room plan-" + (d[0] === "room" ? "living" : d[0]));
       b.type = "button";
+      b.appendChild(el("span", null, d[1]));
       b.addEventListener("click", function () { self.goTo(d[0]); });
-      tabs.appendChild(b);
+      plan.appendChild(b);
       self.tabEls.push({ scene: d[0], el: b });
     });
-    inv.appendChild(tabs);
-    this.tabsEl = tabs;
+    ["bedroom", "kitchen", "front"].forEach(function (k) { if (k !== "kitchen" || FLAGS.kitchen) { var dr = el("span", "plan-door plan-door-" + k); dr.setAttribute("aria-hidden", "true"); plan.appendChild(dr); } });
+    inv.parentNode.insertBefore(plan, inv);
+    this.tabsEl = plan;
+    root.classList.add("has-plan");
   }
   var addInv = function (scene, id, label, onClick, cls) {
     var b = el("button", "pbtn inv-btn" + (cls ? " " + cls : ""), label);
