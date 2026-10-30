@@ -4,21 +4,17 @@
 var SW = 320, SH = 180, FLOOR = 128, CELL = 3;
 
 var TOKENS = {
-  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", dial: "#E9DDB8", invBg: "#2A3829", invOn: "#E2BF5E", hallWall: "#D6CDB4", hallFloor: "#BDBBB3" },
-  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", dial: "#F2C46B", invBg: "#141A14", invOn: "#E2BF5E", hallWall: "#5E594F", hallFloor: "#3A3936" }
+  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", dial: "#E9DDB8", invBg: "#2A3829", invOn: "#E2BF5E", hallWall: "#D6CDB4", hallFloor: "#BDBBB3", themeColor: "#1D251C" },
+  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", dial: "#F2C46B", invBg: "#141A14", invOn: "#E2BF5E", hallWall: "#5E594F", hallFloor: "#3A3936", themeColor: "#0A0E0A" }
 };
 
 var C = {
   wall: [206, 214, 190], fleck: [196, 205, 180],
   slatA: [138, 90, 52], slatB: [122, 78, 44], slatGap: [70, 42, 22],
   teak: [138, 90, 52], teakD: [94, 58, 30], teakL: [176, 124, 76],
-  gold: [201, 166, 70], goldL: [226, 196, 110], mat: [232, 226, 206], cream: [233, 221, 184],
-  sage: [94, 122, 88], deep: [31, 42, 30], black: [26, 28, 24],
-  metal: [176, 170, 150], metalD: [110, 106, 94], rust: [181, 67, 42],
-  leather: [44, 60, 42], leatherL: [74, 98, 68], leatherD: [30, 40, 29],
-  leafA: [74, 106, 82], leafB: [134, 173, 140], pot: [51, 66, 50], rug: [22, 30, 21]
+  gold: [201, 166, 70], goldL: [226, 196, 110], mat: [232, 226, 206], black: [26, 28, 24],
+  metal: [176, 170, 150], metalD: [110, 106, 94], rust: [181, 67, 42], rug: [22, 30, 21]
 };
-var BOOKC = [[51, 66, 50], [201, 166, 70], [138, 90, 52], [74, 106, 82], [154, 78, 42], [233, 221, 184], [31, 42, 30], [62, 38, 20]];
 var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122, 88], [155, 181, 143]], [[51, 51, 28], [110, 106, 52], [176, 168, 92]], [[36, 51, 40], [74, 106, 82], [134, 173, 140]]];
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
@@ -698,6 +694,8 @@ var THEME_KEY = "theme";
 
 // Evening if the browser is in dark mode; otherwise follow the visitor's clock (evening 6pm-6am).
 // Flipping the lamp sticks for this visit only, so the next visit starts from these defaults again.
+function reducedMotion() { return !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
+
 function storedMode() {
   try { localStorage.removeItem(THEME_KEY); } catch (e) {} // the old site kept this for good
   try { var m = sessionStorage.getItem(THEME_KEY); if (m === "light" || m === "dark") return m; } catch (e) {}
@@ -725,10 +723,11 @@ function Room(root) {
   var $ = function (id) { return root.querySelector("#" + id); };
   // Start at the front door once per visit; later loads in the same tab go straight in.
   var mode = storedMode(), scene = entered() ? "room" : "hall", intro = scene === "hall" ? HALL_INTRO : introFor(mode);
-  this.state = { scene: scene, mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, book: -1, station: "now", vw: 1440, vh: 900 };
+  this.state = { scene: scene, mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, sayN: 0, focusId: null, book: -1, station: "now", vw: 1440, vh: 900 };
   this.raf = 0; this.tw = 0; this.last = null;
   this.fluffing = false; this.builtFor = null; this.brushed = false; this.paintedHover = null;
   this.renderedMode = null; this.renderedCam = null;
+  this.buf = { col: new Uint8ClampedArray(SW * SH * 3), emis: new Uint8Array(SW * SH), obj: new Uint8Array(SW * SH), img: new ImageData(SW, SH) };
 
   var r = rng(4242);
   this.strands = [];
@@ -751,7 +750,18 @@ function Room(root) {
     themeColor: document.querySelector('meta[name="theme-color"]')
   };
 
-  this.back = function () { self.setState({ open: null, zone: null }); self.say("You step back."); };
+  this.back = function () {
+    if (!self.state.zone && !self.state.open) return;
+    var opened = self.state.open, panel = opened && self.dom.panels[opened];
+    var hadFocus = panel && panel.contains(document.activeElement);
+    self.setState({ open: null, zone: null, focusId: null });
+    self.say("You step back.");
+    // Keyboard users go back to whatever opened the panel (or that object's hotspot if it's gone).
+    if (hadFocus && self.kbd) {
+      var to = self.opener && self.opener.offsetParent ? self.opener : self.hotEls[opened];
+      if (to) to.focus({ preventScroll: true });
+    }
+  };
   this.fluff = function () { self.fluffing = true; self.kick(); self.say("You fluff the shag rug."); };
 
   // Hotspots: real buttons over each object, positioned in scene percentages.
@@ -860,6 +870,10 @@ function Room(root) {
   this.canvas.addEventListener("pointermove", function (e) { self.brush(e); });
   this.canvas.addEventListener("pointerleave", function () { self.last = null; });
   this.canvas.addEventListener("pointerup", function () { self.last = null; });
+  this.canvas.addEventListener("pointercancel", function () { self.last = null; });
+  // Remember whether the visitor is on the keyboard, for focus handling around panels.
+  document.addEventListener("keydown", function () { self.kbd = true; }, true);
+  document.addEventListener("pointerdown", function () { self.kbd = false; }, true);
 
   // A mouse click or tap shouldn't leave a button focused: a later key press (like Esc) would make the browser
   // draw its keyboard focus ring around it. Keyboard presses (detail 0) keep focus where it is.
@@ -910,14 +924,17 @@ Room.prototype.setState = function (patch) {
 };
 
 Room.prototype.say = function (text) {
-  var self = this;
+  var self = this, d = this.dom, instant = reducedMotion();
   clearInterval(this.tw);
-  this.setState({ say: text, n: 0 });
+  this.setState({ say: text, n: instant ? text.length : 0, sayN: this.state.sayN + 1 });
+  if (instant) return;
+  // Typing touches only the narrator line, not the rest of the page.
   this.tw = setInterval(function () {
-    self.setState(function (s) {
-      if (s.n >= s.say.length) { clearInterval(self.tw); return null; }
-      return { n: Math.min(s.say.length, s.n + 2) };
-    });
+    var s = self.state;
+    s.n = Math.min(s.say.length, s.n + 2);
+    setText(d.shown, s.say.slice(0, s.n));
+    setText(d.caret, s.n < s.say.length ? "▌" : "");
+    if (s.n >= s.say.length) clearInterval(self.tw);
   }, 24);
 };
 
@@ -945,8 +962,13 @@ Room.prototype.act = function (id) {
     radio: "The receiver's broken. It won't turn on.",
     contact: "You open the Rolodex to Ryan's card."
   };
-  this.setState({ zone: ZONE_FOR[id] || null, open: PANELS[id] ? id : null });
+  var opener = document.activeElement;
+  this.setState({ zone: ZONE_FOR[id] || null, open: PANELS[id] ? id : null, focusId: id });
   this.say(lines[id]);
+  if (PANELS[id]) {
+    this.opener = opener;
+    if (this.kbd) this.dom.panels[id].focus({ preventScroll: true });
+  }
 };
 
 // Ring or open: the door swings in, the camera walks through the doorway, and the room takes over.
@@ -956,12 +978,12 @@ Room.prototype.enter = function (viaBell) {
   this.entering = true;
   try { sessionStorage.setItem("entered", "1"); } catch (e) {}
   this.setState({ hover: null });
-  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (reducedMotion()) {
     this.setState({ scene: "room", zone: null }); this.say(introFor(this.mode())); this.entering = false;
     return;
   }
   this.say(viaBell ? "Ding-dong. The door swings open." : "You open the door.");
-  this.peek = this.roomImage(0).data;
+  this.peek = new Uint8ClampedArray(this.roomImage(0).data);
   setTimeout(function () { self.door = { t0: performance.now() }; self.tick(); }, viaBell ? 700 : 150);
 };
 
@@ -1012,7 +1034,7 @@ Room.prototype.frame = function () {
 // Every so often a plane crosses the window, heading southwest and down toward Newark.
 Room.prototype.schedulePlane = function (first) {
   var self = this;
-  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (reducedMotion()) return;
   clearTimeout(this.planeTimer);
   this.planeTimer = setTimeout(function () {
     if (document.hidden) { self.schedulePlane(); return; }
@@ -1057,15 +1079,18 @@ Room.prototype.paint = function () {
 Room.prototype.hallImage = function (hv) {
   var mode = this.mode();
   if (this.hallFor !== mode) { this.hall = makeHall(mode); this.hallLight = makeHallLight(mode); this.hallFor = mode; }
-  var h = this.hall, col = new Uint8ClampedArray(h.col), emis = new Uint8Array(h.emis), obj = new Uint8Array(h.obj);
+  var h = this.hall, B = this.buf, col = B.col, emis = B.emis, obj = B.obj;
+  col.set(h.col); emis.set(h.emis); obj.set(h.obj);
   drawDoor(h, col, emis, obj, this.doorP || 0, this.peek);
-  return composite(col, emis, obj, this.hallLight, hv);
+  return composite(col, emis, obj, this.hallLight, hv, B.img);
 };
 
 Room.prototype.roomImage = function (hv) {
   var mode = this.mode();
   if (this.builtFor !== mode) { this.scene = makeScene(mode); this.light = makeLight(mode); this.builtFor = mode; }
-  var col = new Uint8ClampedArray(this.scene.col), emis = new Uint8Array(this.scene.emis), obj = new Uint8Array(this.scene.obj);
+  // Draw into scratch buffers kept on the room, so painting doesn't allocate every frame.
+  var B = this.buf, col = B.col, emis = B.emis, obj = B.obj;
+  col.set(this.scene.col); emis.set(this.scene.emis); obj.set(this.scene.obj);
   var cur = 0;
   var put = function (x, y, c) { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= SW || y >= SH) return; var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 0; obj[i] = cur; };
   var setCur = function (v) { cur = v; };
@@ -1085,12 +1110,12 @@ Room.prototype.roomImage = function (hv) {
   }
   if (this.planeX != null) drawPlane(this.planeX, mode === "dark", col, emis, obj);
   drawFront(put, setCur, this.state.open === "contact");
-  return composite(col, emis, obj, this.light, hv);
+  return composite(col, emis, obj, this.light, hv, B.img);
 };
 
 // Light the color buffer, then highlight and outline the hovered object.
-function composite(col, emis, obj, L, hv) {
-  var img = new ImageData(SW, SH), out = img.data;
+function composite(col, emis, obj, L, hv, img) {
+  var out = img.data;
   for (var i = 0; i < SW * SH; i++) {
     var o = i * 4, p = i * 3;
     if (emis[i]) { out[o] = col[p]; out[o + 1] = col[p + 1]; out[o + 2] = col[p + 2]; }
@@ -1160,8 +1185,7 @@ Room.prototype.render = function () {
 
   if (this.renderedMode !== mode) {
     for (var k in t) this.stage.style.setProperty("--" + k, t[k]);
-    document.documentElement.setAttribute("data-theme", mode);
-    if (d.themeColor) d.themeColor.setAttribute("content", mode === "dark" ? "#0A0E0A" : "#1D251C");
+    if (d.themeColor) d.themeColor.setAttribute("content", t.themeColor);
     this.renderedMode = mode;
   }
 
@@ -1187,11 +1211,12 @@ Room.prototype.render = function () {
     : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · click Room to step back" : "Walk around the room")));
   setText(d.shown, s.say.slice(0, s.n));
   setText(d.caret, s.n < s.say.length ? "▌" : "");
-  setText(d.live, s.say);
+  // A trailing no-break space on alternate lines makes a repeated line still count as new for screen readers.
+  setText(d.live, s.say + (s.sayN % 2 ? "\u00A0" : ""));
 
   this.invEls.forEach(function (v) {
     v.el.hidden = !!v.hall !== hall;
-    var on = (open && open === v.id) || (!open && s.zone && v.id === "window" && s.zone === "window") || (v.id === "room" && !s.zone);
+    var on = (v.id === "room" && !s.zone) || (!!s.zone && s.focusId === v.id);
     if (v.id === "lamp") setText(v.el, mode === "dark" ? "Lamp off" : "Lamp on");
     v.el.classList.toggle("on", !!on);
   });
@@ -1211,12 +1236,20 @@ Room.prototype.render = function () {
   setText(d.bookNext, s.book < 0 ? "Start →" : (last ? "Next?" : "Next →"));
   if (last) setAttr(d.bookNext, "aria-label", "Next? Open the Rolodex"); else d.bookNext.removeAttribute("aria-label");
 
+  if (!PANELS.radio) return; // the receiver's panel is parked; skip updating it
   var st = STATIONS[s.station];
   for (var key in this.stationEls) setAttr(this.stationEls[key], "aria-pressed", s.station === key ? "true" : "false");
   d.needle.style.left = st.needle + "%";
   setText(d.kicker, st.kicker); setText(d.title, st.title); setText(d.text, st.text);
 };
 
-var stage = document.getElementById("stage");
-if (stage && document.getElementById("room").getContext) new Room(stage);
+// If the room can't start, drop the "js" class so the plain text version shows instead.
+var stage = document.getElementById("stage"), roomCanvas = document.getElementById("room");
+try {
+  if (!stage || !roomCanvas.getContext || !roomCanvas.getContext("2d")) throw new Error("No canvas support");
+  new Room(stage);
+} catch (e) {
+  document.documentElement.classList.remove("js");
+  if (window.console) console.error(e);
+}
 })();
