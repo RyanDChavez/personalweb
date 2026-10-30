@@ -4,8 +4,8 @@
 var SW = 320, SH = 180, FLOOR = 128, CELL = 3;
 
 var TOKENS = {
-  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", dial: "#E9DDB8", invBg: "#2A3829", invOn: "#E2BF5E", hallWall: "#D6CDB4", hallFloor: "#BDBBB3", themeColor: "#1D251C" },
-  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", dial: "#F2C46B", invBg: "#141A14", invOn: "#E2BF5E", hallWall: "#5E594F", hallFloor: "#3A3936", themeColor: "#0A0E0A" }
+  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", dial: "#E9DDB8", invBg: "#2A3829", invOn: "#E2BF5E", hallWall: "#D6CDB4", hallFloor: "#BDBBB3", bedWall: "#AEBBC1", bedFloor: "#9C7048", themeColor: "#1D251C" },
+  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", dial: "#F2C46B", invBg: "#141A14", invOn: "#E2BF5E", hallWall: "#5E594F", hallFloor: "#3A3936", bedWall: "#353C40", bedFloor: "#2E241C", themeColor: "#0A0E0A" }
 };
 
 var C = {
@@ -19,7 +19,7 @@ var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122,
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
 // Object ids painted into the scene, used for in-scene highlights.
-var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13 };
+var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19 };
 
 function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
@@ -627,6 +627,169 @@ function drawDoor(h, col, emis, obj, p, peek) {
   }
 }
 
+// ---- the bedroom (behind the apartment flag): window across the street, ladder bookshelf, mid-century desk with a
+// green banker's lamp, wooden desk chair, and a black Fender Jazz Bass on its stand ----
+var BFLOOR = 132;
+
+function makeBedroom(mode) {
+  var col = new Uint8ClampedArray(SW * SH * 3), emis = new Uint8Array(SW * SH), obj = new Uint8Array(SW * SH), cur = 0;
+  function put(x, y, c, e) { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= SW || y >= SH) return; var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = e ? 1 : 0; obj[i] = cur; }
+  function rect(x, y, w, h, c, e) { for (var j = y; j < y + h; j++) for (var i = x; i < x + w; i++) put(i, j, c, e); }
+  function ellipse(cx, cy, rx, ry, fn) { for (var y = -ry; y <= ry; y++) for (var x = -rx; x <= rx; x++) if (x * x / (rx * rx) + y * y / (ry * ry) <= 1) fn(cx + x, cy + y, x, y); }
+  var night = mode === "dark", x, y, i, r = rng(night ? 23 : 17);
+
+  // dusty blue plaster, wood crown, white baseboard, oak plank floor
+  for (y = 0; y < BFLOOR; y++) for (x = 0; x < SW; x++) put(x, y, (x * 5 + y * 7) % 13 === 0 ? [168, 181, 188] : [178, 190, 196]);
+  rect(0, 0, SW, 3, C.teakD); rect(0, 3, SW, 1, C.teak);
+  rect(0, BFLOOR - 5, SW, 4, [236, 230, 212]); rect(0, BFLOOR - 1, SW, 1, [184, 176, 154]);
+  var OAK = [176, 128, 82], OAKL = [196, 148, 98], OAKD = [148, 104, 64], SEAM = [112, 76, 44];
+  for (y = BFLOOR; y < SH; y++) {
+    var row = ((y - BFLOOR) / 4) | 0, ry = (y - BFLOOR) % 4;
+    for (x = 0; x < SW; x++) {
+      var off = (row * 37) % 60, plank = ((x + off) / 60) | 0, pxp = (x + off) % 60;
+      var c = ry === 3 || pxp === 0 ? SEAM : [OAKL, OAK, OAKD][(plank + row) % 3];
+      if (ry !== 3 && pxp !== 0 && (x * 7 + y * 13) % 29 === 0) c = OAKD;
+      put(x, y, c);
+    }
+  }
+
+  // window: across the street, a brick building (room at the bottom for the car later)
+  cur = OBJ.bwindow;
+  rect(16, 20, 72, 78, C.teak);
+  var GX0 = 19, GX1 = 85, GY0 = 23, GY1 = 95, ROOF = 38;
+  for (y = GY0; y < GY1; y++) for (x = GX0; x < GX1; x++) put(x, y, night ? mix([10, 14, 30], [36, 32, 54], (y - GY0) / 20) : mix([136, 182, 204], [214, 224, 214], Math.min(1, (y - GY0) / 20)), true);
+  var BR = night ? [52, 30, 28] : [156, 82, 60], BRD = night ? [40, 24, 22] : [130, 66, 48], MORT = night ? [62, 52, 50] : [196, 176, 160];
+  rect(GX0, ROOF - 2, GX1 - GX0, 2, night ? [40, 40, 44] : [112, 112, 114], true);
+  for (y = ROOF; y < GY1; y++) for (x = GX0; x < GX1; x++) {
+    var brow = ((y - ROOF) / 3) | 0, bo = brow % 2 ? 3 : 0;
+    put(x, y, (y - ROOF) % 3 === 2 || (x + bo) % 6 === 0 ? MORT : ((x * 3 + brow) % 7 === 0 ? BRD : BR), true);
+  }
+  for (var wy = ROOF + 5; wy < GY1 - 12; wy += 16) for (var wx = GX0 + 5; wx < GX1 - 8; wx += 14) {
+    var lit = night && r() < 0.55, TR = night ? [70, 64, 60] : [214, 206, 192];
+    rect(wx - 1, wy - 1, 9, 12, TR, true); rect(wx, wy, 7, 10, lit ? [244, 206, 128] : (night ? [20, 22, 30] : [80, 104, 118]), true); rect(wx, wy + 5, 7, 1, TR, true);
+  }
+  rect(51, GY0, 2, GY1 - GY0, C.teak);
+  rect(13, 98, 78, 3, C.teakL);
+
+  // ladder bookshelf, like the living room's but without the drawer cabinet: four shelves
+  cur = OBJ.bshelf;
+  var WAL = [132, 82, 44], WALL2 = [168, 112, 64], WALD = [88, 52, 26];
+  var BK = [[51, 66, 50], [201, 166, 70], [138, 90, 52], [74, 106, 82], [176, 60, 44], [233, 221, 184], [31, 42, 30], [62, 38, 20], [226, 196, 72], [70, 120, 140], [240, 236, 226], [150, 70, 96]];
+  function railL(yy) { return Math.round(104 - (yy - 28) * 0.04); }
+  function railR(yy) { return Math.round(146 + (yy - 28) * 0.04); }
+  function books(base, x0, x1, hmin, hmax) {
+    var xx = x0;
+    while (xx < x1) {
+      var w = 2 + Math.floor(r() * 2), h = hmin + Math.floor(r() * (hmax - hmin));
+      if (xx + w > x1) break;
+      var bc = BK[Math.floor(r() * BK.length)];
+      rect(xx, base - h, w, h, bc);
+      if (r() < 0.6) put(xx, base - h + 2 + Math.floor(r() * 3), bc === BK[5] || bc === BK[10] ? [60, 60, 60] : C.goldL);
+      xx += w + (r() < 0.05 ? 1 : 0);
+    }
+  }
+  books(48, 107, 128, 11, 17);
+  rect(130, 36, 12, 12, [30, 30, 32]); rect(131, 37, 10, 10, [200, 90, 60]); rect(134, 40, 4, 4, [240, 230, 200]);
+  books(70, 107, 143, 10, 16);
+  books(92, 107, 128, 11, 17);
+  rect(132, 86, 7, 6, [226, 216, 190]); rect(132, 86, 7, 1, [244, 238, 220]);
+  [[131, 85], [133, 84], [135, 83], [137, 84], [139, 85], [140, 87], [141, 89], [130, 87], [129, 89], [140, 91], [141, 93]].forEach(function (p, k) { put(p[0], p[1], k % 2 ? [92, 150, 80] : [62, 118, 60]); });
+  books(114, 107, 143, 10, 15);
+  for (y = 28; y < BFLOOR; y++) { var lx = railL(y), rx = railR(y); put(lx, y, WALL2); put(lx + 1, y, WAL); put(rx - 1, y, WAL); put(rx, y, WALD); }
+  [48, 70, 92, 114].forEach(function (sy) { for (x = railL(sy) + 2; x < railR(sy) - 1; x++) { put(x, sy, WALL2); put(x, sy + 1, WAL); put(x, sy + 2, WALD); } });
+
+  // mid-century walnut desk: thin top, two-drawer apron, splayed tapered legs
+  cur = OBJ.desk;
+  var DW = [154, 98, 54], DWL = [186, 128, 76], DWD = [108, 66, 34];
+  for (i = 0; i < 20; i++) { put(172, 107 + i, DWD); put(251, 107 + i, DWD); }
+  for (i = 0; i < 25; i++) {
+    var lo = (i / 6) | 0;
+    if (i < 22) { put(164 - lo, 107 + i, DWL); put(165 - lo, 107 + i, DW); put(258 + lo, 107 + i, DW); put(259 + lo, 107 + i, DWD); }
+    else { put(164 - lo, 107 + i, DW); put(259 + lo, 107 + i, DW); }
+  }
+  rect(160, 96, 104, 1, DWL); rect(160, 97, 104, 1, DW); rect(160, 98, 104, 1, DWD);
+  rect(162, 99, 100, 8, DW); rect(162, 106, 100, 1, DWD); rect(211, 100, 1, 6, DWD);
+  for (y = 100; y < 106; y++) for (x = 163; x < 261; x++) if (x !== 211 && (x * 7 + y * 3) % 13 === 0) put(x, y, [140, 88, 48]);
+  put(186, 102, [214, 180, 120]); put(236, 102, [214, 180, 120]); put(186, 103, [150, 112, 60]); put(236, 103, [150, 112, 60]);
+  // on the desk: a short stack of books, a notebook and a mug (the left half stays clear for a computer later)
+  [[166, 93, 12, 2, [176, 60, 44]], [167, 91, 10, 2, [70, 120, 140]], [166, 89, 11, 2, [233, 221, 184]]].forEach(function (b) { rect(b[0], b[1], b[2], b[3], b[4]); });
+  rect(200, 94, 14, 2, [240, 236, 226]); rect(200, 95, 14, 1, [200, 196, 186]); put(206, 94, [176, 60, 44]);
+  rect(220, 90, 5, 6, [226, 216, 190]); put(225, 92, [226, 216, 190]); put(226, 93, [226, 216, 190]); rect(221, 90, 3, 1, [90, 60, 40]);
+
+  // green banker's lamp: brass base and stem, green glass shade
+  cur = OBJ.blamp;
+  var BRS = [200, 160, 70], BRSL = [240, 210, 124], BRSD = [132, 98, 40];
+  var GRN = [30, 104, 66], GRNL = [84, 170, 116], GRND = [18, 66, 42];
+  rect(236, 93, 15, 3, BRS); rect(237, 93, 13, 1, BRSL); rect(236, 95, 15, 1, BRSD);
+  rect(243, 86, 2, 7, BRS); put(243, 86, BRSL);
+  rect(237, 80, 14, 1, GRND); rect(235, 81, 18, 1, GRN); rect(233, 82, 22, 4, GRN);
+  rect(236, 81, 6, 1, GRNL); rect(234, 82, 9, 1, GRNL); rect(234, 83, 4, 1, GRNL);
+  rect(233, 85, 22, 1, GRND); rect(233, 86, 22, 1, BRS);
+  rect(235, 87, 18, 1, night ? [255, 232, 170] : [214, 206, 180], night);
+  put(252, 87, BRSD); put(252, 88, BRS); put(252, 89, BRS); put(252, 90, BRSL);
+
+  // wooden mid-century desk chair, pushed in, seen from behind
+  cur = OBJ.dchair;
+  var CO = [184, 132, 80], COL = [212, 160, 104], COD = [134, 92, 52];
+  for (i = 0; i < 18; i++) { put(197, 115 + i, COD); put(211, 115 + i, COD); }
+  for (i = 0; i < 22; i++) { var co = (i / 7) | 0; put(192 - co, 115 + i, COL); put(193 - co, 115 + i, CO); put(215 + co, 115 + i, CO); put(216 + co, 115 + i, COD); }
+  rect(190, 112, 28, 3, CO); rect(190, 112, 28, 1, COL); rect(190, 114, 28, 1, COD);
+  rect(193, 101, 2, 11, CO); rect(213, 101, 2, 11, COD);
+  [199, 204, 209].forEach(function (sx) { rect(sx, 101, 1, 11, CO); });
+  rect(189, 97, 30, 1, COL); rect(188, 98, 32, 3, CO); rect(188, 100, 32, 1, COD); put(188, 97, CO); put(219, 97, CO);
+
+  // black Fender Jazz Bass on a tubular stand: offset body (longer upper horn on the left), tortoise pickguard,
+  // chrome control plate, rosewood board on a maple neck, four tuners down one side of the headstock
+  cur = OBJ.bass;
+  var STD = [40, 40, 44], STDL = [84, 84, 90];
+  rect(289, 52, 1, 72, STD); rect(286, 50, 7, 2, STD); put(286, 49, STD); put(292, 49, STD);
+  for (i = 0; i < 12; i++) { put(286 - i * 0.7, 124 + i, STD); put(292 + i * 0.7, 124 + i, STD); put(289, 124 + i, i < 6 ? STDL : STD); }
+  rect(284, 122, 11, 1, STD);
+  var BLK = [22, 22, 24], BLKL = [84, 84, 92], TORT = [120, 60, 38], TORTD = [72, 36, 22], CHR = [196, 196, 202], RW = [74, 44, 30], MPL = [214, 174, 112];
+  var BX = 278, BY = 97;
+  var SPANS = [[[3, 4]], [[2, 5], [16, 17]], [[2, 6], [15, 18]], [[2, 7], [14, 18]], [[2, 8], [13, 19]], [[2, 19]], [[2, 19]], [[3, 19]], [[3, 18]], [[4, 18]], [[4, 18]], [[3, 19]], [[2, 20]], [[1, 20]],
+    [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 21]], [[1, 20]], [[2, 20]], [[2, 19]], [[3, 18]], [[5, 16]], [[8, 13]]];
+  SPANS.forEach(function (row, ry) {
+    row.forEach(function (sp) {
+      for (var cx = sp[0]; cx <= sp[1]; cx++) {
+        var c = cx === sp[0] ? BLKL : BLK;
+        if (cx !== sp[0] && cx !== sp[1] && ry >= 4 && ry <= 16 && cx >= 3 && cx <= 17 && (ry <= 11 || cx <= 9)) c = (cx + ry) % 3 === 0 ? TORTD : TORT;
+        put(BX + cx, BY + ry, c);
+      }
+    });
+  });
+  rect(BX + 15, BY + 15, 4, 8, CHR); put(BX + 16, BY + 17, [60, 60, 64]); put(BX + 17, BY + 20, [60, 60, 64]); put(BX + 15, BY + 22, [150, 150, 156]);
+  rect(BX + 6, BY + 9, 9, 2, [34, 34, 36]); [7, 9, 11, 13].forEach(function (cx) { put(BX + cx, BY + 9, [176, 176, 182]); });
+  rect(BX + 7, BY + 16, 9, 2, [34, 34, 36]); [8, 10, 12, 14].forEach(function (cx) { put(BX + cx, BY + 16, [176, 176, 182]); });
+  rect(BX + 7, BY + 21, 8, 2, CHR);
+  rect(288, 38, 3, 66, RW); rect(288, 38, 1, 66, MPL);
+  for (y = 41; y < 102; y += 4) rect(289, y, 2, 1, [150, 130, 110]);
+  [51, 59, 67, 79].forEach(function (py) { put(290, py, [236, 232, 220]); });
+  rect(288, 37, 3, 1, [236, 230, 210]);
+  rect(288, 28, 5, 9, MPL); rect(289, 26, 4, 2, MPL); put(292, 25, MPL); rect(288, 28, 1, 9, [182, 140, 84]);
+  [28, 31, 34, 37].forEach(function (py) { put(287, py, CHR); put(286, py, CHR); });
+  return { col: col, emis: emis, obj: obj };
+}
+
+function makeBedroomLight(mode) {
+  var A = new Float32Array(SW * SH), G = new Float32Array(SW * SH), q = function (v, steps, b) { return Math.floor(v * steps + b) / steps; };
+  for (var y = 0; y < SH; y++) for (var x = 0; x < SW; x++) {
+    var i = y * SW + x, b = BAYER[(y & 3) * 4 + (x & 3)], g = 0, a;
+    if (mode === "dark") {
+      // the banker's lamp: a warm pool on the desk and the floor below it
+      a = 0.28;
+      var dx = x - 243, dy = y - 92, d = Math.sqrt(dx * dx + dy * dy * 1.6);
+      g = Math.pow(Math.max(0, 1 - d / 78), 1.6) * 0.95;
+      g = q(Math.min(1.2, g), 6, b);
+    } else {
+      a = q(1.0 - 0.12 * (x / SW), 12, b);
+      if (y >= BFLOOR - 2) { var off = (y - BFLOOR) * 1.4, x0 = 30 + off, x1 = 90 + off, e = Math.min(x - x0, x1 - x); if (e > 0 && Math.abs(x - (56 + off)) > 1.2) g = e > 2 ? 0.24 : (b < e / 2 ? 0.24 : 0); }
+    }
+    A[i] = a; G[i] = g;
+  }
+  return mode === "dark" ? { A: A, G: G, at: [0.84, 0.92, 1.08], gt: [1.22, 1.06, 0.72] } : { A: A, G: G, at: [1, 1, 1], gt: [1.1, 1.04, 0.84] };
+}
+
 var HOTS = [
   { id: "window", name: "the window", verb: "Look out", x: 12, y: 14, w: 86, h: 77 },
   { id: "shelf", name: "the bookshelf", verb: "Browse", x: 100, y: 16, w: 57, h: 112 },
@@ -639,7 +802,13 @@ var HOTS = [
   { id: "contact", name: "the phone and Rolodex", verb: "Pick up", x: 263, y: 102, w: 41, h: 20 },
   { id: "plant", name: "the snake plant", verb: "Water", x: 0, y: 96, w: 24, h: 80 },
   { id: "door", scene: "hall", name: "the door", verb: "Open", x: 128, y: 30, w: 64, h: 120 },
-  { id: "bell", scene: "hall", name: "the doorbell", verb: "Ring", x: 203, y: 74, w: 21, h: 30 }
+  { id: "bell", scene: "hall", name: "the doorbell", verb: "Ring", x: 203, y: 74, w: 21, h: 30 },
+  { id: "bwindow", scene: "bedroom", name: "the window", verb: "Look out", x: 13, y: 18, w: 80, h: 84 },
+  { id: "bshelf", scene: "bedroom", name: "the bookshelf", verb: "Browse", x: 99, y: 26, w: 52, h: 106 },
+  { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 158, y: 86, w: 108, h: 46 },
+  { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 186, y: 96, w: 36, h: 41 },
+  { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 230, y: 78, w: 26, h: 19 },
+  { id: "bass", scene: "bedroom", name: "the bass", verb: "Play", x: 275, y: 24, w: 30, h: 112 }
 ];
 
 // Camera zones: the part of the room each object zooms to.
@@ -655,9 +824,13 @@ var ZONES = {
   // walking in: the doorway in the hall and the part of the room it frames fill the screen identically
   // (framed just past the hinge, so the swung-open slab is off screen when the scenes swap)
   doorway: { x: HALL.DX + 3, y: HALL.DY, w: HALL.DW - 3, h: HALL.DH, cover: true },
-  entry: { x: 116.5, y: 0, w: 91.5, h: 180, cover: true }
+  entry: { x: 116.5, y: 0, w: 91.5, h: 180, cover: true },
+  bwindow: { x: 6, y: 12, w: 96, h: 94 },
+  bshelf: { x: 92, y: 20, w: 66, h: 118 },
+  desk: { x: 150, y: 72, w: 124, h: 66 },
+  bass: { x: 258, y: 20, w: 62, h: 120 }
 };
-var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant" };
+var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", bass: "bass" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
 var PANELS = { shelf: 1, contact: 1 };
 
@@ -706,6 +879,16 @@ function storedMode() {
 function storeMode(m) { try { sessionStorage.setItem(THEME_KEY, m); } catch (e) {} }
 
 var HALL_INTRO = "You're at Ryan's front door.";
+var BEDROOM_INTRO = "Ryan's bedroom. Have a look around."; // placeholder copy
+
+// Unreleased rooms sit behind this flag. Try them on the live site with ?apartment=1 (sticks for the tab; ?apartment=0
+// turns it off). Release by setting apartment to true.
+var FLAGS = { apartment: false };
+try {
+  var flagParam = /[?&]apartment=([01])/.exec(location.search);
+  if (flagParam) { if (flagParam[1] === "1") sessionStorage.setItem("flag-apartment", "1"); else sessionStorage.removeItem("flag-apartment"); }
+  if (sessionStorage.getItem("flag-apartment") === "1") FLAGS.apartment = true;
+} catch (e) {}
 function entered() { try { return sessionStorage.getItem("entered") === "1"; } catch (e) { return false; } }
 
 function introFor(m) {
@@ -786,19 +969,36 @@ function Room(root) {
   // HUD inventory: the accessible / mobile way around the room.
   this.invEls = [];
   var inv = $("inv");
-  [["shelf", "About me"], ["radio", "Radio"], ["contact", "Contact"], ["window", "Window"], ["chair", "Chair"], ["lamp", "Lamp"], ["fluff", "Fluff rug"], ["room", "Room"]].forEach(function (d) {
-    var b = el("button", "pbtn inv-btn", d[1]);
+  // Rooms in the apartment (behind the flag): a tab row at the top of the menu.
+  this.tabEls = [];
+  if (FLAGS.apartment) {
+    var tabs = el("div", "room-tabs");
+    tabs.setAttribute("role", "group"); tabs.setAttribute("aria-label", "Rooms");
+    [["room", "Living room"], ["bedroom", "Bedroom"]].forEach(function (d) {
+      var b = el("button", "pbtn room-tab", d[1]);
+      b.type = "button";
+      b.addEventListener("click", function () { self.goTo(d[0]); });
+      tabs.appendChild(b);
+      self.tabEls.push({ scene: d[0], el: b });
+    });
+    inv.appendChild(tabs);
+    this.tabsEl = tabs;
+  }
+  var addInv = function (scene, id, label, onClick, cls) {
+    var b = el("button", "pbtn inv-btn" + (cls ? " " + cls : ""), label);
     b.type = "button";
-    b.addEventListener("click", d[0] === "fluff" ? self.fluff : (d[0] === "room" ? self.back : function () { self.act(d[0]); }));
+    b.addEventListener("click", onClick);
     inv.appendChild(b);
-    self.invEls.push({ id: d[0], el: b });
+    self.invEls.push({ id: id, el: b, scene: scene });
+  };
+  [["shelf", "About me"], ["radio", "Radio"], ["contact", "Contact"], ["window", "Window"], ["chair", "Chair"], ["lamp", "Lamp"], ["fluff", "Fluff rug"], ["room", "Room"]].forEach(function (d) {
+    addInv("room", d[0], d[1], d[0] === "fluff" ? self.fluff : (d[0] === "room" ? self.back : function () { self.act(d[0]); }));
+  });
+  [["desk", "Desk"], ["bshelf", "Books"], ["bass", "Bass"], ["bwindow", "Window"], ["blamp", "Lamp"], ["room", "Room"]].forEach(function (d) {
+    addInv("bedroom", d[0], d[1], d[0] === "room" ? self.back : function () { self.act(d[0]); });
   });
   [["bell", "Ring the bell"], ["door", "Open the door"]].forEach(function (d) {
-    var b = el("button", "pbtn inv-btn inv-hall", d[1]);
-    b.type = "button";
-    b.addEventListener("click", function () { self.enter(d[0] === "bell"); });
-    inv.appendChild(b);
-    self.invEls.push({ id: d[0], el: b, hall: true });
+    addInv("hall", d[0], d[1], function () { self.enter(d[0] === "bell"); }, "inv-hall");
   });
 
   // Bookshelf panel: clickable spines.
@@ -863,7 +1063,7 @@ function Room(root) {
   this.canvas.addEventListener("pointerdown", function (e) { downAt = { x: e.clientX, y: e.clientY }; self.last = null; self.brush(e); });
   // While zoomed in, a tap or click on anything that isn't an object steps back to the full room (but not the end of a rug stroke).
   root.addEventListener("click", function (e) {
-    if (self.state.scene !== "room" || !self.state.zone || (e.target !== self.canvas && e.target !== root)) return;
+    if (self.state.scene === "hall" || !self.state.zone || (e.target !== self.canvas && e.target !== root)) return;
     if (e.target === self.canvas && downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 8) return;
     self.back();
   });
@@ -881,7 +1081,7 @@ function Room(root) {
     var btn = e.target.closest && e.target.closest("button");
     if (btn && e.detail > 0) btn.blur();
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && self.state.scene === "room" && self.state.zone) self.back(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && self.state.scene !== "hall" && self.state.zone) self.back(); });
 
   // Stage size, plus how much of the bottom the HUD takes up (phones sit the room right on top of it).
   var hudEl = root.querySelector(".hud");
@@ -940,11 +1140,11 @@ Room.prototype.say = function (text) {
 
 Room.prototype.act = function (id) {
   var night = this.mode() === "dark";
-  if (id === "lamp") {
-    var next = night ? "light" : "dark";
+  if (id === "lamp" || id === "blamp") {
+    var next = night ? "light" : "dark", which = id === "blamp" ? "the banker's lamp" : "the lamp";
     storeMode(next);
     this.setState({ mode: next });
-    this.say(next === "dark" ? "You turn on the lamp." : "You turn off the lamp.");
+    this.say(next === "dark" ? "You turn on " + which + "." : "You turn off " + which + ".");
     return;
   }
   var lines = {
@@ -960,7 +1160,13 @@ Room.prototype.act = function (id) {
     plant: "You water the snake plant.",
     shelf: "The bookshelf appears to be a kind of archive of Ryan's life.",
     radio: "The receiver's broken. It won't turn on.",
-    contact: "You open the Rolodex to Ryan's card."
+    contact: "You open the Rolodex to Ryan's card.",
+    // bedroom: placeholder copy
+    bwindow: night ? "Across the street, a few windows are lit." : "Across the street, a brick building.",
+    bshelf: "More books. The full catalog will live here.",
+    desk: "A mid-century walnut desk. The projects will live here.",
+    dchair: "A wooden desk chair, pushed in.",
+    bass: "A black Fender Jazz Bass on its stand."
   };
   var opener = document.activeElement;
   this.setState({ zone: ZONE_FOR[id] || null, open: PANELS[id] ? id : null, focusId: id });
@@ -969,6 +1175,22 @@ Room.prototype.act = function (id) {
     this.opener = opener;
     if (this.kbd) this.dom.panels[id].focus({ preventScroll: true });
   }
+};
+
+// Walk to another room in the apartment: a quick fade, then the new room from its overview.
+Room.prototype.goTo = function (scene) {
+  var self = this, st = this.stage;
+  if (this.state.scene === scene || this.state.scene === "hall" || this.moving) return;
+  var swap = function () {
+    st.classList.remove("ready");
+    self.setState({ scene: scene, zone: null, open: null, focusId: null, hover: null });
+    self.say(scene === "bedroom" ? BEDROOM_INTRO : introFor(self.mode()));
+    st.getBoundingClientRect();
+    st.classList.add("ready");
+  };
+  if (reducedMotion()) { swap(); return; }
+  this.moving = true; st.classList.add("fading");
+  setTimeout(function () { swap(); st.classList.remove("fading"); self.moving = false; }, 360);
 };
 
 // Ring or open: the door swings in, the camera walks through the doorway, and the room takes over.
@@ -1071,7 +1293,7 @@ Room.prototype.brush = function (e) {
 
 Room.prototype.paint = function () {
   var hv = this.state.hover ? OBJ[this.state.hover] : 0;
-  var img = this.state.scene === "hall" ? this.hallImage(hv) : this.roomImage(hv);
+  var sc = this.state.scene, img = sc === "hall" ? this.hallImage(hv) : (sc === "bedroom" ? this.bedroomImage(hv) : this.roomImage(hv));
   this.paintedHover = this.state.hover; this.paintedScene = this.state.scene; this.paintedRdx = this.state.open === "contact";
   this.canvas.getContext("2d").putImageData(img, 0, 0);
 };
@@ -1083,6 +1305,14 @@ Room.prototype.hallImage = function (hv) {
   col.set(h.col); emis.set(h.emis); obj.set(h.obj);
   drawDoor(h, col, emis, obj, this.doorP || 0, this.peek);
   return composite(col, emis, obj, this.hallLight, hv, B.img);
+};
+
+Room.prototype.bedroomImage = function (hv) {
+  var mode = this.mode();
+  if (this.bedFor !== mode) { this.bed = makeBedroom(mode); this.bedLight = makeBedroomLight(mode); this.bedFor = mode; }
+  var B = this.buf;
+  B.col.set(this.bed.col); B.emis.set(this.bed.emis); B.obj.set(this.bed.obj);
+  return composite(B.col, B.emis, B.obj, this.bedLight, hv, B.img);
 };
 
 Room.prototype.roomImage = function (hv) {
@@ -1154,7 +1384,7 @@ Room.prototype.camera = function () {
     tx = (vw - SW * S0) / 2; ty = (vh - SH * S0) / 2;
   }
   // The fill around the scene splits wall/floor at the scene's floor line, so any exposed edge continues it.
-  var floorY = s.scene === "hall" ? HALL.FLOOR : FLOOR;
+  var floorY = s.scene === "hall" ? HALL.FLOOR : (s.scene === "bedroom" ? BFLOOR : FLOOR);
   this.split = Math.round(ty + floorY * S0);
   var z = s.zone ? ZONES[s.zone] : null;
   if (z && z.cover) {
@@ -1197,29 +1427,35 @@ Room.prototype.render = function () {
   }
 
   var lampVerb = mode === "dark" ? "Turn off" : "Turn on";
-  var hall = s.scene === "hall";
+  var hall = s.scene === "hall", isLamp = function (id) { return id === "lamp" || id === "blamp"; };
   this.stage.classList.toggle("in-hall", hall);
+  this.stage.classList.toggle("in-bedroom", s.scene === "bedroom");
   HOTS.forEach(function (h) {
     var b = this.hotEls[h.id];
     b.hidden = (h.scene || "room") !== s.scene;
-    setAttr(b, "aria-label", (h.id === "lamp" ? lampVerb : h.verb) + " " + h.name);
+    setAttr(b, "aria-label", (isLamp(h.id) ? lampVerb : h.verb) + " " + h.name);
   }, this);
 
   var hov = HOTS.filter(function (h) { return h.id === s.hover; })[0];
   setText(d.action, hov
-    ? (hov.id === "lamp" ? lampVerb + " the lamp" : hov.verb + " " + hov.name)
-    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · click Room to step back" : "Walk around the room")));
+    ? (isLamp(hov.id) ? lampVerb : hov.verb) + " " + hov.name
+    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · click Room to step back" : (s.scene === "bedroom" ? "Walk around the bedroom" : "Walk around the room"))));
   setText(d.shown, s.say.slice(0, s.n));
   setText(d.caret, s.n < s.say.length ? "▌" : "");
   // A trailing no-break space on alternate lines makes a repeated line still count as new for screen readers.
   setText(d.live, s.say + (s.sayN % 2 ? "\u00A0" : ""));
 
   this.invEls.forEach(function (v) {
-    v.el.hidden = !!v.hall !== hall;
+    v.el.hidden = v.scene !== s.scene;
     var on = (v.id === "room" && !s.zone) || (!!s.zone && s.focusId === v.id);
-    if (v.id === "lamp") setText(v.el, mode === "dark" ? "Lamp off" : "Lamp on");
+    if (isLamp(v.id)) setText(v.el, mode === "dark" ? "Lamp off" : "Lamp on");
     v.el.classList.toggle("on", !!on);
   });
+
+  if (this.tabsEl) {
+    this.tabsEl.hidden = hall;
+    this.tabEls.forEach(function (tb) { tb.el.classList.toggle("on", tb.scene === s.scene); if (tb.scene === s.scene) tb.el.setAttribute("aria-current", "true"); else tb.el.removeAttribute("aria-current"); });
+  }
 
   for (var p in d.panels) d.panels[p].hidden = open !== p;
   this.stage.classList.toggle("panel-open", !!open);
