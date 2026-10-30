@@ -1123,6 +1123,8 @@ function makeKitchen(mode) {
   // white range hood over the stove
   var EN = [238, 236, 228], ENL = [250, 248, 242], END = [196, 194, 186], CHR = [196, 198, 204], CHRD = [132, 134, 140];
   rect(58, 40, 44, 8, EN); rect(58, 40, 44, 1, ENL); rect(56, 46, 48, 3, EN); rect(56, 48, 48, 1, END); rect(62, 49, 36, 1, CHRD);
+  // a smoke alarm on the ceiling: it has opinions about the stove (drawStove)
+  rect(86, 4, 9, 2, [236, 234, 226]); rect(87, 6, 7, 1, [206, 204, 196]); put(90, 5, [150, 150, 150]);
 
   // window over the sink: across the courtyard, rooftops with a wooden water tower; a fire escape rail outside,
   // and a few herbs on the sill
@@ -2022,7 +2024,7 @@ function Room(root) {
   // Remember whether the visitor is on the keyboard, for focus handling around panels.
   document.addEventListener("keydown", function () { self.kbd = true; }, true);
   // The computer screen pauses while the tab is hidden; pick it back up on return.
-  document.addEventListener("visibilitychange", function () { if (!document.hidden && (self.state.scene === "bedroom" || self.state.scene === "room")) self.kick(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && self.state.scene !== "hall") self.kick(); });
   document.addEventListener("pointerdown", function () { self.kbd = false; }, true);
 
   // A mouse click or tap shouldn't leave a button focused: a later key press (like Esc) would make the browser
@@ -2112,6 +2114,14 @@ Room.prototype.act = function (id) {
     this.kick();
     return;
   }
+  if (id === "stove") {
+    var on = !!this.stove, boiled = on && this.stove.boiled;
+    this.stove = on ? null : { t0: performance.now() };
+    this.setState({ zone: ZONE_FOR.stove, open: null, focusId: id });
+    this.say(on ? (boiled ? "You turn off the burner and wave the smoke away. The alarm stops." : "You turn off the burner.") : "A red Dutch oven sits on the stove. It looks well used. You turn on the burner.");
+    this.kick();
+    return;
+  }
   if (id === "chair") {
     var nowS = performance.now();
     this.spins = this.lastSpin && nowS - this.lastSpin < 12000 ? this.spins + 1 : 0;
@@ -2152,7 +2162,6 @@ Room.prototype.act = function (id) {
     map: "A world map with a pin in every city Ryan has been to.",
     // kitchen
     fridge: "You open the fridge. Leftovers, mostly.",
-    stove: "A red Dutch oven sits on the stove. It looks well used.",
     sink: "The dishes are done.",
     kwindow: night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.",
     outlet: night ? "A nightlight in the outlet. It came on by itself when it got dark." : "A nightlight in the outlet. It comes on by itself when it gets dark.",
@@ -2387,12 +2396,69 @@ Room.prototype.hallImage = function (hv) {
   return composite(col, emis, obj, this.hallLight, hv, B.img);
 };
 
+// The burner under the Dutch oven, t ms after it was turned on: a blue flame, steam off the lid, and after a while the
+// lid rattles. Left on, it boils over: foam runs down the pot, smoke rolls up and the smoke alarm blinks.
+var BOIL = 18000;
+function stoveFrame(t, still) { var boil = t >= BOIL; return { t: still ? 2000 : t, rattle: !still && t > 6000 && Math.floor(t / 160) % 3 === 0, boil: boil, blink: boil && Math.floor(t / 400) % 2 === 0 }; }
+function stoveKey(f) { return f ? Math.floor(f.t / 120) + (f.rattle ? "r" : "") + (f.boil ? "b" : "") + (f.blink ? "!" : "") : ""; }
+function drawStove(col, emis, obj, f) {
+  var put = function (x, y, c, e, a) {
+    x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= SW || y >= SH) return;
+    var i = y * SW + x, k = a == null ? 1 : a;
+    col[i * 3] = col[i * 3] + (c[0] - col[i * 3]) * k; col[i * 3 + 1] = col[i * 3 + 1] + (c[1] - col[i * 3 + 1]) * k; col[i * 3 + 2] = col[i * 3 + 2] + (c[2] - col[i * 3 + 2]) * k;
+    if (e) emis[i] = 1;
+  };
+  var t = f.t, x, k;
+  // flame: a flickering blue ring peeking out under the pot
+  for (x = 61; x < 76; x++) { var fl = (x * 7 + Math.floor(t / 90)) % 5; put(x, 89, fl < 2 ? [120, 170, 255] : (fl === 2 ? [60, 110, 230] : [90, 140, 250]), true); if (fl === 0) put(x, 88, [150, 200, 255], true, 0.7); }
+  // the lid hops when it rattles
+  if (f.rattle) {
+    var RD = [196, 40, 36], RDL = [232, 90, 70];
+    for (x = 61; x < 76; x++) { put(x, 77, RD); put(x, 76, RD); put(x, 78, [70, 22, 20]); }
+    for (x = 63; x < 74; x++) put(x, 75, x < 69 ? RDL : RD);
+    for (x = 67; x < 70; x++) { put(x, 73, [196, 198, 204]); put(x, 74, [196, 198, 204]); }
+  }
+  // steam (or smoke, once it boils over): soft puffs rising and drifting off the lid
+  var n = f.boil ? 9 : 7;
+  for (k = 0; k < n; k++) {
+    var ph = (t / (f.boil ? 1300 : 1700) + k / n) % 1, sx = 63 + (k * 5) % 12 + Math.sin(ph * 5 + k) * 2.5, sy = 74 - ph * (f.boil ? 64 : 34);
+    var a = Math.min(1, (1 - ph) * 1.3) * (f.boil ? 0.85 : 0.8), sc = f.boil ? [88, 86, 84] : [246, 248, 250], sz = f.boil ? 1 + Math.round(ph * 4) : 2 + Math.round(ph * 2);
+    for (var dy = 0; dy <= sz; dy++) for (var dx = 0; dx <= sz; dx++) if (dx + dy <= sz + 1) put(sx + dx, sy + dy, sc, false, a);
+  }
+  if (f.boil) {
+    // foam down the sides of the pot
+    [[61, 6], [66, 4], [71, 7], [75, 5]].forEach(function (d) { var len = Math.min(d[1], Math.floor((t - BOIL) / 300)); for (var j = 0; j <= len; j++) put(d[0], 79 + j, [238, 226, 196]); });
+    // the alarm's light
+    put(90, 5, f.blink ? [255, 60, 50] : [120, 30, 30], f.blink);
+  }
+}
+
 Room.prototype.kitchenImage = function (hv) {
   var mode = this.mode();
   if (this.kitFor !== mode) { this.kit = makeKitchen(mode); this.kitLight = makeKitchenLight(mode); this.kitFor = mode; }
   var B = this.buf;
   B.col.set(this.kit.col); B.emis.set(this.kit.emis); B.obj.set(this.kit.obj);
+  var still = reducedMotion(), f = this.stove ? stoveFrame(performance.now() - this.stove.t0, still) : null;
+  if (f) {
+    drawStove(B.col, B.emis, B.obj, f);
+    if (f.boil && !this.stove.boiled) { this.stove.boiled = true; if (this.state.scene === "kitchen") this.say("It's boiling over. The smoke alarm goes off."); }
+  }
+  this.stoveShown = stoveKey(f);
+  if (f && !still) this.watchStove();
   return composite(B.col, B.emis, B.obj, this.kitLight, hv, B.img);
+};
+
+// While the kitchen is on screen with the burner on, check the stove every 60ms and repaint when it changes.
+Room.prototype.watchStove = function () {
+  var self = this;
+  if (this.stoveTimer) return;
+  this.stoveTimer = setTimeout(function () {
+    self.stoveTimer = 0;
+    if (!self.stove || document.hidden) return;
+    if (self.state.scene !== "kitchen") { self.watchStove(); return; }
+    if (stoveKey(stoveFrame(performance.now() - self.stove.t0, false)) !== self.stoveShown) self.kick();
+    else self.watchStove();
+  }, 60);
 };
 
 // The computer's screen is a blank prompt: just the block cursor blinking in the corner (steady with reduced motion).
