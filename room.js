@@ -798,12 +798,13 @@ function makeBedroom(mode) {
   rect(172, 110, 25, 2, PNL); rect(172, 112, 25, 17, PN); rect(172, 128, 25, 1, PND); rect(196, 112, 1, 16, PND);
   rect(174, 119, 21, 1, PND); put(184, 115, [120, 84, 44]); put(184, 123, [120, 84, 44]);
   rect(173, 129, 2, 3, PND); rect(194, 129, 2, 3, PND);
-  rect(187, 108, 8, 2, [70, 120, 140]); rect(186, 106, 9, 2, [233, 221, 184]); rect(188, 104, 7, 2, [176, 60, 44]);
+  rect(174, 108, 8, 2, [70, 120, 140]); rect(174, 106, 9, 2, [233, 221, 184]); rect(174, 104, 7, 2, [176, 60, 44]);
+  // the task lamp leans left, toward the bed
   var TL = [30, 30, 32], TLL = [84, 84, 90];
-  rect(176, 107, 8, 3, TL); rect(177, 107, 6, 1, TLL);
-  line(180, 106, 175, 96, TL); line(175, 96, 182, 90, TL); put(175, 96, TLL);
-  rect(182, 88, 4, 1, TL); rect(182, 89, 5, 1, TL); rect(183, 90, 5, 1, TL); rect(184, 91, 5, 1, TLL);
-  rect(185, 92, 4, 1, night ? [255, 232, 170] : [90, 90, 96], night);
+  rect(185, 107, 8, 3, TL); rect(186, 107, 6, 1, TLL);
+  line(188, 106, 193, 96, TL); line(193, 96, 186, 90, TL); put(193, 96, TLL);
+  rect(183, 88, 4, 1, TL); rect(182, 89, 5, 1, TL); rect(181, 90, 5, 1, TL); rect(180, 91, 5, 1, TLL);
+  rect(180, 92, 4, 1, night ? [255, 232, 170] : [90, 90, 96], night);
 
   ox = 111;
   // the bed: pine plank headboard, pillows (two white, a gray one, the bird pillow), and a quilt of green and
@@ -856,7 +857,7 @@ function makeBedroomLight(mode) {
       g = Math.pow(Math.max(0, 1 - d / 78), 1.6) * 0.95;
       var sx = x - 104, sy = y - 69, sd = Math.sqrt(sx * sx + sy * sy * 1.4);
       g += Math.max(0, 1 - sd / 30) * 0.35;
-      var nx = x - 307, ny = y - 100, nd = Math.sqrt(nx * nx + ny * ny * 1.5);
+      var nx = x - 301, ny = y - 100, nd = Math.sqrt(nx * nx + ny * ny * 1.5);
       g += Math.pow(Math.max(0, 1 - nd / 30), 1.4) * 0.5; // the nightstand lamp
       g = q(Math.min(1.2, g), 6, b);
     } else {
