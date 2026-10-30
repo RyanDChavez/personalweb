@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
-  <link rel="stylesheet" href="room.css?v=43">
+  <link rel="stylesheet" href="room.css?v=44">
   <script>document.documentElement.classList.add("js");</script>
   <script type="application/ld+json">
   {
@@ -49,7 +49,7 @@
     ]
   }
   </script>
-  <script src="room.js?v=58" defer onerror="document.documentElement.classList.remove('js')"></script>
+  <script src="room.js?v=59" defer onerror="document.documentElement.classList.remove('js')"></script>
 </head>
 
 <body>
@@ -136,13 +136,19 @@
         <button class="pbtn back-btn" type="button" data-back>Back to the room</button>
       </div>
       <div class="panel-body map-body">
-        <canvas class="atlas" id="atlas" width="640" height="232" role="img" aria-label="A world map with a pin for each place Ryan has been"></canvas>
-        <div class="map-side">
+        <div class="atlas-wrap" id="atlas-wrap">
+          <canvas class="atlas" id="atlas" width="876" height="318" role="img" aria-label="A world map with a pin for each place Ryan has been"></canvas>
+          <span class="atlas-tip" id="atlas-tip" aria-hidden="true" hidden></span>
+        </div>
+        <div class="map-foot">
           <div class="place-out" aria-live="polite">
             <p class="station-title" id="place-title"></p>
             <p id="place-text"></p>
           </div>
-          <div class="places" id="places" role="group" aria-label="Pick a country"></div>
+          <div class="book-nav map-nav">
+            <button class="pbtn book-step" type="button" id="place-prev"></button>
+            <button class="pbtn book-step" type="button" id="place-next"></button>
+          </div>
         </div>
       </div>
       <div class="more" aria-hidden="true"><span>▼ More</span></div>
