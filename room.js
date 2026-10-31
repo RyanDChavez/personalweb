@@ -2232,6 +2232,29 @@ Room.prototype.act = function (id) {
     this.kick();
     return;
   }
+  if (id === "apple") {
+    if (!reducedMotion()) this.boot = { t0: performance.now() };
+    this.setState({ zone: ZONE_FOR.apple, open: null, focusId: id });
+    this.say("You switch it off and on again. It boots, then sits at the cursor. Nothing's loaded yet.");
+    this.kick();
+    return;
+  }
+  if (id === "bass") {
+    var nowP = performance.now();
+    this.plays = this.lastPlay && nowP - this.lastPlay < 20000 ? this.plays + 1 : 0;
+    this.lastPlay = nowP;
+    if (!reducedMotion()) this.pluck = { t0: nowP };
+    this.setState({ zone: ZONE_FOR.bass, open: null, focusId: id });
+    var bangs = this.plays >= 4;
+    this.say(["A black Fender Jazz Bass on its stand. It's got plenty of dings picked up on the road. You play a riff.", "You play it again.",
+      "You play the bass line from Lost in the City.", "You turn it up.", "The neighbor bangs on the wall."][Math.min(4, this.plays)]);
+    if (bangs) {
+      this.plays = -1;
+      if (!reducedMotion()) { var cv = this.canvas; cv.classList.remove("shake"); cv.getBoundingClientRect(); cv.classList.add("shake"); }
+    }
+    this.kick();
+    return;
+  }
   if (id === "chair") {
     var nowS = performance.now();
     this.spins = this.lastSpin && nowS - this.lastSpin < 12000 ? this.spins + 1 : 0;
@@ -2264,9 +2287,7 @@ Room.prototype.act = function (id) {
     // bedroom
     bshelf: "Every book Ryan owns, sorted by what it's about.",
     desk: this.coffeeAt && Date.now() - this.coffeeAt < COFFEE_HOT ? "A mid-century walnut desk. There's a fresh coffee from the kitchen and a notebook with cursive scrawled notes written hastily." : "A mid-century walnut desk. There's half-drunk coffee and a notebook with cursive scrawled notes written hastily.",
-    apple: "An old computer. The cursor's blinking, but nothing's loaded yet.",
     dchair: "A wooden desk chair, pushed in.",
-    bass: "A black Fender Jazz Bass on its stand. It's got plenty of dings picked up on the road.",
     map: "A world map with a pin in every city Ryan has been to.",
     // kitchen
     kwindow: night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.",
@@ -2624,6 +2645,45 @@ function drawScreen(col, emis, obj, f) {
 }
 function screenKey(f) { return f.cur ? "1" : "0"; }
 
+// Switching the computer off and on (BOOT ms): a bright flash, then lines of boot text scrolling up the screen, then
+// back to the blinking cursor.
+var BOOT = 2600;
+function drawBoot(col, emis, obj, t) {
+  var S = SCREEN, BGS = [12, 26, 16], PH = [70, 222, 112], PHD = [40, 150, 76];
+  var px = function (x, y, c) { var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 1; obj[i] = OBJ.apple; };
+  for (var y = 0; y < S.h; y++) for (var x = 0; x < S.w; x++) if (!((x === 0 || x === S.w - 1) && (y === 0 || y === S.h - 1))) px(S.x + x, S.y + y, t < 250 ? [200, 250, 210] : BGS);
+  if (t < 250) return;
+  var lines = Math.floor((t - 250) / 130), first = Math.max(0, lines - 4);
+  for (var n = first; n <= lines; n++) {
+    var ly = S.y + 2 + (n - first) * 3, len = 6 + ((n * 7) % 15);
+    for (var lx = 0; lx < len && lx < S.w - 4; lx++) if ((lx * 5 + n) % 6 !== 0) px(S.x + 2 + lx, ly, (lx + n) % 4 ? PH : PHD);
+  }
+}
+
+// The bass when you play it (PLUCK ms): the strings shiver along the neck and a note floats up off the body.
+var PLUCK = 1000, NOTE = ["..##", "..#.", "..#.", "..#.", "###.", "###."];
+function drawPluck(col, emis, obj, t) {
+  var put = function (x, y, c, a) { var i = y * SW + x, k = a == null ? 1 : a; for (var j = 0; j < 3; j++) col[i * 3 + j] += (c[j] - col[i * 3 + j]) * k; };
+  var k = Math.floor(t / 60), amp = t < 600 ? 1 : 0;
+  if (amp) for (var y = 86; y < 106; y++) if ((y + k) % 3 === 0) { var d = k % 2 ? 1 : -1; put(65 + d, y, [70, 70, 76], 0.5); put(66 - d, y, [70, 70, 76], 0.5); }
+  var p = t / PLUCK, nx = Math.round(76 + p * 8), ny = Math.round(100 - p * 26);
+  NOTE.forEach(function (row, ry) { for (var rx = 0; rx < 4; rx++) if (row[rx] === "#") put(nx + rx, ny + ry, [36, 36, 40], 1 - p * 0.7); });
+}
+
+// The Dodgers pennant flaps in the breeze while the window's open: each column of felt rides a wave that grows toward
+// the tip.
+var PENNANT = { l: 279, r: 318, t: 18, b: 50 };
+function drawFlap(col, base, now) {
+  var isPen = function (i) { var r = base[i * 3], g = base[i * 3 + 1], b = base[i * 3 + 2]; return (b > 120 && r < 40) || (r > 200 && g > 200 && b > 190); };
+  for (var x = PENNANT.l + 4; x <= PENNANT.r; x++) {
+    var f = (x - PENNANT.l) / (PENNANT.r - PENNANT.l), d = Math.round(Math.sin((x - PENNANT.l) * 0.35 - now / 140) * 1.6 * f), y, i;
+    if (!d) continue;
+    var ys = [];
+    for (y = PENNANT.t; y <= PENNANT.b; y++) { i = y * SW + x; if (isPen(i)) { ys.push(y); col[i * 3] = 178; col[i * 3 + 1] = 190; col[i * 3 + 2] = 196; } }
+    ys.forEach(function (yy) { var src = yy * SW + x, dst = (yy + d) * SW + x; col[dst * 3] = base[src * 3]; col[dst * 3 + 1] = base[src * 3 + 1]; col[dst * 3 + 2] = base[src * 3 + 2]; });
+  }
+}
+
 // Pigeons out the bedroom window: three on the parapet across the street and one on a window sill. Now and then one
 // pecks at the ledge, and one turns around; at night they sleep with their heads tucked. Sprites face right:
 // h head, n green neck, k beak, b body, w wing, t tail, f feet.
@@ -2717,6 +2777,12 @@ function drawBird(col, emis, obj, f) {
   });
 }
 
+// The frame of the bedroom's other animations (the computer booting, the bass, the pennant), to know when to repaint.
+Room.prototype.bedAnimKey = function (now) {
+  var b = this.boot && now - this.boot.t0 < BOOT ? Math.floor((now - this.boot.t0) / 60) : "", p = this.pluck && now - this.pluck.t0 < PLUCK ? Math.floor((now - this.pluck.t0) / 60) : "";
+  return b + "/" + p + "/" + (this.winOpen ? Math.floor(now / 140) : "");
+};
+
 Room.prototype.bedroomImage = function (hv) {
   var mode = this.mode();
   if (this.bedFor !== mode) { this.bed = makeBedroom(mode); this.bedLight = makeBedroomLight(mode); this.bedFor = mode; }
@@ -2726,6 +2792,11 @@ Room.prototype.bedroomImage = function (hv) {
   drawScreen(B.col, B.emis, B.obj, f);
   drawPigeons(B.col, B.emis, B.obj, pf, mode === "dark");
   drawSash(B.col, B.emis, B.obj, !!this.winOpen);
+  var boot = this.boot && !still && now - this.boot.t0 < BOOT ? now - this.boot.t0 : -1, pluck = this.pluck && !still && now - this.pluck.t0 < PLUCK ? now - this.pluck.t0 : -1;
+  if (boot >= 0) drawBoot(B.col, B.emis, B.obj, boot);
+  if (pluck >= 0) drawPluck(B.col, B.emis, B.obj, pluck);
+  var flap = this.winOpen && !still ? Math.floor(now / 140) : -1;
+  if (flap >= 0) drawFlap(B.col, this.bed.col, now);
   var hot = this.coffeeAt && Date.now() - this.coffeeAt < COFFEE_HOT ? Math.floor(now / 160) : -1;
   if (hot >= 0) drawDeskSteam(B.col, B.emis, still ? 0 : hot);
   var bf = birdAt(this.bird, now, still);
@@ -2733,7 +2804,7 @@ Room.prototype.bedroomImage = function (hv) {
     drawBird(B.col, B.emis, B.obj, bf);
     if (bf.landed && !this.bird.landed) { this.bird.landed = true; if (this.state.scene === "bedroom") this.say("A pigeon flies in and lands on the bed."); }
   } else if (this.bird && now > this.bird.t0 + 100) this.bird = null;
-  this.screenShown = screenKey(f) + "#" + pigeonKey(pf) + "#" + birdKey(bf) + "#" + hot;
+  this.screenShown = screenKey(f) + "#" + pigeonKey(pf) + "#" + birdKey(bf) + "#" + hot + "#" + this.bedAnimKey(now);
   if (!still) this.watchScreen();
   return composite(B.col, B.emis, B.obj, this.bedLight, hv, B.img);
 };
@@ -2746,7 +2817,7 @@ Room.prototype.watchScreen = function () {
     self.screenTimer = 0;
     if (self.state.scene !== "bedroom" || document.hidden) return;
     var now = performance.now();
-    if (screenKey(screenFrame(now % SCREEN.loop, false)) + "#" + pigeonKey(pigeonFrame(now, false, self.mode() === "dark")) + "#" + birdKey(birdAt(self.bird, now, false)) + "#" + (self.coffeeAt && Date.now() - self.coffeeAt < COFFEE_HOT ? Math.floor(now / 160) : -1) !== self.screenShown) self.kick();
+    if (screenKey(screenFrame(now % SCREEN.loop, false)) + "#" + pigeonKey(pigeonFrame(now, false, self.mode() === "dark")) + "#" + birdKey(birdAt(self.bird, now, false)) + "#" + (self.coffeeAt && Date.now() - self.coffeeAt < COFFEE_HOT ? Math.floor(now / 160) : -1) + "#" + self.bedAnimKey(now) !== self.screenShown) self.kick();
     else self.watchScreen();
   }, 100);
 };
