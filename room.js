@@ -1906,7 +1906,8 @@ function Room(root) {
   var addInv = function (scene, id, label, onClick, cls) {
     var b = el("button", "pbtn inv-btn" + (cls ? " " + cls : ""), label);
     b.type = "button";
-    b.addEventListener("click", onClick);
+    // tapping the button of the close-up that's open (it's lit up) closes it again
+    b.addEventListener("click", function () { if (PANELS[id] && self.state.open === id) self.back(); else onClick(); });
     inv.appendChild(b);
     self.invEls.push({ id: id, el: b, scene: scene });
   };
@@ -2354,7 +2355,7 @@ Room.prototype.act = function (id) {
     contact: this.answered ? "You pick up. Wrong number. You open the Rolodex to Ryan's card." : "You open the Rolodex to Ryan's card.",
     // bedroom
     bshelf: "Every book Ryan owns, sorted by what it's about.",
-    desk: this.coffeeAt && Date.now() - this.coffeeAt < COFFEE_HOT ? "A mid-century walnut desk. There's a fresh coffee from the kitchen and a notebook with cursive scrawled notes written hastily." : "A mid-century walnut desk. There's half-drunk coffee and a notebook with cursive scrawled notes written hastily.",
+    desk: this.coffeeAt && Date.now() - this.coffeeAt < COFFEE_HOT ? "A mid-century walnut desk. There's a fresh coffee from the kitchen and a notebook with cursive scrawled notes written hastily." : "A mid-century walnut desk. There's a half-finished coffee and a notebook with cursive scrawled notes written hastily.",
     dchair: "A wooden desk chair, pushed in.",
     map: "A world map with a pin in every city Ryan has been to.",
     // kitchen
@@ -3204,7 +3205,7 @@ Room.prototype.render = function () {
   var hov = HOTS.filter(function (h) { return h.id === s.hover; })[0];
   setText(d.action, hov
     ? verbOf(hov) + " " + hov.name
-    : (hall ? "Ring the bell or open the door" : (s.zone && !ZONES[s.zone].cover ? "Looking closer · tap outside it to step back" : (s.scene === "bedroom" ? "Walk around the bedroom" : (s.scene === "kitchen" ? "Walk around the kitchen" : "Walk around the room")))));
+    : (hall ? "Ring the bell or open the door" : (s.open ? "Close-up · tap Back to the room to step back" : s.zone && !ZONES[s.zone].cover ? "Looking closer · tap outside it to step back" : (s.scene === "bedroom" ? "Walk around the bedroom" : (s.scene === "kitchen" ? "Walk around the kitchen" : "Walk around the room")))));
   setText(d.shown, s.say.slice(0, s.n));
   setText(d.caret, s.n < s.say.length ? "▌" : "");
   // A trailing no-break space on alternate lines makes a repeated line still count as new for screen readers.
