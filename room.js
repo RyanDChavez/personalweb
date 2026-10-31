@@ -3000,6 +3000,10 @@ Room.prototype.roomImage = function (hv) {
   return composite(col, emis, obj, this.light, hv, B.img);
 };
 
+// Objects drawn in front of another one, which its hover outline leaves alone.
+var FRONT_OF = {};
+FRONT_OF[OBJ.desk] = [OBJ.dchair, OBJ.apple, OBJ.blamp];
+
 // Light the color buffer, then highlight and outline the hovered object.
 function composite(col, emis, obj, L, hv, img) {
   var out = img.data;
@@ -3015,11 +3019,13 @@ function composite(col, emis, obj, L, hv, img) {
     if (hv && obj[i] === hv) { out[o] = out[o] * 1.18 + 14; out[o + 1] = out[o + 1] * 1.18 + 12; out[o + 2] = out[o + 2] * 1.12 + 4; }
     out[o + 3] = 255;
   }
-  // Pixel outline around the hovered object, the classic adventure-game highlight.
+  // Pixel outline around the hovered object, the classic adventure-game highlight. It isn't drawn over things that
+  // stand in front of the object (the chair, computer and lamp at the desk), so they don't look picked too.
   if (hv) {
+    var front = FRONT_OF[hv];
     for (var yy = 0; yy < SH; yy++) for (var xx = 0; xx < SW; xx++) {
       var k = yy * SW + xx;
-      if (obj[k] === hv) continue;
+      if (obj[k] === hv || (front && front.indexOf(obj[k]) >= 0)) continue;
       if ((xx > 0 && obj[k - 1] === hv) || (xx < SW - 1 && obj[k + 1] === hv) || (yy > 0 && obj[k - SW] === hv) || (yy < SH - 1 && obj[k + SW] === hv)) {
         var q = k * 4; out[q] = 255; out[q + 1] = 214; out[q + 2] = 102;
       }
