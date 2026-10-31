@@ -1268,14 +1268,21 @@ function makeKitchen(mode, ks) {
   [[22, 3], [26, 2], [29, 4]].forEach(function (rf) { rect(rf[0], 72, rf[1], 2, [192, 84, 56]); });
   rect(22, 76, 11, 1, [150, 132, 110]);
   if (ks.fridge) {
-    // door open: the lit inside, shelves of leftovers, eggs, oat milk and a jar of pickles; the door edge-on at the left
-    rect(4, 59, 50, 61, [226, 234, 230], true); rect(6, 61, 46, 57, [238, 244, 240], true);
-    [74, 89, 104].forEach(function (sy) { rect(6, sy, 46, 1, [198, 206, 204], true); });
-    rect(10, 68, 11, 6, [176, 40, 36], true); rect(10, 67, 11, 1, [210, 70, 60], true); rect(24, 69, 9, 5, [236, 236, 230], true); rect(24, 68, 9, 1, [70, 120, 170], true);
-    rect(38, 63, 6, 11, [232, 222, 196], true); rect(38, 66, 6, 3, [86, 128, 186], true); rect(39, 62, 4, 1, [232, 222, 196], true);
-    for (x = 10; x < 26; x += 3) { put(x, 87, [246, 240, 226], true); put(x + 1, 87, [246, 240, 226], true); put(x, 88, [226, 218, 200], true); put(x + 1, 88, [226, 218, 200], true); }
-    rect(30, 80, 5, 9, [110, 150, 70], true); rect(30, 79, 5, 1, [196, 198, 204], true);
-    rect(14, 97, 9, 7, [244, 242, 236], true); rect(14, 97, 9, 1, [200, 60, 50], true); rect(32, 98, 12, 6, [210, 180, 120], true);
+    // door open: the lit inside (a cool, dim white, so the items still read when the fridge is highlighted), glass
+    // shelves, and things with dark outlines: a red container of leftover stew, a takeout box, eggs in a carton, oat
+    // milk, a jar of pickles, a head of lettuce, a couple of beers
+    var IN = [196, 210, 210], INL = [214, 226, 224], GLS = [150, 170, 172], OUT = [84, 92, 96];
+    rect(4, 59, 50, 61, [170, 186, 188], true); rect(6, 61, 46, 57, IN, true); rect(6, 61, 46, 2, INL, true);
+    [76, 92, 107].forEach(function (sy) { rect(6, sy, 46, 1, GLS, true); rect(6, sy + 1, 46, 1, [176, 192, 194], true); });
+    var box = function (bx, by, w, h, c, top) { rect(bx, by, w, h, OUT, true); rect(bx + 1, by + 1, w - 2, h - 2, c, true); if (top) rect(bx + 1, by + 1, w - 2, 1, top, true); };
+    box(9, 68, 12, 8, [184, 44, 38], [222, 92, 76]);                 // stew
+    box(24, 70, 9, 6, [238, 236, 228], [200, 60, 50]);               // takeout, red band
+    box(37, 62, 7, 14, [236, 226, 196]); rect(38, 66, 5, 3, [70, 112, 176], true); rect(39, 61, 3, 1, OUT, true); // oat milk
+    box(9, 88, 17, 4, [186, 170, 140]); for (x = 10; x < 25; x += 3) { rect(x, 86, 2, 2, OUT, true); rect(x, 86, 2, 1, [248, 244, 232], true); put(x + 1, 87, [236, 228, 210], true); } // eggs
+    box(29, 81, 6, 11, [96, 140, 64], [198, 200, 204]); put(31, 85, [150, 184, 96], true); put(32, 88, [150, 184, 96], true); // pickles
+    box(38, 84, 11, 8, [104, 168, 82], [140, 200, 110]); put(42, 86, [70, 128, 60], true); put(45, 88, [70, 128, 60], true); // lettuce
+    [[12, 96], [17, 96]].forEach(function (bt) { box(bt[0], bt[1] + 3, 4, 8, [120, 76, 30]); rect(bt[0] + 1, bt[1], 2, 3, [120, 76, 30], true); rect(bt[0] + 1, bt[1] + 5, 2, 3, [232, 214, 150], true); }); // beers
+    box(28, 100, 14, 7, [214, 190, 132], [236, 214, 160]);           // leftovers in foil
     rect(0, 58, 4, 63, MT); rect(0, 58, 1, 63, MTL); rect(3, 58, 1, 63, MTD);
   }
 
@@ -1832,7 +1839,7 @@ function Room(root) {
     b.style.width = (h.w / SW * 100).toFixed(2) + "%"; b.style.height = (h.h / SH * 100).toFixed(2) + "%";
     var enter = function () { self.setState({ hover: h.id }); };
     var leave = function () { self.setState(function (s) { return s.hover === h.id ? { hover: null } : null; }); };
-    b.addEventListener("click", function () { if (h.scene === "hall") self.enter(h.id === "bell"); else self.act(h.id); });
+    b.addEventListener("click", function () { if (h.id === "bell") self.ring(); else if (h.scene === "hall") self.enter(); else self.act(h.id); });
     // Hover highlight for a real mouse or keyboard focus only; taps would leave it stuck on.
     b.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") enter(); });
     b.addEventListener("pointerleave", leave);
@@ -1894,7 +1901,7 @@ function Room(root) {
     addInv("kitchen", d[0], d[1], function () { self.act(d[0]); });
   });
   [["bell", "Ring the bell"], ["door", "Open the door"]].forEach(function (d) {
-    addInv("hall", d[0], d[1], function () { self.enter(d[0] === "bell"); }, "inv-hall");
+    addInv("hall", d[0], d[1], function () { if (d[0] === "bell") self.ring(); else self.enter(); }, "inv-hall");
   });
 
   // Bookshelf panel: clickable spines.
@@ -2436,8 +2443,16 @@ Room.prototype.goTo = function (scene) {
   setTimeout(function () { swap(); st.classList.remove("fading"); self.moving = false; }, 360);
 };
 
-// Ring or open: the door swings in, the camera walks through the doorway, and the room takes over.
-Room.prototype.enter = function (viaBell) {
+// The doorbell just rings: nobody comes, but the door's unlocked. Ring it a few times and the narrator gets a little
+// pointed about it.
+Room.prototype.ring = function () {
+  if (this.state.scene !== "hall" || this.entering) return;
+  this.rings = (this.rings || 0) + 1;
+  this.say(["Ding-dong. Nobody comes to the door, but it looks unlocked.", "Ding-dong. Still nobody. The door's unlocked.", "Ding-dong. Really, just open the door."][Math.min(2, this.rings - 1)]);
+};
+
+// Opening the door: it swings in, the camera walks through the doorway, and the room takes over.
+Room.prototype.enter = function () {
   var self = this;
   if (this.state.scene !== "hall" || this.entering) return;
   this.entering = true;
@@ -2447,9 +2462,9 @@ Room.prototype.enter = function (viaBell) {
     this.setState({ scene: "room", zone: null }); this.say(introFor(this.mode())); this.entering = false;
     return;
   }
-  this.say(viaBell ? "Ding-dong. The door swings open." : "You open the door.");
+  this.say("You open the door.");
   this.peek = new Uint8ClampedArray(this.roomImage(0).data);
-  setTimeout(function () { self.door = { t0: performance.now() }; self.tick(); }, viaBell ? 700 : 150);
+  setTimeout(function () { self.door = { t0: performance.now() }; self.tick(); }, 150);
 };
 
 Room.prototype.walkIn = function () {
