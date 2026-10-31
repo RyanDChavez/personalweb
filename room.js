@@ -2197,11 +2197,13 @@ Room.prototype.act = function (id) {
     this.coffees = (this.coffees || 0) + 1;
     this.coffeeAt = Date.now();
     this.dishes = Math.min(4, (this.dishes || 0) + 1);
-    this.printTilt = true;
+    // now and then (about one coffee in five) the cart gets bumped and the print over it goes crooked
+    var bump = !this.printTilt && Math.random() < 0.2;
+    if (bump) this.printTilt = true;
     if (!reducedMotion()) this.brew = { t0: performance.now() };
     this.setState({ zone: ZONE_FOR.coffee, open: null, focusId: id });
-    this.say(["You grind some beans, pull a shot and steam the milk. Your coffee's waiting on the desk in the bedroom.", "You make another one. The print over the cart's gone crooked.",
-      "That's three coffees.", "Your hands are shaking a little."][Math.min(3, this.coffees - 1)]);
+    this.say(["You grind some beans, pull a shot and steam the milk. Your coffee's waiting on the desk in the bedroom.", "You make another one.",
+      "That's three coffees.", "Your hands are shaking a little."][Math.min(3, this.coffees - 1)] + (bump ? " You bump the cart and the print goes crooked." : ""));
     this.kick();
     return;
   }
