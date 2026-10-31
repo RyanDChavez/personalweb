@@ -69,6 +69,9 @@ body { margin: 0; background: #1C251B; }
 .panel.can-scroll .more { opacity: 1; }
 .panel.can-scroll .more span { animation: nudge 1.2s steps(2) infinite; }
 @keyframes nudge { 50% { transform: translateY(3px); } }
+/* the neighbor bangs on the wall */
+.shake { animation: shake 0.36s steps(3) 2; }
+@keyframes shake { 33% { transform: translate(2px, 1px); } 66% { transform: translate(-2px, -1px); } }
 
 /* bookshelf */
 .books { display: flex; align-items: flex-end; gap: 4px; padding: 0 10px; overflow-x: auto; }
