@@ -2360,7 +2360,7 @@ Room.prototype.act = function (id) {
     desk: this.coffeeAt && Date.now() - this.coffeeAt < COFFEE_HOT ? "A mid-century walnut desk. There's a fresh coffee from the kitchen and a notebook with cursive scrawled notes written hastily." : "A mid-century walnut desk. There's a half-finished coffee and a notebook with cursive scrawled notes written hastily.",
     dchair: "A wooden desk chair, pushed in.",
     map: "A world map with a pin in every city Ryan has been to.",
-    pennant: "You flip the Dodgers pennant over. There's a meme printed out and taped to the back.",
+    pennant: "You flip the Dodgers pennant over. Taped to the back is a printout for any New Yorker who gives Ryan grief about it: the Dodgers used to play in Brooklyn.",
     // kitchen
     kwindow: (night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.")
       + (this.perchFrame(performance.now(), true) ? " A pigeon's on the fire escape." : "") + " The herbs on the sill " + ["are just coming up.", "are coming along.", "are filling out.", "are thriving."][this.kitchenState().herbs] ,
