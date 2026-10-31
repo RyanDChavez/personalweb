@@ -3200,12 +3200,10 @@ Room.prototype.render = function () {
     this.catEls.forEach(function (b, i) { setAttr(b, "aria-pressed", s.cat === i ? "true" : "false"); });
     this.subEls.forEach(function (v) { v.el.hidden = v.c !== s.cat; setAttr(v.el, "aria-pressed", v.c === s.cat && v.k === s.sub ? "true" : "false"); });
     for (var sid in this.spineEls) setAttr(this.spineEls[sid], "aria-pressed", s.pick === +sid ? "true" : "false");
-    var sv = SHELVES[s.cat], ids = this.shelfIds(s.cat, s.sub), at = ids.indexOf(s.pick), pk = LIBRARY[s.pick], sh = d.libShelf;
-    // on a phone the shelf scrolls sideways: keep the picked spine in view
+    var sv = SHELVES[s.cat], ids = this.shelfIds(s.cat, s.sub), at = ids.indexOf(s.pick), pk = LIBRARY[s.pick];
+    // on a phone the shelves run long: bring the picked book's details into view below them
     if (this.shownPick !== s.pick) {
-      var sp = this.spineEls[s.pick];
-      if (sp && sh.scrollWidth > sh.clientWidth) sh.scrollLeft = sp.offsetLeft - sh.offsetLeft - (sh.clientWidth - sp.offsetWidth) / 2;
-      if (s.pick < 0) sh.scrollLeft = 0;
+      if (s.pick >= 0 && s.vw < 760) d.libKicker.parentNode.scrollIntoView({ block: "nearest", behavior: reducedMotion() ? "auto" : "smooth" });
       this.shownPick = s.pick;
     }
     setText(d.libKicker, pk ? pk[1] : (s.sub < 0 ? "" : sv[0]));
