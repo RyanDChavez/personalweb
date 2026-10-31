@@ -152,11 +152,12 @@ body { margin: 0; background: #1C251B; }
 .lib-spine[aria-pressed="true"] .lib-face { transform: translateY(-10px); outline: 3px solid var(--gold); }
 @media (hover: hover) { .lib-spine:hover { transform: none; } .lib-spine:hover .lib-face { transform: translateY(-6px); } }
 @media (max-width: 759px) {
-  /* the category and subcategory buttons wrap onto more lines rather than running off the edge */
-  .genre { flex: 1 1 auto; justify-content: center; min-height: 38px; }
-  .subgenre { min-height: 30px; padding: 0 7px; }
-  /* shorter planks; the spines wrap onto as many as they need, so none is cut off at the edge */
-  .lib-shelf { --row: 124px; }
+  .genres { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -18px; padding: 0 18px; }
+  .genres::-webkit-scrollbar { display: none; }
+  .genre { flex: none; }
+  /* one row that scrolls sideways, so the picked book's details stay in view */
+  .lib-shelf { --row: 150px; flex-wrap: nowrap; overflow-x: auto; margin: 0 -18px; padding: 12px 18px var(--gap); background-position: 0 12px; background-attachment: local; scrollbar-width: thin; scrollbar-color: var(--hudLine) var(--panel); }
+  .lib-shelf::after { content: ""; flex: 0 0 8px; }
 }
 
 /* recipe box: a faded, folded printout of a web recipe, with a coffee ring */
