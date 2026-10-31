@@ -1087,7 +1087,8 @@ function makeBedroomLight(mode) {
 var KFLOOR = 132;
 
 // ks: what's changed in the kitchen. apples left (0-3), how ripe the bananas are (0 yellow, 1 spotty, 2 brown, 3 baked
-// into banana bread), dirty dishes by the sink (0-4), the fridge door open, and the print knocked crooked.
+// into banana bread), dirty dishes by the sink (0-4), the fridge door open, the print knocked crooked, and how far
+// along the herbs on the sill are (0-3, a step for each day you've visited).
 function makeKitchen(mode, ks) {
   var col = new Uint8ClampedArray(SW * SH * 3), emis = new Uint8Array(SW * SH), obj = new Uint8Array(SW * SH), cur = 0;
   var ox = 0, tilt = ks.tilt ? 0.09 : 0; // ox shifts a whole piece into place; tilt leans the print
@@ -1153,7 +1154,9 @@ function makeKitchen(mode, ks) {
   [[154, 5], [163, 4], [198, 5]].forEach(function (p, k) {
     var TC = [190, 104, 64], TCD = [150, 78, 46];
     rect(p[0], 70, p[1], 4, TC); rect(p[0], 70, p[1], 1, [210, 128, 86]); rect(p[0] + p[1] - 1, 71, 1, 3, TCD);
-    for (var n = 0; n < 9; n++) put(p[0] + Math.floor(r() * p[1]), 64 + Math.floor(r() * 6) + (k === 1 ? 2 : 0), r() < 0.5 ? [78, 132, 70] : [104, 160, 86]);
+    // they fill out with each day you visit
+    var tall = 6 + ks.herbs * 2;
+    for (var n = 0; n < 9 + ks.herbs * 4; n++) put(p[0] - (ks.herbs > 1 ? 1 : 0) + Math.floor(r() * (p[1] + (ks.herbs > 1 ? 2 : 0))), 70 - tall + Math.floor(r() * tall) + (k === 1 ? 2 : 0), r() < 0.5 ? [78, 132, 70] : [104, 160, 86]);
   });
 
   // counter run: white laminate with a chrome edge over walnut drawers and doors, a dark toe kick
@@ -1344,8 +1347,10 @@ function makeKitchen(mode, ks) {
   // the legs; lit at night (they switch the kitchen between day and night)
   cur = OBJ.coffee;
   var BUL = [[232, 60, 60], [80, 200, 96], [244, 160, 60], [80, 140, 230], [240, 110, 170]], WIRE = [40, 64, 44], nb = 0;
+  var bulbs = [];
   var bulb = function (bx, by) {
     var bc = BUL[nb++ % BUL.length];
+    bulbs.push([Math.round(bx + ox), by, bc]);
     put(bx, by, night ? bc : mix(bc, [120, 116, 108], 0.55), night); put(bx, by + 1, night ? mix(bc, [255, 255, 255], 0.4) : mix(bc, [120, 116, 108], 0.6), night);
   };
   [[98, 4, 3], [109, 3, 4]].forEach(function (sw) {
@@ -1358,7 +1363,7 @@ function makeKitchen(mode, ks) {
   });
   for (y = 100; y < 128; y++) { put(249 + (y % 6 < 3 ? 0 : 1), y, WIRE); put(305 - (y % 6 < 3 ? 0 : 1), y, WIRE); if (y % 6 === 1) { bulb(248, y); bulb(306, y + 3); } }
   cur = 0; ox = 0;
-  return { col: col, emis: emis, obj: obj };
+  return { col: col, emis: emis, obj: obj, bulbs: bulbs };
 }
 
 function makeKitchenLight(mode) {
@@ -2312,7 +2317,8 @@ Room.prototype.act = function (id) {
     dchair: "A wooden desk chair, pushed in.",
     map: "A world map with a pin in every city Ryan has been to.",
     // kitchen
-    kwindow: night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.",
+    kwindow: (night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.")
+      + (this.perchFrame(performance.now(), true) ? " A pigeon's on the fire escape." : "") + " The herbs on the sill " + ["are just coming up.", "are coming along.", "are filling out.", "are thriving."][this.kitchenState().herbs] ,
     outlet: night ? "A nightlight in the outlet. It came on by itself when it got dark." : "A nightlight in the outlet. It comes on by itself when it gets dark.",
     recipes: "A recipe box, with a faded printout tucked in the front.",
     coffee: "Ryan's coffee setup: an espresso machine, a grinder full of beans and a drip brewer.",
@@ -2614,17 +2620,41 @@ Room.prototype.kitchenState = function () {
     if (a && a.day === today()) apples = a.left;
   } catch (e) { first = first || Date.now(); }
   var d = daysSince(first);
-  return { apples: apples, banana: d < 2 ? 0 : (d < 4 ? 1 : (d < 6 ? 2 : 3)), dishes: this.dishes || 0, fridge: !!this.fridgeOpen, tilt: !!this.printTilt };
+  if (this.visitDays == null) {
+    var v = null;
+    try { v = JSON.parse(localStorage.getItem("visits")); } catch (e) {}
+    v = v || { last: "", n: 0 };
+    if (v.last !== today()) { v = { last: today(), n: v.n + 1 }; try { localStorage.setItem("visits", JSON.stringify(v)); } catch (e) {} }
+    this.visitDays = v.n;
+  }
+  return { herbs: Math.min(3, this.visitDays - 1), apples: apples, banana: d < 2 ? 0 : (d < 4 ? 1 : (d < 6 ? 2 : 3)), dishes: this.dishes || 0, fridge: !!this.fridgeOpen, tilt: !!this.printTilt };
 };
 
 Room.prototype.kitchenAnim = function (now, still) {
   return {
     stove: this.stove ? stoveFrame(now - this.stove.t0, still) : null,
     brew: this.brew && !still && now - this.brew.t0 < BREW ? now - this.brew.t0 : -1,
-    tap: this.tap && !still && now - this.tap.t0 < TAP ? now - this.tap.t0 : -1
+    tap: this.tap && !still && now - this.tap.t0 < TAP ? now - this.tap.t0 : -1,
+    perch: this.perchFrame(now, still),
+    twinkle: this.mode() === "dark" && !still ? Math.floor(now / 700) : -1
   };
 };
-function kitchenKey(a) { return stoveKey(a.stove) + "|" + (a.brew >= 0 ? Math.floor(a.brew / 80) : "") + "|" + (a.tap >= 0 ? Math.floor(a.tap / 80) : ""); }
+function kitchenKey(a) { return stoveKey(a.stove) + "|" + (a.brew >= 0 ? Math.floor(a.brew / 80) : "") + "|" + (a.tap >= 0 ? Math.floor(a.tap / 80) : "") + "|" + (a.perch || "") + "|" + a.twinkle; }
+
+// A pigeon drops onto the fire escape outside the kitchen window for a while (from 20 to 60 seconds of every two
+// minutes), pecking at the rail; at night it's asleep there.
+Room.prototype.perchFrame = function (now, still) {
+  if (this.perchT0 == null) this.perchT0 = now;
+  var t = (now - this.perchT0) % 120000;
+  if (t < 20000 || t > 60000) return null;
+  if (this.mode() === "dark") return "sleep";
+  return still ? "stand" : ["stand", "peck", "stand", "stand", "peck"][Math.floor(t / 1400) % 5];
+};
+function drawPerch(col, emis, obj, pose) {
+  PIGEON_POSES[pose].forEach(function (row, ry) {
+    for (var k = 0; k < row.length; k++) if (row[k] !== ".") { var c = PIGEON_INK[row[k]], i = (57 + ry) * SW + 186 + k; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 1; obj[i] = OBJ.kwindow; }
+  });
+}
 
 Room.prototype.kitchenImage = function (hv) {
   var mode = this.mode(), ks = this.kitchenState(), key = mode + JSON.stringify(ks);
@@ -2638,9 +2668,15 @@ Room.prototype.kitchenImage = function (hv) {
     if (a.stove.boil && !this.stove.boiled) { this.stove.boiled = true; if (this.state.scene === "kitchen") this.say("It's boiling over. The smoke alarm goes off."); }
   }
   if (a.brew >= 0) drawBrew(B.col, B.emis, a.brew);
+  if (a.perch) drawPerch(B.col, B.emis, B.obj, a.perch);
+  if (a.twinkle >= 0) this.kit.bulbs.forEach(function (bl, i) {
+    if ((i * 7 + a.twinkle) % 5) return;
+    var q = bl[1] * SW + bl[0]; B.col[q * 3] = bl[2][0] * 0.45; B.col[q * 3 + 1] = bl[2][1] * 0.45; B.col[q * 3 + 2] = bl[2][2] * 0.45;
+  });
   if (a.tap >= 0) drawTap(B.col, B.emis, a.tap);
   this.kitchenShown = kitchenKey(a);
-  if (!still && (a.stove || a.brew >= 0 || a.tap >= 0)) this.watchKitchen();
+  // keep an eye on the kitchen while it's on screen: the pigeon comes and goes on its own schedule
+  if (!still) this.watchKitchen();
   return composite(B.col, B.emis, B.obj, this.kitLight, hv, B.img);
 };
 
