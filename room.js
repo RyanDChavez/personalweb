@@ -383,7 +383,8 @@ function drawClock(put, setCur, now, still) {
 }
 
 // fx: the chair's spin (cos of its turn, 1 when still), the plant's stage (0 fine, 1-2 watered, 3-4 drooping, 5 dead)
-// the watering can's pour (0..1, or -1) and a new plant's leaves growing in (0..1, 1 when grown).
+// the watering can's pour (0..1, or -1), a new plant's leaves growing in (0..1, 1 when grown), and how far its leaf
+// tips lean (sway, in pixels: the breeze from the window, or bobbing to a record).
 function drawFront(put, setCur, rdxOpen, fx) {
   var x, y, i, flat = put;
   function rect(rx, ry, w, h, c) { for (var j = ry; j < ry + h; j++) for (var k = rx; k < rx + w; k++) put(k, j, c); }
@@ -528,7 +529,7 @@ function drawFront(put, setCur, rdxOpen, fx) {
   [[6, 30, -4], [17, 28, 4], [9, 40, -2], [14, 36, 2], [12, 46, 0]].forEach(function (bl, n) {
     var side = bl[2] ? (bl[2] < 0 ? -1 : 1) : -1, len = Math.round(bl[1] * fx.grow);
     for (var j = bl[1] - len; j < bl[1]; j++) {
-      var jj = j - (bl[1] - len), f = j / bl[1], lx = bl[0] + Math.round(bl[2] * f + side * droop * f * f * bl[1] * 0.6), ly = 143 - Math.round(jj * (1 - droop * 0.45 * f));
+      var jj = j - (bl[1] - len), f = j / bl[1], lx = bl[0] + Math.round(bl[2] * f + side * droop * f * f * bl[1] * 0.6 + (fx.sway || 0) * f * f * (1 + n * 0.15)), ly = 143 - Math.round(jj * (1 - droop * 0.45 * f));
       var w = j < bl[1] * 0.7 ? 3 : (j < bl[1] * 0.9 ? 2 : 1);
       for (var k = 0; k < w; k++) put(lx + k - 1, ly, w > 1 && k === w - 1 ? EDGE : ((j + n * 2) % 6 < 2 ? BAND : LEAF));
     }
@@ -2255,6 +2256,33 @@ Room.prototype.act = function (id) {
     this.kick();
     return;
   }
+  if (id === "window") {
+    this.livingWin = !this.livingWin;
+    this.setState({ zone: ZONE_FOR.window, open: null, focusId: id });
+    this.say(this.livingWin ? (night ? "The Hudson at night, from the northwest Bronx. The GWB is lit up to the south." : "The Hudson and the Palisades, from the northwest Bronx. The George Washington Bridge is to the south.")
+      + (this.plane ? " A plane is on its way down to Newark." : "") + " You open the window and a breeze comes in off the river." : "You close the window.");
+    this.kick();
+    return;
+  }
+  if (id === "record") {
+    this.playing = !this.playing;
+    this.setState({ zone: ZONE_FOR.record, open: null, focusId: id });
+    this.say(this.playing ? "You put a record on: Lost in the City, by City in the Clouds. The snake plant seems to like it." : "You lift the needle off the record.");
+    this.kick();
+    return;
+  }
+  if (id === "radio") {
+    var nowR = performance.now();
+    this.whacks = this.lastWhack && nowR - this.lastWhack < 10000 ? this.whacks + 1 : 0;
+    this.lastWhack = nowR;
+    if (this.whacks >= 2) { this.whacks = -1; this.crackle = { t0: nowR }; }
+    this.setState({ zone: ZONE_FOR.radio, open: null, focusId: id });
+    this.say(["The receiver's broken. It won't turn on.", "You give it a whack. Nothing.", "You whack it again. It crackles to life for a second, then dies."][this.crackle && this.whacks === -1 ? 2 : Math.max(0, this.whacks)]);
+    this.kick();
+    return;
+  }
+  if (id === "clock" && !reducedMotion()) this.clockSpin = { t0: performance.now() };
+  if (id === "contact" && this.ringing) { this.ringing = null; this.ringAt = performance.now() + 240000 + Math.random() * 240000; this.answered = true; }
   if (id === "chair") {
     var nowS = performance.now();
     this.spins = this.lastSpin && nowS - this.lastSpin < 12000 ? this.spins + 1 : 0;
@@ -2265,6 +2293,7 @@ Room.prototype.act = function (id) {
     this.kick();
     return;
   }
+  if (id === "lamp" && !reducedMotion()) this.lampSway = { t0: performance.now() };
   if (id === "lamp" || id === "blamp" || id === "nlamp" || id === "klights") {
     var next = night ? "light" : "dark", which = id === "blamp" ? "the banker's lamp" : (id === "nlamp" ? "the bedside lamp" : (id === "klights" ? "the string lights" : "the lamp"));
     storeMode(next);
@@ -2273,17 +2302,10 @@ Room.prototype.act = function (id) {
     return;
   }
   var lines = {
-    window: (night
-      ? "The Hudson at night, from the northwest Bronx. The GWB is lit up to the south."
-      : "The Hudson and the Palisades, from the northwest Bronx. The George Washington Bridge is to the south.")
-      + (night ? " The cacti on the sill look sleepy." : " The cacti on the sill look happy.")
-      + (this.plane ? " A plane is on its way down to Newark." : ""),
     clock: "The clock says " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ". It's right.",
-    record: "You put a record on.",
     portrait: "A poster of Ryan.",
     shelf: "The bookshelf appears to be a kind of archive of Ryan's life.",
-    radio: "The receiver's broken. It won't turn on.",
-    contact: "You open the Rolodex to Ryan's card.",
+    contact: this.answered ? "You pick up. Wrong number. You open the Rolodex to Ryan's card." : "You open the Rolodex to Ryan's card.",
     // bedroom
     bshelf: "Every book Ryan owns, sorted by what it's about.",
     desk: this.coffeeAt && Date.now() - this.coffeeAt < COFFEE_HOT ? "A mid-century walnut desk. There's a fresh coffee from the kitchen and a notebook with cursive scrawled notes written hastily." : "A mid-century walnut desk. There's half-drunk coffee and a notebook with cursive scrawled notes written hastily.",
@@ -2299,6 +2321,7 @@ Room.prototype.act = function (id) {
   var opener = document.activeElement;
   this.setState({ zone: ZONE_FOR[id] || null, open: PANELS[id] ? id : null, focusId: id });
   this.say(lines[id]);
+  this.answered = false;
   if (PANELS[id]) {
     this.opener = opener;
     if (this.kbd) this.dom.panels[id].focus({ preventScroll: true });
@@ -2463,9 +2486,10 @@ Room.prototype.frame = function () {
     var key = px == null ? null : px + ":" + planeBlink();
     if (key !== this.planeKey) { this.planeKey = key; this.planeX = px; if (this.state.scene === "room") this.dirty = true; }
   }
-  if (this.spin || this.watering || this.regrow) this.dirty = true;
+  var anim = this.spin || this.watering || this.regrow || this.clockSpin || this.lampSway;
+  if (anim) this.dirty = true;
   if (this.dirty) { this.dirty = false; this.paint(); }
-  if (this.fluffing || this.plane || this.door || this.spin || this.watering || this.regrow) this.tick();
+  if (this.fluffing || this.plane || this.door || anim) this.tick();
 };
 
 // Every so often a plane crosses the window, heading southwest and down toward Newark.
@@ -2822,6 +2846,71 @@ Room.prototype.watchScreen = function () {
   }, 100);
 };
 
+// The living room's other moving parts, drawn over the room each paint: the window's sash when it's open, the record
+// spinning (strobe dots marching, the arm on the record, notes floating up), the receiver crackling to life for a
+// moment, the arc lamp's shade swinging after its chain is pulled, and the phone ringing.
+Room.prototype.drawLiving = function (put, setCur, now, still) {
+  var x, k = Math.floor(now / 150);
+  if (this.livingWin) { setCur(OBJ.window); for (x = 15; x < 95; x++) { put(x, 50, C.teakL); put(x, 51, C.teak); } }
+  if (this.playing) {
+    setCur(OBJ.record);
+    var TSIL = [190, 190, 194], TDK = [18, 18, 20];
+    for (x = 207; x < 225; x++) { put(x, 84, (x + (still ? 0 : k)) % 2 ? TSIL : TDK); put(x, 86, (x + (still ? 0 : k)) % 2 ? TDK : TSIL); }
+    put(229, 84, TSIL); put(227, 84, TSIL); put(225, 84, TSIL); put(224, 85, TSIL); put(226, 85, [30, 30, 32]); put(228, 85, [30, 30, 32]);
+    if (!still) for (var nn = 0; nn < 3; nn++) {
+      var ph = (now / 2400 + nn / 3) % 1, nx = Math.round(214 + nn * 6 + Math.sin(ph * 6 + nn) * 2), ny = Math.round(80 - ph * 26);
+      setCur(0); put(nx + 2, ny, C.goldL); put(nx + 2, ny + 1, C.goldL); put(nx + 2, ny + 2, C.goldL); put(nx, ny + 3, C.gold); put(nx + 1, ny + 3, C.gold); put(nx + 1, ny + 2, C.gold); put(nx + 3, ny, C.goldL);
+    }
+  }
+  if (this.crackle) {
+    var ct = now - this.crackle.t0;
+    if (ct > 1300) this.crackle = null;
+    else if (Math.floor(ct / 80) % 3) {
+      setCur(OBJ.radio);
+      for (x = 163; x < 190; x++) { put(x, 83, [242, 200, 120]); put(x, 84, [242, 200, 120]); put(x, 85, x % 2 ? [242, 200, 120] : [70, 60, 40]); }
+      var nx2 = 166 + Math.floor((ct * 7919) % 21); put(nx2, 83, C.rust); put(nx2, 84, C.rust); put(nx2, 85, C.rust);
+    }
+  }
+  if (this.lampSway) {
+    // the shade (and the bit of wall behind it) slides side to side, settling over about a second
+    var lt = now - this.lampSway.t0, dx = Math.round(Math.sin(lt / 130) * 1.6 * Math.max(0, 1 - lt / 1100));
+    if (lt > 1100) this.lampSway = null;
+    else if (dx) {
+      var B = this.buf, sc = this.scene;
+      for (var yy = 38; yy < 53; yy++) for (x = 221; x < 256; x++) {
+        var d = yy * SW + x, sidx = yy * SW + x - dx;
+        B.col[d * 3] = sc.col[sidx * 3]; B.col[d * 3 + 1] = sc.col[sidx * 3 + 1]; B.col[d * 3 + 2] = sc.col[sidx * 3 + 2]; B.emis[d] = sc.emis[sidx]; B.obj[d] = sc.obj[sidx];
+      }
+    }
+  }
+  if (this.ringing) {
+    var rt = now - this.ringing.t0;
+    if (rt > 8000) { this.ringing = null; this.ringAt = now + 240000 + Math.random() * 240000; if (this.state.say === "The phone's ringing.") this.say("The phone stops ringing."); }
+    else if (still || Math.floor(rt / 150) % 2) {
+      setCur(OBJ.contact);
+      [[262, 108], [261, 110], [262, 112], [306, 108], [307, 110], [306, 112]].forEach(function (p) { put(p[0], p[1], [36, 34, 30]); });
+    }
+  }
+  if (!this.ringing && this.state.scene === "room" && !this.state.open && !this.state.zone) {
+    if (!this.ringAt) this.ringAt = now + 60000 + Math.random() * 60000;
+    if (now >= this.ringAt) { this.ringing = { t0: now }; this.say("The phone's ringing."); }
+  }
+};
+Room.prototype.roomKey = function (now) {
+  return (this.livingWin ? Math.floor(now / 120) : "") + "/" + (this.playing ? Math.floor(now / 150) : "") + "/" + (this.ringing ? Math.floor(now / 150) : "") + "/" + (this.crackle ? Math.floor(now / 80) : "");
+};
+// While the window's open, a record's playing, the receiver crackles or the phone rings, check every 80ms and repaint
+// when a frame changes.
+Room.prototype.watchRoom = function () {
+  var self = this;
+  if (this.roomTimer) return;
+  this.roomTimer = setTimeout(function () {
+    self.roomTimer = 0;
+    if (self.state.scene !== "room" || document.hidden) return;
+    if (self.roomKey(performance.now()) !== self.roomShown) self.kick(); else self.watchRoom();
+  }, 80);
+};
+
 // While the living room is on screen, repaint on the next tick of the clock (each second, or each minute with reduced
 // motion).
 Room.prototype.watchClock = function (still) {
@@ -2843,11 +2932,12 @@ Room.prototype.roomImage = function (hv) {
   var put = function (x, y, c) { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= SW || y >= SH) return; var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 0; obj[i] = cur; };
   var setCur = function (v) { cur = v; };
   for (var y = FLOOR; y < SH; y++) for (var x = 0; x < SW; x++) put(x, y, C.rug);
-  var maxB = 5, GW = this.GW;
+  var maxB = 5, GW = this.GW, still = reducedMotion(), now = performance.now(), wind = this.livingWin && !still;
   for (var n = 0; n < this.strands.length; n++) {
     var st = this.strands[n];
     var gi = Math.min(this.GH - 1, (st.y / CELL) | 0) * GW + ((st.x / CELL) | 0);
-    var fx = this.bx[gi] * st.give, fy = this.by[gi] * st.give;
+    // with the window open, a breeze ripples across the shag, strongest near the window
+    var fx = this.bx[gi] * st.give + (wind ? Math.sin(now / 420 - st.x * 0.05 + st.y * 0.08) * 2.4 * (1.3 - st.x / SW) : 0), fy = this.by[gi] * st.give;
     var shade = Math.max(-1, Math.min(1, (this.by[gi] + this.bx[gi] * 0.45) / maxB));
     var rootEnd = 0.3 - shade * 0.25, hi = shade > 0.35 ? 2 : (shade < -0.4 ? 0 : 1);
     var shown = Math.max(2, Math.round(st.len * (1 - Math.min(0.3, Math.hypot(fx, fy) / (maxB * 3))))), lf = st.len - 1;
@@ -2857,16 +2947,22 @@ Room.prototype.roomImage = function (hv) {
     }
   }
   if (this.planeX != null) drawPlane(this.planeX, mode === "dark", col, emis, obj);
-  var still = reducedMotion();
-  drawClock(put, setCur, new Date(), still);
+  // the clock spins forward an hour into place when tapped
+  var cs = this.clockSpin, back = 0;
+  if (cs) { var cp = Math.min(1, (now - cs.t0) / 1200); back = Math.pow(1 - cp, 2) * 3600000; if (cp >= 1) this.clockSpin = null; }
+  drawClock(put, setCur, new Date(Date.now() - back), still);
   this.watchClock(still);
-  var now = performance.now(), sp = this.spin, wt = this.watering;
+  this.drawLiving(put, setCur, now, still);
+  var sp = this.spin, wt = this.watering;
   var chair = 1, pour = -1;
   if (sp) { var pp = Math.min(1, (now - sp.t0) / 1500); chair = Math.cos(Math.PI * 2 * 3 * (1 - Math.pow(1 - pp, 3))); if (pp >= 1) { this.spin = null; chair = 1; } }
   if (wt) { pour = (now - wt.t0) / 1100; if (pour >= 1) { this.watering = null; pour = -1; } }
   var grow = 1, rg = this.regrow;
   if (rg) { grow = Math.min(1, (now - rg.t0) / 900); if (grow >= 1) this.regrow = null; grow = 1 - Math.pow(1 - grow, 2); }
-  drawFront(put, setCur, this.state.open === "contact", { chair: Math.round(chair * 12) / 12 || 0.08, plant: this.plantStage(), pour: pour, grow: grow });
+  drawFront(put, setCur, this.state.open === "contact", { chair: Math.round(chair * 12) / 12 || 0.08, plant: this.plantStage(), pour: pour, grow: grow,
+    sway: wind ? Math.sin(now / 520) * 2 : (this.playing && !still ? (Math.floor(now / 330) % 2 ? 1 : -1) : 0) });
+  this.roomShown = this.roomKey(now);
+  if (!still && (this.livingWin || this.playing || this.ringing || this.crackle)) this.watchRoom();
   return composite(col, emis, obj, this.light, hv, B.img);
 };
 
