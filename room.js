@@ -19,7 +19,7 @@ var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122,
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
 // Object ids painted into the scene, used for in-scene highlights.
-var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21, nlamp: 22, map: 23, outlet: 33, fridge: 24, stove: 25, sink: 26, fruit: 27, recipes: 28, coffee: 29, kprint: 30, klights: 31, kwindow: 32 };
+var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21, nlamp: 22, map: 23, outlet: 33, kettle: 34, fridge: 24, stove: 25, sink: 26, fruit: 27, recipes: 28, coffee: 29, kprint: 30, klights: 31, kwindow: 32 };
 
 function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
@@ -1245,6 +1245,19 @@ function makeKitchen(mode, ks) {
   rect(67, 75, 3, 2, CHR); put(67, 75, [232, 234, 238]);
   put(59, 82, RDD); put(59, 83, RDD); put(77, 82, RDD); put(77, 83, RDD);
 
+  // and Ryan's blue Le Creuset kettle on the front burner: round enamel body, a tiered lid with a steel knob, a black
+  // grip on steel arms, and a black whistle cap on the spout (pointing right, clear of the stove's clock)
+  cur = OBJ.kettle;
+  var KB = [74, 158, 190], KBL = [134, 202, 224], KBD = [44, 112, 146], KBX = [32, 84, 112], STL = [206, 210, 214], BLK = [28, 28, 30];
+  rect(96, 71, 1, 9, STL); rect(86, 71, 1, 9, STL); put(95, 79, STL); put(87, 79, STL);
+  rect(86, 69, 11, 2, BLK); rect(87, 68, 9, 1, BLK); rect(89, 69, 7, 1, [70, 70, 74]);
+  rect(90, 74, 3, 1, STL); put(91, 75, STL); put(92, 74, [240, 242, 244]);
+  rect(88, 76, 7, 1, KBL); rect(87, 77, 9, 1, KB); rect(87, 78, 9, 1, KBD);
+  rect(86, 79, 11, 1, KB); rect(85, 80, 13, 6, KB); rect(85, 86, 13, 1, KBD); rect(86, 87, 11, 1, KBX); rect(87, 88, 9, 1, KBX);
+  rect(94, 81, 2, 3, KBL); put(93, 81, KBL); rect(86, 80, 1, 6, KBD);
+  [[98, 83], [99, 82], [100, 81], [101, 80]].forEach(function (q) { put(q[0], q[1], KB); put(q[0], q[1] + 1, KBD); });
+  rect(102, 78, 2, 2, BLK); put(101, 79, BLK); put(104, 79, BLK);
+
   // mint fridge with rounded shoulders: freezer on top, chrome handles and badge, a grille at the foot
   cur = OBJ.fridge;
   var MT = [178, 214, 198], MTL = [206, 232, 220], MTD = [140, 178, 162];
@@ -1429,6 +1442,7 @@ var HOTS = [
   { id: "kwindow", scene: "kitchen", name: "the window", verb: "Look out", x: 147, y: 17, w: 62, h: 57 },
   { id: "fridge", scene: "kitchen", name: "the fridge", verb: "Open", x: 3, y: 23, w: 52, h: 108 },
   { id: "stove", scene: "kitchen", name: "the stove", verb: "Look at", x: 55, y: 73, w: 48, h: 58 },
+  { id: "kettle", scene: "kitchen", name: "the kettle", verb: "Put on", x: 83, y: 67, w: 23, h: 22 },
   { id: "coffee", scene: "kitchen", name: "the coffee setup", verb: "Make coffee at", x: 248, y: 64, w: 58, h: 68 },
   { id: "sink", scene: "kitchen", name: "the sink", verb: "Use", x: 157, y: 78, w: 42, h: 18 },
   { id: "outlet", scene: "kitchen", name: "the nightlight", verb: "Look at", x: 138, y: 65, w: 10, h: 18 },
@@ -1463,7 +1477,7 @@ var ZONES = {
   recipes: { x: 176, y: 54, w: 92, h: 50 },
   coffee: { x: 240, y: 8, w: 72, h: 126 }
 };
-var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", fridge: "fridge", stove: "stove", sink: "sink", kwindow: "sink", outlet: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
+var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", fridge: "fridge", stove: "stove", kettle: "stove", sink: "sink", kwindow: "sink", outlet: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
 var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1, recipes: 1 };
 
@@ -2163,6 +2177,14 @@ Room.prototype.act = function (id) {
     this.kick();
     return;
   }
+  if (id === "kettle") {
+    var hot = !!this.kettle;
+    this.kettle = hot ? null : { t0: performance.now() };
+    this.setState({ zone: ZONE_FOR.stove, open: null, focusId: id });
+    this.say(hot ? "You take the kettle off the heat." : "Ryan's blue Le Creuset kettle. You put it on.");
+    this.kick();
+    return;
+  }
   if (id === "stove") {
     var on = !!this.stove, boiled = on && this.stove.boiled;
     this.stove = on ? null : { t0: performance.now() };
@@ -2606,7 +2628,18 @@ function drawStove(col, emis, obj, f) {
 
 // Making coffee at the cart (BREW ms): the grinder chatters through its beans, a shot drips into a cup under the
 // espresso machine, and the steam wand puffs. Running the tap (TAP ms): water streams from the faucet into the sink.
-var BREW = 3200, TAP = 2400;
+var BREW = 3200, TAP = 2400, WHISTLE = 4500;
+// The kettle on the heat (t ms): a blue flame under it, then once it's boiling a jet of steam from the spout.
+function drawKettle(col, emis, t) {
+  var put = function (x, y, c, a) { var i = y * SW + x, k = a == null ? 1 : a; for (var j = 0; j < 3; j++) col[i * 3 + j] += (c[j] - col[i * 3 + j]) * k; if (a == null) emis[i] = 1; };
+  var k = Math.floor(t / 90);
+  for (var x = 85; x < 98; x++) { var fl = (x * 7 + k) % 5; put(x, 89, fl < 2 ? [120, 170, 255] : (fl === 2 ? [60, 110, 230] : [90, 140, 250])); }
+  if (t < WHISTLE) return;
+  for (var n = 0; n < 6; n++) {
+    var ph = ((t - WHISTLE) / 700 + n / 6) % 1, sx = Math.round(103 + ph * 10), sy = Math.round(77 - ph * 12 + Math.sin(ph * 6 + n));
+    for (var dy = 0; dy < 2; dy++) for (var dx = 0; dx < 2; dx++) put(sx + dx, sy + dy, [246, 248, 250], 0.85 * (1 - ph));
+  }
+}
 function drawBrew(col, emis, t) {
   var put = function (x, y, c) { var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 0; };
   var k = Math.floor(t / 80), x, y;
@@ -2650,11 +2683,12 @@ Room.prototype.kitchenAnim = function (now, still) {
     stove: this.stove ? stoveFrame(now - this.stove.t0, still) : null,
     brew: this.brew && !still && now - this.brew.t0 < BREW ? now - this.brew.t0 : -1,
     tap: this.tap && !still && now - this.tap.t0 < TAP ? now - this.tap.t0 : -1,
+    kettle: this.kettle ? (still ? WHISTLE : now - this.kettle.t0) : -1,
     perch: this.perchFrame(now, still),
     twinkle: this.mode() === "dark" && !still ? Math.floor(now / 700) : -1
   };
 };
-function kitchenKey(a) { return stoveKey(a.stove) + "|" + (a.brew >= 0 ? Math.floor(a.brew / 80) : "") + "|" + (a.tap >= 0 ? Math.floor(a.tap / 80) : "") + "|" + (a.perch || "") + "|" + a.twinkle; }
+function kitchenKey(a) { return stoveKey(a.stove) + "|" + (a.brew >= 0 ? Math.floor(a.brew / 80) : "") + "|" + (a.tap >= 0 ? Math.floor(a.tap / 80) : "") + "|" + (a.perch || "") + "|" + a.twinkle + "|" + (a.kettle >= 0 ? Math.floor(a.kettle / 90) : ""); }
 
 // A pigeon drops onto the fire escape outside the kitchen window for a while (from 20 to 60 seconds of every two
 // minutes), pecking at the rail; at night it's asleep there.
@@ -2689,6 +2723,10 @@ Room.prototype.kitchenImage = function (hv) {
     var q = bl[1] * SW + bl[0]; B.col[q * 3] = bl[2][0] * 0.45; B.col[q * 3 + 1] = bl[2][1] * 0.45; B.col[q * 3 + 2] = bl[2][2] * 0.45;
   });
   if (a.tap >= 0) drawTap(B.col, B.emis, a.tap);
+  if (a.kettle >= 0) {
+    drawKettle(B.col, B.emis, a.kettle);
+    if (a.kettle >= WHISTLE && !this.kettle.whistled) { this.kettle.whistled = true; if (this.state.scene === "kitchen") this.say("The kettle's whistling."); }
+  }
   this.kitchenShown = kitchenKey(a);
   // keep an eye on the kitchen while it's on screen: the pigeon comes and goes on its own schedule
   if (!still) this.watchKitchen();
@@ -3018,6 +3056,7 @@ Room.prototype.roomImage = function (hv) {
 // Objects drawn in front of another one, which its hover outline leaves alone.
 var FRONT_OF = {};
 FRONT_OF[OBJ.desk] = [OBJ.dchair, OBJ.apple, OBJ.blamp];
+FRONT_OF[OBJ.stove] = [OBJ.kettle];
 
 // Light the color buffer, then highlight and outline the hovered object.
 function composite(col, emis, obj, L, hv, img) {
@@ -3107,8 +3146,8 @@ Room.prototype.render = function () {
 
   var lampVerb = mode === "dark" ? "Turn off" : "Turn on";
   var hall = s.scene === "hall", isLamp = function (id) { return id === "lamp" || id === "blamp" || id === "nlamp" || id === "klights"; };
-  var deadPlant = this.plantStage() >= 5, winOpen = this.winOpen;
-  var verbOf = function (h) { return isLamp(h.id) ? lampVerb : (h.id === "plant" && deadPlant ? "Replace" : (h.id === "bwindow" && winOpen ? "Close" : h.verb)); };
+  var deadPlant = this.plantStage() >= 5, winOpen = this.winOpen, kettleOn = !!this.kettle;
+  var verbOf = function (h) { return isLamp(h.id) ? lampVerb : (h.id === "plant" && deadPlant ? "Replace" : (h.id === "bwindow" && winOpen ? "Close" : (h.id === "kettle" && kettleOn ? "Take off" : h.verb))); };
   this.stage.classList.toggle("in-hall", hall);
   this.stage.classList.toggle("in-bedroom", s.scene === "bedroom");
   this.stage.classList.toggle("in-kitchen", s.scene === "kitchen");
