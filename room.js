@@ -3064,8 +3064,9 @@ Room.prototype.camera = function () {
   tx = area.x + area.w / 2 - (z.x + z.w / 2) * S;
   ty = area.y + area.h / 2 - (z.y + z.h / 2) * S;
   // Don't slide past the room's edges (the window and plant sit at the far left); the object goes off-center instead.
-  // Edges the panel covers don't count.
-  var right = panel && !narrow ? area.w : vw, bottom = panel && narrow ? area.h : vh;
+  // Edges the panel or the menu covers don't count: the room's bottom edge stops at the top of the menu, so things at
+  // the bottom (the snake plant, the rug, the bed's foot) stay in view.
+  var right = panel && !narrow ? area.w : vw, bottom = area.y + area.h;
   if (SW * S >= right) tx = Math.min(0, Math.max(right - SW * S, tx));
   if (SH * S >= bottom) ty = Math.min(0, Math.max(bottom - SH * S, ty));
   this.split = Math.round(ty + floorY * S);
