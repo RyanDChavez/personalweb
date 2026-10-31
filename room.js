@@ -1250,7 +1250,7 @@ function makeKitchen(mode, ks) {
   cur = OBJ.kettle;
   var KB = [74, 158, 190], KBL = [134, 202, 224], KBD = [44, 112, 146], KBX = [32, 84, 112], STL = [206, 210, 214], BLK = [28, 28, 30];
   rect(95, 74, 1, 5, STL); rect(87, 74, 1, 5, STL); put(95, 79, STL); put(87, 79, STL);
-  rect(87, 72, 9, 2, BLK); rect(88, 71, 7, 1, BLK); rect(89, 72, 5, 1, [70, 70, 74]);
+  rect(87, 73, 9, 1, BLK);
   rect(90, 74, 3, 1, STL); put(91, 75, STL); put(92, 74, [240, 242, 244]);
   rect(88, 76, 7, 1, KBL); rect(87, 77, 9, 1, KB); rect(87, 78, 9, 1, KBD);
   rect(86, 79, 11, 1, KB); rect(85, 80, 13, 6, KB); rect(85, 86, 13, 1, KBD); rect(86, 87, 11, 1, KBX); rect(87, 88, 9, 1, KBX);
@@ -1442,7 +1442,7 @@ var HOTS = [
   { id: "kwindow", scene: "kitchen", name: "the window", verb: "Look out", x: 147, y: 17, w: 62, h: 57 },
   { id: "fridge", scene: "kitchen", name: "the fridge", verb: "Open", x: 3, y: 23, w: 52, h: 108 },
   { id: "stove", scene: "kitchen", name: "the stove", verb: "Look at", x: 55, y: 73, w: 48, h: 58 },
-  { id: "kettle", scene: "kitchen", name: "the kettle", verb: "Put on", x: 83, y: 70, w: 23, h: 19 },
+  { id: "kettle", scene: "kitchen", name: "the kettle", verb: "Put on", x: 83, y: 71, w: 23, h: 18 },
   { id: "coffee", scene: "kitchen", name: "the coffee setup", verb: "Make coffee at", x: 248, y: 64, w: 58, h: 68 },
   { id: "sink", scene: "kitchen", name: "the sink", verb: "Use", x: 157, y: 78, w: 42, h: 18 },
   { id: "outlet", scene: "kitchen", name: "the nightlight", verb: "Look at", x: 138, y: 65, w: 10, h: 18 },
