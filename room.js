@@ -384,7 +384,7 @@ function drawClock(put, setCur, now, still) {
 
 // fx: the chair's spin (cos of its turn, 1 when still), the plant's stage (0 fine, 1-2 watered, 3-4 drooping, 5 dead)
 // the watering can's pour (0..1, or -1), a new plant's leaves growing in (0..1, 1 when grown), and how far its leaf
-// tips lean (sway, in pixels: the breeze from the window, or bobbing to a record).
+// tips lean (sway, in pixels: bobbing to a record).
 function drawFront(put, setCur, rdxOpen, fx) {
   var x, y, i, flat = put;
   function rect(rx, ry, w, h, c) { for (var j = ry; j < ry + h; j++) for (var k = rx; k < rx + w; k++) put(k, j, c); }
@@ -2264,14 +2264,6 @@ Room.prototype.act = function (id) {
     this.kick();
     return;
   }
-  if (id === "window") {
-    this.livingWin = !this.livingWin;
-    this.setState({ zone: ZONE_FOR.window, open: null, focusId: id });
-    this.say(this.livingWin ? (night ? "The Hudson at night, from the northwest Bronx. The GWB is lit up to the south." : "The Hudson and the Palisades, from the northwest Bronx. The George Washington Bridge is to the south.")
-      + (this.plane ? " A plane is on its way down to Newark." : "") + " You open the window and a breeze comes in off the river." : "You close the window.");
-    this.kick();
-    return;
-  }
   if (id === "record") {
     this.playing = !this.playing;
     this.setState({ zone: ZONE_FOR.record, open: null, focusId: id });
@@ -2310,6 +2302,11 @@ Room.prototype.act = function (id) {
     return;
   }
   var lines = {
+    window: (night
+      ? "The Hudson at night, from the northwest Bronx. The GWB is lit up to the south."
+      : "The Hudson and the Palisades, from the northwest Bronx. The George Washington Bridge is to the south.")
+      + (night ? " The cacti on the sill look sleepy." : " The cacti on the sill look happy.")
+      + (this.plane ? " A plane is on its way down to Newark." : ""),
     clock: "The clock says " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ". It's right.",
     portrait: "A poster of Ryan.",
     shelf: "The bookshelf appears to be a kind of archive of Ryan's life.",
@@ -2885,12 +2882,11 @@ Room.prototype.watchScreen = function () {
   }, 100);
 };
 
-// The living room's other moving parts, drawn over the room each paint: the window's sash when it's open, the record
+// The living room's other moving parts, drawn over the room each paint: the record
 // spinning (strobe dots marching, the arm on the record, notes floating up), the receiver crackling to life for a
 // moment, the arc lamp's shade swinging after its chain is pulled, and the phone ringing.
 Room.prototype.drawLiving = function (put, setCur, now, still) {
   var x, k = Math.floor(now / 150);
-  if (this.livingWin) { setCur(OBJ.window); for (x = 15; x < 95; x++) { put(x, 50, C.teakL); put(x, 51, C.teak); } }
   if (this.playing) {
     setCur(OBJ.record);
     var TSIL = [190, 190, 194], TDK = [18, 18, 20];
@@ -2936,9 +2932,9 @@ Room.prototype.drawLiving = function (put, setCur, now, still) {
   }
 };
 Room.prototype.roomKey = function (now) {
-  return (this.livingWin ? Math.floor(now / 120) : "") + "/" + (this.playing ? Math.floor(now / 150) : "") + "/" + (this.ringing ? Math.floor(now / 150) : "") + "/" + (this.crackle ? Math.floor(now / 80) : "");
+  return (this.playing ? Math.floor(now / 150) : "") + "/" + (this.ringing ? Math.floor(now / 150) : "") + "/" + (this.crackle ? Math.floor(now / 80) : "");
 };
-// While the window's open, a record's playing, the receiver crackles or the phone rings, check every 80ms and repaint
+// While a record's playing, the receiver crackles or the phone rings, check every 80ms and repaint
 // when a frame changes.
 Room.prototype.watchRoom = function () {
   var self = this;
@@ -2971,12 +2967,11 @@ Room.prototype.roomImage = function (hv) {
   var put = function (x, y, c) { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= SW || y >= SH) return; var i = y * SW + x; col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2]; emis[i] = 0; obj[i] = cur; };
   var setCur = function (v) { cur = v; };
   for (var y = FLOOR; y < SH; y++) for (var x = 0; x < SW; x++) put(x, y, C.rug);
-  var maxB = 5, GW = this.GW, still = reducedMotion(), now = performance.now(), wind = this.livingWin && !still;
+  var maxB = 5, GW = this.GW, still = reducedMotion(), now = performance.now();
   for (var n = 0; n < this.strands.length; n++) {
     var st = this.strands[n];
     var gi = Math.min(this.GH - 1, (st.y / CELL) | 0) * GW + ((st.x / CELL) | 0);
-    // with the window open, a breeze ripples across the shag, strongest near the window
-    var fx = this.bx[gi] * st.give + (wind ? Math.sin(now / 420 - st.x * 0.05 + st.y * 0.08) * 2.4 * (1.3 - st.x / SW) : 0), fy = this.by[gi] * st.give;
+    var fx = this.bx[gi] * st.give, fy = this.by[gi] * st.give;
     var shade = Math.max(-1, Math.min(1, (this.by[gi] + this.bx[gi] * 0.45) / maxB));
     var rootEnd = 0.3 - shade * 0.25, hi = shade > 0.35 ? 2 : (shade < -0.4 ? 0 : 1);
     var shown = Math.max(2, Math.round(st.len * (1 - Math.min(0.3, Math.hypot(fx, fy) / (maxB * 3))))), lf = st.len - 1;
@@ -2999,9 +2994,9 @@ Room.prototype.roomImage = function (hv) {
   var grow = 1, rg = this.regrow;
   if (rg) { grow = Math.min(1, (now - rg.t0) / 900); if (grow >= 1) this.regrow = null; grow = 1 - Math.pow(1 - grow, 2); }
   drawFront(put, setCur, this.state.open === "contact", { chair: Math.round(chair * 12) / 12 || 0.08, plant: this.plantStage(), pour: pour, grow: grow,
-    sway: wind ? Math.sin(now / 520) * 2 : (this.playing && !still ? (Math.floor(now / 330) % 2 ? 1 : -1) : 0) });
+    sway: this.playing && !still ? (Math.floor(now / 330) % 2 ? 1 : -1) : 0 });
   this.roomShown = this.roomKey(now);
-  if (!still && (this.livingWin || this.playing || this.ringing || this.crackle)) this.watchRoom();
+  if (!still && (this.playing || this.ringing || this.crackle)) this.watchRoom();
   return composite(col, emis, obj, this.light, hv, B.img);
 };
 
