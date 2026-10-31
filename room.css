@@ -189,6 +189,15 @@ body { margin: 0; background: #1C251B; }
 .printout-ring { position: absolute; right: 22px; bottom: 36px; width: 74px; height: 74px; border-radius: 50%; border: 5px solid rgba(132, 92, 52, 0.22); border-left-color: rgba(132, 92, 52, 0.12); pointer-events: none; }
 .recipe-link { align-self: flex-start; min-height: 44px; padding: 0 14px; display: inline-flex; align-items: center; background: var(--hud); color: var(--hudInk); font-family: Silkscreen, monospace; font-size: 12px; text-decoration: none; }
 
+/* the back of the Dodgers pennant: blue felt with a printed-out meme taped on, a little crooked */
+.pennant-body { padding: 22px 18px 28px; }
+.pennant-back { background: repeating-linear-gradient(135deg, #1A54A4 0 3px, #12428A 3px 4px); padding: 26px 20px 30px; box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3); }
+.meme { position: relative; margin: 0 auto; max-width: 420px; padding: 8px; background: #F6F4EE; transform: rotate(-1.5deg); box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.35); }
+.meme img { display: block; width: 100%; height: auto; filter: contrast(0.92) saturate(0.85); }
+.tape { position: absolute; top: -9px; width: 64px; height: 20px; background: rgba(236, 226, 190, 0.78); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12); }
+.tape-l { left: -14px; transform: rotate(-32deg); }
+.tape-r { right: -14px; transform: rotate(28deg); }
+
 /* Rolodex */
 .contact-body { padding-bottom: 24px; gap: 14px; }
 .rolodex { position: relative; padding-top: 22px; }
