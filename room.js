@@ -19,7 +19,7 @@ var RUG = [[[31, 42, 30], [51, 66, 50], [79, 106, 76]], [[44, 58, 42], [94, 122,
 var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(function (v) { return (v + 0.5) / 16; });
 
 // Object ids painted into the scene, used for in-scene highlights.
-var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21, nlamp: 22, map: 23, outlet: 33, kettle: 34, fridge: 24, stove: 25, sink: 26, fruit: 27, recipes: 28, coffee: 29, kprint: 30, klights: 31, kwindow: 32 , cactus: 35, pkg: 36 };
+var OBJ = { window: 1, shelf: 2, clock: 3, radio: 4, record: 5, portrait: 6, lamp: 7, chair: 8, contact: 9, plant: 11, door: 12, bell: 13, bwindow: 14, bshelf: 15, desk: 16, blamp: 17, dchair: 18, bass: 19, apple: 20, bed: 21, nlamp: 22, map: 23, outlet: 33, kettle: 34, fridge: 24, stove: 25, sink: 26, fruit: 27, recipes: 28, coffee: 29, kprint: 30, klights: 31, kwindow: 32 , cactus: 35, pkg: 36 , pennant: 37 };
 
 function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
 function mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
@@ -829,8 +829,8 @@ function makeBedroom(mode) {
 
   ox = 0;
   // a Dodgers pennant on the wall right of the window: blue felt, "Dodgers" in white script, a white band with
-  // tassels at the hanging edge, pinned with a brass tack
-  cur = 0;
+  // tassels at the hanging edge, pinned with a brass tack (there's something taped to the back)
+  cur = OBJ.pennant;
   var DB = [26, 84, 164], DBD = [18, 66, 136], FW = [240, 240, 236], FWD = [206, 206, 200];
   var PL = 279, PR = 318, PT = 24, PB = 44, PM = (PT + PB) / 2;
   for (x = PL; x <= PR; x++) {
@@ -1440,6 +1440,7 @@ var HOTS = [
   { id: "desk", scene: "bedroom", name: "the desk", verb: "Look at", x: 80, y: 86, w: 108, h: 54 },
   { id: "dchair", scene: "bedroom", name: "the desk chair", verb: "Sit in", x: 108, y: 96, w: 36, h: 41 },
   { id: "apple", scene: "bedroom", name: "the computer", verb: "Use", x: 84, y: 56, w: 41, h: 41 },
+  { id: "pennant", scene: "bedroom", name: "the Dodgers pennant", verb: "Flip over", x: 277, y: 21, w: 43, h: 30 },
   { id: "nlamp", scene: "bedroom", name: "the bedside lamp", verb: "Turn on", x: 298, y: 85, w: 18, h: 27 },
   { id: "blamp", scene: "bedroom", name: "the banker's lamp", verb: "Turn on", x: 152, y: 78, w: 26, h: 19 },
   { id: "kprint", scene: "kitchen", name: "the print", verb: "Look at", x: 266, y: 20, w: 35, h: 44 },
@@ -1474,6 +1475,7 @@ var ZONES = {
   bass: { x: 36, y: 60, w: 60, h: 80 },
   bed: { x: 179, y: 68, w: 141, h: 108 },
   desk: { x: 70, y: 50, w: 130, h: 88 },
+  pennant: { x: 252, y: 6, w: 68, h: 56 },
   fridge: { x: 0, y: 18, w: 74, h: 118 },
   stove: { x: 40, y: 56, w: 80, h: 80 },
   sink: { x: 136, y: 14, w: 84, h: 92 },
@@ -1481,9 +1483,9 @@ var ZONES = {
   recipes: { x: 176, y: 54, w: 92, h: 50 },
   coffee: { x: 240, y: 8, w: 72, h: 126 }
 };
-var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", fridge: "fridge", stove: "stove", kettle: "stove", sink: "sink", kwindow: "sink", outlet: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
+var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", pennant: "pennant", fridge: "fridge", stove: "stove", kettle: "stove", sink: "sink", kwindow: "sink", outlet: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
-var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1, recipes: 1 };
+var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1, recipes: 1, pennant: 1 };
 
 // The shelf reads left to right, oldest first: [spine, height, color, ink, kicker, title, paragraph]
 var BOOKS = [
@@ -1827,7 +1829,7 @@ function Room(root) {
   this.canvas = $("room");
   this.dom = {
     action: $("action"), shown: $("say-shown"), caret: $("caret"), live: $("say-live"),
-    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map"), bshelf: $("panel-bshelf"), recipes: $("panel-recipes") },
+    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map"), bshelf: $("panel-bshelf"), recipes: $("panel-recipes"), pennant: $("panel-pennant") },
     libShelf: $("lib-shelf"), libKicker: $("lib-kicker"), libTitle: $("lib-title"), libText: $("lib-text"), libPrev: $("lib-prev"), libNext: $("lib-next"),
     atlas: $("atlas"), atlasWrap: $("atlas-wrap"), atlasTip: $("atlas-tip"), placeTitle: $("place-title"), placeText: $("place-text"), placePrev: $("place-prev"), placeNext: $("place-next"),
     bookKicker: $("book-kicker"), bookTitle: $("book-title"), bookText: $("book-text"), bookPrev: $("book-prev"), bookNext: $("book-next"), needle: $("needle"),
@@ -2358,6 +2360,7 @@ Room.prototype.act = function (id) {
     desk: this.coffeeAt && Date.now() - this.coffeeAt < COFFEE_HOT ? "A mid-century walnut desk. There's a fresh coffee from the kitchen and a notebook with cursive scrawled notes written hastily." : "A mid-century walnut desk. There's a half-finished coffee and a notebook with cursive scrawled notes written hastily.",
     dchair: "A wooden desk chair, pushed in.",
     map: "A world map with a pin in every city Ryan has been to.",
+    pennant: "You flip the Dodgers pennant over. There's a meme printed out and taped to the back.",
     // kitchen
     kwindow: (night ? "Across the courtyard, a water tower on the roof. A few windows are lit." : "Across the courtyard, a water tower on the roof.")
       + (this.perchFrame(performance.now(), true) ? " A pigeon's on the fire escape." : "") + " The herbs on the sill " + ["are just coming up.", "are coming along.", "are filling out.", "are thriving."][this.kitchenState().herbs] ,
