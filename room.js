@@ -3206,6 +3206,8 @@ Room.prototype.render = function () {
       var sp = this.spineEls[s.pick];
       if (sp && sh.scrollWidth > sh.clientWidth) sh.scrollLeft = sp.offsetLeft - sh.offsetLeft - (sh.clientWidth - sp.offsetWidth) / 2;
       if (s.pick < 0) sh.scrollLeft = 0;
+      // and keep the picked book's details in view above the pinned Previous / Next
+      if (s.pick >= 0 && s.vw < 760) d.libKicker.parentNode.scrollIntoView({ block: "nearest", behavior: reducedMotion() ? "auto" : "smooth" });
       this.shownPick = s.pick;
     }
     setText(d.libKicker, pk ? pk[1] : (s.sub < 0 ? "" : sv[0]));
