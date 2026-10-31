@@ -1202,7 +1202,8 @@ function makeKitchen(mode, ks) {
     var BY = [242, 208, 72], ripe = [[0, 0], [0.25, 0.08], [0.6, 0.12]][ks.banana];
     var bc = function (c) { return mix(c, [120, 82, 36], ripe[0]); };
     for (i = 0; i <= 12; i++) {
-      var bx = 124 + i, by = 85 - Math.round(Math.sin(i / 12 * Math.PI) * 4) - Math.round(i * 0.25), spot = ks.banana && (i * 7) % 5 === (ks.banana === 1 ? 2 : 1);
+      // the bunch rests on the apples; as they're eaten it settles down into the bowl
+      var drop = [3, 2, 1, 0][ks.apples], bx = 124 + i - drop * 2, by = 85 + drop - Math.round(Math.sin(i / 12 * Math.PI) * (4 - drop * 0.7)) - Math.round(i * (0.25 - drop * 0.06)), spot = ks.banana && (i * 7) % 5 === (ks.banana === 1 ? 2 : 1);
       put(bx, by, i === 0 || i === 12 ? [92, 70, 30] : (spot ? [96, 66, 30] : bc(BY))); put(bx, by + 1, i === 0 || i === 12 ? [92, 70, 30] : bc(i % 4 === 0 ? [212, 170, 48] : [232, 196, 62]));
       if (i > 1 && i < 11) put(bx, by - 1, bc([250, 226, 120]));
     }
