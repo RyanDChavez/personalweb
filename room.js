@@ -372,7 +372,7 @@ function drawClock(put, setCur, now, still) {
   var hand = function (turn, len, c) { var a = -Math.PI / 2 + turn * Math.PI * 2; for (var k = 0; k <= len * 2; k++) put(CLOCK.x + Math.cos(a) * k / 2, CLOCK.y + Math.sin(a) * k / 2, c); };
   setCur(OBJ.clock);
   hand((h + m / 60) / 12, 4.5, INK);
-  hand((m + sec / 60) / 60, 7, INK);
+  hand((m + (still ? 0 : sec / 60)) / 60, 7, INK); // with reduced motion it moves once a minute, so it sits on the minute
   if (!still) {
     var a = -Math.PI / 2 + sec / 60 * Math.PI * 2;
     hand(sec / 60, 6, SEC);
@@ -2087,6 +2087,10 @@ function Room(root) {
   document.addEventListener("keydown", function () { self.kbd = true; }, true);
   // The computer screen pauses while the tab is hidden; pick it back up on return.
   document.addEventListener("visibilitychange", function () { if (!document.hidden && self.state.scene !== "hall") self.kick(); });
+  // Coming back to the page any other way (restored from the back/forward cache, or the window refocused) repaints
+  // too, so the clock never shows a time from before you left.
+  window.addEventListener("pageshow", function () { self.kick(); });
+  window.addEventListener("focus", function () { self.kick(); });
   document.addEventListener("pointerdown", function () { self.kbd = false; }, true);
 
   // A mouse click or tap shouldn't leave a button focused: a later key press (like Esc) would make the browser
@@ -2318,7 +2322,6 @@ Room.prototype.act = function (id) {
     this.kick();
     return;
   }
-  if (id === "clock" && !reducedMotion()) this.clockSpin = { t0: performance.now() };
   if (id === "contact" && this.ringing) { this.ringing = null; this.ringAt = performance.now() + 240000 + Math.random() * 240000; this.answered = true; }
   if (id === "cactusL" || id === "cactusM" || id === "cactusR") {
     this.setState({ zone: ZONE_FOR.window, open: null, focusId: "window" });
@@ -2559,7 +2562,7 @@ Room.prototype.frame = function () {
     var key = px == null ? null : px + ":" + planeBlink();
     if (key !== this.planeKey) { this.planeKey = key; this.planeX = px; if (this.state.scene === "room") this.dirty = true; }
   }
-  var anim = this.spin || this.watering || this.regrow || this.clockSpin || this.lampSway;
+  var anim = this.spin || this.watering || this.regrow || this.lampSway;
   if (anim) this.dirty = true;
   if (this.dirty) { this.dirty = false; this.paint(); }
   if (this.fluffing || this.plane || this.door || anim) this.tick();
@@ -3078,10 +3081,7 @@ Room.prototype.roomImage = function (hv) {
     }
   }
   if (this.planeX != null) drawPlane(this.planeX, mode === "dark", col, emis, obj);
-  // the clock spins forward an hour into place when tapped
-  var cs = this.clockSpin, back = 0;
-  if (cs) { var cp = Math.min(1, (now - cs.t0) / 1200); back = Math.pow(1 - cp, 2) * 3600000; if (cp >= 1) this.clockSpin = null; }
-  drawClock(put, setCur, new Date(Date.now() - back), still);
+  drawClock(put, setCur, new Date(), still);
   this.watchClock(still);
   this.drawLiving(put, setCur, now, still);
   var sp = this.spin, wt = this.watering;
