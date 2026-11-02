@@ -2340,7 +2340,6 @@ Room.prototype.act = function (id) {
     this.kick();
     return;
   }
-  if (id === "lamp" && !reducedMotion()) this.lampSway = { t0: performance.now() };
   if (id === "lamp" || id === "blamp" || id === "nlamp" || id === "klights") {
     var next = night ? "light" : "dark", which = id === "blamp" ? "the banker's lamp" : (id === "nlamp" ? "the bedside lamp" : (id === "klights" ? "the string lights" : "the lamp"));
     storeMode(next);
@@ -2562,7 +2561,7 @@ Room.prototype.frame = function () {
     var key = px == null ? null : px + ":" + planeBlink();
     if (key !== this.planeKey) { this.planeKey = key; this.planeX = px; if (this.state.scene === "room") this.dirty = true; }
   }
-  var anim = this.spin || this.watering || this.regrow || this.lampSway;
+  var anim = this.spin || this.watering || this.regrow;
   if (anim) this.dirty = true;
   if (this.dirty) { this.dirty = false; this.paint(); }
   if (this.fluffing || this.plane || this.door || anim) this.tick();
@@ -2984,7 +2983,7 @@ Room.prototype.watchScreen = function () {
 
 // The living room's other moving parts, drawn over the room each paint: the record
 // spinning (strobe dots marching, the arm on the record, notes floating up), the receiver crackling to life for a
-// moment, the arc lamp's shade swinging after its chain is pulled, and the phone ringing.
+// moment, and the phone ringing.
 Room.prototype.drawLiving = function (put, setCur, now, still) {
   var x, k = Math.floor(now / 150);
   if (this.playing) {
@@ -3004,18 +3003,6 @@ Room.prototype.drawLiving = function (put, setCur, now, still) {
       setCur(OBJ.radio);
       for (x = 163; x < 190; x++) { put(x, 83, [242, 200, 120]); put(x, 84, [242, 200, 120]); put(x, 85, x % 2 ? [242, 200, 120] : [70, 60, 40]); }
       var nx2 = 166 + Math.floor((ct * 7919) % 21); put(nx2, 83, C.rust); put(nx2, 84, C.rust); put(nx2, 85, C.rust);
-    }
-  }
-  if (this.lampSway) {
-    // the shade (and the bit of wall behind it) slides side to side, settling over about a second
-    var lt = now - this.lampSway.t0, dx = Math.round(Math.sin(lt / 130) * 1.6 * Math.max(0, 1 - lt / 1100));
-    if (lt > 1100) this.lampSway = null;
-    else if (dx) {
-      var B = this.buf, sc = this.scene;
-      for (var yy = 38; yy < 53; yy++) for (x = 221; x < 256; x++) {
-        var d = yy * SW + x, sidx = yy * SW + x - dx;
-        B.col[d * 3] = sc.col[sidx * 3]; B.col[d * 3 + 1] = sc.col[sidx * 3 + 1]; B.col[d * 3 + 2] = sc.col[sidx * 3 + 2]; B.emis[d] = sc.emis[sidx]; B.obj[d] = sc.obj[sidx];
-      }
     }
   }
   if (this.ringing) {
