@@ -3138,6 +3138,12 @@ Room.prototype.camera = function () {
     // The whole room, full width, resting on the HUD: wall fills the space above, rug the space around the HUD.
     S0 = vw / SW;
     tx = 0; ty = vh - hud - SH * S0;
+  } else if (vh / SH > vw / SW * 1.14) {
+    // A tall or squarish desktop window (half of a big monitor, say): filling it would crop more than a tenth off
+    // each side of the room, so fit the room to the width instead, resting on the menu like on a phone, with the wall
+    // carrying on above (or tucked under the menu's edge if there's not quite room).
+    S0 = vw / SW;
+    tx = 0; ty = Math.min(vh - SH * S0, Math.max(0, vh - (s.hud || hud) - SH * S0));
   } else {
     S0 = Math.max(vw / SW, vh / SH);
     tx = (vw - SW * S0) / 2; ty = (vh - SH * S0) / 2;
