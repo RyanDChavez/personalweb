@@ -2325,7 +2325,11 @@ Room.prototype.act = function (id) {
   if (id === "contact" && this.ringing) { this.ringing = null; this.ringAt = performance.now() + 240000 + Math.random() * 240000; this.answered = true; }
   if (id === "cactusL" || id === "cactusM" || id === "cactusR") {
     this.setState({ zone: ZONE_FOR.window, open: null, focusId: "window" });
-    this.say({ cactusL: "Ow. The tall one's prickly.", cactusM: "Ow. Even the little one with the flower.", cactusR: "Ow. The paddle one too." }[id]);
+    // the line follows what you've already poked, whichever order you go in
+    var cname = { cactusL: "tall one", cactusM: "little one with the flower", cactusR: "paddle one" }[id], poked = this.poked = this.poked || {};
+    var again = poked[id], count = Object.keys(poked).length;
+    poked[id] = true;
+    this.say(again ? "You poke the " + cname + " again. Still prickly." : (count === 0 ? "Ow. The " + cname + " is prickly." : (count === 2 ? "Ow. The " + cname + " too. They're all prickly." : "Ow. The " + cname + " too.")));
     if (!reducedMotion()) { var sayEl = this.dom.shown.parentNode; sayEl.classList.remove("ouch"); sayEl.getBoundingClientRect(); sayEl.classList.add("ouch"); }
     return;
   }
