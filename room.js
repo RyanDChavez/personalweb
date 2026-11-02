@@ -1940,17 +1940,17 @@ function Room(root) {
     shelf.appendChild(b);
     self.bookEls.push(b);
   });
-  // The next book isn't written yet: a blank spine at the end that opens the Rolodex.
+  // A blank spine at the end that says hi: it opens the Rolodex.
   var nextBook = el("button", "pbtn spine spine-next");
   nextBook.type = "button";
-  nextBook.setAttribute("aria-label", "Next? Open the Rolodex");
-  nextBook.appendChild(el("span", null, "Next?"));
+  nextBook.setAttribute("aria-label", "Say hi: open the Rolodex");
+  nextBook.appendChild(el("span", null, "Say hi"));
   nextBook.addEventListener("click", function () { self.act("contact"); });
   shelf.appendChild(nextBook);
 
   // Read the shelf in order.
   this.dom.bookPrev.addEventListener("click", function () { self.setState({ book: Math.max(0, self.state.book - 1) }); });
-  // Past the last book the story continues on the Rolodex: what's next is up to whoever's reading.
+  // Past the last book, the Rolodex: a way to say hi.
   this.dom.bookNext.addEventListener("click", function () {
     if (self.state.book >= BOOKS.length - 1) self.act("contact");
     else self.setState({ book: self.state.book + 1 });
@@ -3240,8 +3240,8 @@ Room.prototype.render = function () {
   setText(d.bookKicker, bk[0]); setText(d.bookTitle, bk[1]); setText(d.bookText, bk[2]);
   d.bookPrev.disabled = s.book <= 0;
   var last = s.book >= BOOKS.length - 1;
-  setText(d.bookNext, s.book < 0 ? "Start →" : (last ? "Next?" : "Next →"));
-  if (last) setAttr(d.bookNext, "aria-label", "Next? Open the Rolodex"); else d.bookNext.removeAttribute("aria-label");
+  setText(d.bookNext, s.book < 0 ? "Start →" : (last ? "Say hi →" : "Next →"));
+  if (last) setAttr(d.bookNext, "aria-label", "Say hi: open the Rolodex"); else d.bookNext.removeAttribute("aria-label");
 
   if (open === "bshelf") {
     if (this.shelved !== s.cat + "/" + s.sub) this.shelve(s.cat, s.sub);
