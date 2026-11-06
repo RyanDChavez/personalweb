@@ -198,6 +198,18 @@ body { margin: 0; background: #1C251B; }
 .tape-l { left: -14px; transform: rotate(-32deg); }
 .tape-r { right: -14px; transform: rotate(28deg); }
 
+/* the computer: its green phosphor screen, with the side project on the disk */
+.apple-body { padding: 22px 18px 28px; }
+.crt { background: #0C1A10; border: 10px solid #CCC2A6; border-radius: 6px; box-shadow: inset 0 0 24px rgba(70, 222, 112, 0.18), 5px 5px 0 rgba(0, 0, 0, 0.3); padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 8px; }
+.crt-line { margin: 0; font-family: Silkscreen, monospace; font-size: 14px; letter-spacing: 0.06em; color: #46DE70; text-shadow: 0 0 6px rgba(70, 222, 112, 0.55); }
+.crt-dim { color: #2C9650; }
+.crt-link { align-self: flex-start; margin: 6px 0; padding: 8px 12px; border: 2px solid #46DE70; color: #46DE70; font-family: Silkscreen, monospace; font-size: 15px; letter-spacing: 0.05em; text-decoration: none; text-shadow: 0 0 6px rgba(70, 222, 112, 0.55); }
+@media (hover: hover) { .crt-link:hover { background: #46DE70; color: #0C1A10; text-shadow: none; } }
+.crt-link:focus-visible { outline: 3px solid #E2BF5E; outline-offset: 3px; }
+.crt-cursor { display: inline-block; width: 9px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #46DE70; animation: crtBlink 1.2s steps(1) infinite; }
+@keyframes crtBlink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .crt-cursor { animation: none; } }
+
 /* Rolodex */
 .contact-body { padding-bottom: 24px; gap: 14px; }
 .rolodex { position: relative; padding-top: 22px; }
