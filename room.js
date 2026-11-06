@@ -1487,7 +1487,7 @@ var ZONES = {
 };
 var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", pennant: "pennant", fridge: "fridge", stove: "stove", dutch: "stove", kettle: "stove", sink: "sink", kwindow: "sink", outlet: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
 // The receiver's Now panel is parked until the radio gets a proper interaction.
-var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1, recipes: 1, pennant: 1 };
+var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1, recipes: 1, pennant: 1, apple: 1 };
 
 // The shelf reads left to right, oldest first: [spine, height, color, ink, kicker, title, paragraph]
 var BOOKS = [
@@ -1831,7 +1831,7 @@ function Room(root) {
   this.canvas = $("room");
   this.dom = {
     action: $("action"), shown: $("say-shown"), caret: $("caret"), live: $("say-live"),
-    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map"), bshelf: $("panel-bshelf"), recipes: $("panel-recipes"), pennant: $("panel-pennant") },
+    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map"), bshelf: $("panel-bshelf"), recipes: $("panel-recipes"), pennant: $("panel-pennant"), apple: $("panel-apple") },
     libShelf: $("lib-shelf"), libKicker: $("lib-kicker"), libTitle: $("lib-title"), libText: $("lib-text"), libPrev: $("lib-prev"), libNext: $("lib-next"),
     atlas: $("atlas"), atlasWrap: $("atlas-wrap"), atlasTip: $("atlas-tip"), placeTitle: $("place-title"), placeText: $("place-text"), placePrev: $("place-prev"), placeNext: $("place-next"),
     bookKicker: $("book-kicker"), bookTitle: $("book-title"), bookText: $("book-text"), bookPrev: $("book-prev"), bookNext: $("book-next"), needle: $("needle"),
@@ -2285,9 +2285,13 @@ Room.prototype.act = function (id) {
     return;
   }
   if (id === "apple") {
+    // it boots, and the disk in the drive has Ryan's side project on it
+    var opener = document.activeElement;
     if (!reducedMotion()) this.boot = { t0: performance.now() };
-    this.setState({ zone: ZONE_FOR.apple, open: null, focusId: id });
-    this.say("You switch it off and on again. It boots, then sits at the cursor. Nothing's loaded yet.");
+    this.setState({ zone: ZONE_FOR.apple, open: "apple", focusId: id });
+    this.say("You switch the computer on. There's one program on the disk: rozdzial.com.");
+    this.opener = opener;
+    if (this.kbd) this.dom.panels.apple.focus({ preventScroll: true });
     this.kick();
     return;
   }
