@@ -1765,6 +1765,7 @@ var STATIONS = {
 
 var CARD_ROWS = [
   ["City", "New York, NY"],
+  ["Email", "hello@ryandchavez.com", "mailto:hello@ryandchavez.com"],
   ["Web", "ryandchavez.com", "https://ryandchavez.com"],
   ["LinkedIn", "ryan-d-chavez", "https://www.linkedin.com/in/ryan-d-chavez"],
   ["X", "@ry_and_chavez", "https://x.com/ry_and_chavez"],
@@ -2062,7 +2063,7 @@ function Room(root) {
     if (row.isLink) {
       var a = el("a", "card-v", row.v);
       a.href = row.href;
-      if (row.href.indexOf("https://ryandchavez.com") !== 0) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
+      if (row.href.indexOf("https://ryandchavez.com") !== 0 && row.href.indexOf("mailto:") !== 0) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
       d.appendChild(a);
     } else d.appendChild(el("span", "card-v", row.v));
     card.appendChild(d);
