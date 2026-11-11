@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wrong door · Ryan D. Chavez</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.ico?v=2" sizes="any">
+  <link rel="stylesheet" href="/fonts/fonts.css?v=2">
+  <meta name="theme-color" content="#1D251C">
+  <style>
+    :root { --wall: #D6CDB4; --hud: rgba(29, 37, 28, 0.94); --ink: #EEF0E2; --line: #5E7A58; --gold: #E2BF5E; }
+    @media (prefers-color-scheme: dark) { :root { --wall: #5E594F; --hud: rgba(10, 14, 10, 0.92); --ink: #E6EDD8; --line: #3A4A38; } }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 24px 16px;
+      background: var(--wall);
+      font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; color: var(--ink);
+    }
+    canvas { display: block; width: min(420px, 86vw); height: auto; image-rendering: pixelated; image-rendering: crisp-edges; }
+    .box { width: min(520px, 100%); padding: 16px 18px; background: var(--hud); border: 3px solid var(--line); box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35); display: flex; flex-direction: column; gap: 10px; }
+    .action { font-family: Silkscreen, monospace; font-size: 12px; letter-spacing: 0.05em; color: var(--gold); }
+    .say { margin: 0; font-family: 'Pixelify Sans', monospace; font-size: 20px; line-height: 1.35; }
+    a.back { align-self: flex-start; margin-top: 4px; padding: 10px 14px; background: var(--gold); color: #1D251C; font-family: Silkscreen, monospace; font-size: 12px; letter-spacing: 0.04em; text-decoration: none; }
+    a.back:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    @media (hover: hover) { a.back:hover { transform: translate(-2px, -2px); box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35); } }
+  </style>
+</head>
+
+<body>
+  <canvas id="door" width="120" height="92" role="img" aria-label="A pixel-art apartment door in a hallway, painted maroon, with 404 on its brass number plate."></canvas>
+  <div class="box">
+    <span class="action">Wrong door</span>
+    <p class="say">You knock on apartment 404. Nobody lives here. Ryan's place is down the hall.</p>
+    <a class="back" href="/">Go to Ryan's door</a>
+  </div>
+  <script>
+    // A different door in the same hallway: maroon instead of navy, and 404 on the brass plate.
+    (function () {
+      var cv = document.getElementById("door"), ctx = cv.getContext && cv.getContext("2d");
+      if (!ctx) return;
+      var dark = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+      var px = function (x, y, w, h, c) { ctx.fillStyle = "rgb(" + c.join(",") + ")"; ctx.fillRect(x, y, w, h); };
+      var shade = function (c) { return dark ? c.map(function (v) { return Math.round(v * 0.55); }) : c; };
+      var TRIM = shade([236, 230, 212]), TRIMD = shade([184, 176, 154]);
+      var DOOR = shade([118, 40, 46]), DOORL = shade([150, 60, 64]), DOORD = shade([84, 26, 32]);
+      var BRASS = shade([200, 160, 70]), BRASSL = shade([240, 210, 124]), BRASSD = shade([132, 98, 40]), INK = shade([46, 34, 20]);
+      // just the door, its frame, a strip of baseboard and the mat: the page's own color is the wall around it
+      px(28, 80, 64, 4, TRIM); px(28, 84, 64, 1, TRIMD);
+      // frame and door
+      px(36, 8, 48, 74, TRIM); px(36, 8, 48, 1, TRIMD); px(39, 11, 42, 71, TRIMD);
+      px(40, 12, 40, 70, DOOR); px(40, 12, 1, 70, DOORL); px(79, 12, 1, 70, DOORD);
+      [[44, 18, 32, 22], [44, 46, 32, 30]].forEach(function (p) { px(p[0], p[1], p[2], p[3], DOORD); px(p[0] + 1, p[1] + 1, p[2] - 2, p[3] - 2, DOOR); px(p[0] + 2, p[1] + 2, p[2] - 4, 1, DOORL); });
+      // knob and peephole
+      px(74, 46, 3, 3, BRASS); px(74, 46, 1, 1, BRASSL); px(76, 48, 1, 1, BRASSD);
+      px(59, 14, 2, 2, BRASSD);
+      // brass number plate: 404
+      px(51, 23, 18, 9, BRASSD); px(52, 24, 16, 7, BRASS); px(52, 24, 16, 1, BRASSL);
+      var G = { "4": ["101", "101", "111", "001", "001"], "0": ["111", "101", "101", "101", "111"] };
+      "404".split("").forEach(function (ch, k) {
+        G[ch].forEach(function (row, ry) { for (var rx = 0; rx < 3; rx++) if (row[rx] === "1") px(54 + k * 4 + rx, 25 + ry, 1, 1, INK); });
+      });
+      // doormat
+      px(42, 85, 36, 6, shade([112, 82, 46])); px(43, 86, 34, 4, shade([164, 124, 70]));
+    })();
+  </script>
+</body>
+
+</html>

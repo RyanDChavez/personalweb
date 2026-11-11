@@ -4,8 +4,8 @@
 var SW = 320, SH = 180, FLOOR = 128, CELL = 3;
 
 var TOKENS = {
-  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", dial: "#E9DDB8", invBg: "#2A3829", invOn: "#E2BF5E", hallWall: "#D6CDB4", hallFloor: "#BDBBB3", bedWall: "#AEBBC1", bedFloor: "#9C7048", kitWall: "#E8DEC6", kitFloor: "#3A5446", themeColor: "#1D251C" },
-  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", dial: "#F2C46B", invBg: "#141A14", invOn: "#E2BF5E", hallWall: "#5E594F", hallFloor: "#3A3936", bedWall: "#353C40", bedFloor: "#2E241C", kitWall: "#3B3730", kitFloor: "#18221C", themeColor: "#0A0E0A" }
+  light: { wallFill: "#C6CDB5", rugFill: "#1C251B", ink: "#1D251C", hud: "rgba(29, 37, 28, 0.92)", hudInk: "#EEF0E2", hudLine: "#5E7A58", gold: "#E2BF5E", frame: "#1D251C", panel: "#EEF0E2", panelInk: "#1D251C", panelMuted: "#465643", invBg: "#2A3829", invOn: "#E2BF5E", hallWall: "#D6CDB4", hallFloor: "#BDBBB3", bedWall: "#AEBBC1", bedFloor: "#9C7048", kitWall: "#E8DEC6", kitFloor: "#3A5446", themeColor: "#1D251C" },
+  dark:  { wallFill: "#2A3130", rugFill: "#0C100B", ink: "#E6EDD8", hud: "rgba(10, 14, 10, 0.9)", hudInk: "#E6EDD8", hudLine: "#3A4A38", gold: "#E2BF5E", frame: "#050805", panel: "#1F291F", panelInk: "#E6EDD8", panelMuted: "#A7B79F", invBg: "#141A14", invOn: "#E2BF5E", hallWall: "#5E594F", hallFloor: "#3A3936", bedWall: "#353C40", bedFloor: "#2E241C", kitWall: "#3B3730", kitFloor: "#18221C", themeColor: "#0A0E0A" }
 };
 
 var C = {
@@ -1486,7 +1486,6 @@ var ZONES = {
   coffee: { x: 240, y: 8, w: 72, h: 126 }
 };
 var ZONE_FOR = { window: "window", shelf: "shelf", clock: "clock", radio: "credenza", record: "credenza", portrait: "portrait", chair: "chair", contact: "table", plant: "plant", bwindow: "bwindow", bshelf: "bshelf", desk: "desk", dchair: "desk", apple: "desk", bass: "bass", bed: "bed", map: "map", pennant: "pennant", fridge: "fridge", stove: "stove", dutch: "stove", kettle: "stove", sink: "sink", kwindow: "sink", outlet: "sink", fruit: "fruit", recipes: "recipes", coffee: "coffee", kprint: "coffee" };
-// The receiver's Now panel is parked until the radio gets a proper interaction.
 var PANELS = { shelf: 1, contact: 1, map: 1, bshelf: 1, recipes: 1, pennant: 1, apple: 1 };
 
 // The shelf reads left to right, oldest first: [spine, height, color, ink, kicker, title, paragraph]
@@ -1757,11 +1756,6 @@ var LIBRARY = [
   ["Electra", "", 3, 0, "Subscription"]
 ];
 
-var STATIONS = {
-  before: { label: "Before", needle: 10, kicker: "Before", title: "Teaching, an NGO, a band", text: "I've taught, worked at an NGO and toured with a band." },
-  startups: { label: "Startups", needle: 48, kicker: "Startups", title: "Series A–B fintech", text: "Product and operations roles at several venture-backed fintech startups." },
-  now: { label: "Now", needle: 88, kicker: "Now", title: "Product Manager, Conduit Financial", text: "I'm in New York, building an AI-native, multi-bank and stablecoin USD money-movement API for cross-border payments. Small team, shipping quickly." }
-};
 
 var CARD_ROWS = [
   ["City", "New York, NY"],
@@ -1809,7 +1803,7 @@ function Room(root) {
   var $ = function (id) { return root.querySelector("#" + id); };
   // Start at the front door once per visit; later loads in the same tab go straight in.
   var mode = storedMode(), scene = entered() ? "room" : "hall", intro = scene === "hall" ? HALL_INTRO : introFor(mode);
-  this.state = { scene: scene, mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, sayN: 0, focusId: null, book: -1, station: "now", place: -1, cat: 0, sub: -1, pick: -1, vw: 1440, vh: 900 };
+  this.state = { scene: scene, mode: mode, open: null, zone: null, hover: null, say: intro, n: intro.length, sayN: 0, focusId: null, book: -1, place: -1, cat: 0, sub: -1, pick: -1, vw: 1440, vh: 900 };
   this.raf = 0; this.tw = 0; this.last = null;
   this.pkg = scene === "hall" && Math.random() < 0.35;
   this.fluffing = false; this.builtFor = null; this.brushed = false; this.paintedHover = null;
@@ -1831,11 +1825,10 @@ function Room(root) {
   this.canvas = $("room");
   this.dom = {
     action: $("action"), shown: $("say-shown"), caret: $("caret"), live: $("say-live"),
-    panels: { shelf: $("panel-shelf"), radio: $("panel-radio"), contact: $("panel-contact"), map: $("panel-map"), bshelf: $("panel-bshelf"), recipes: $("panel-recipes"), pennant: $("panel-pennant"), apple: $("panel-apple") },
+    panels: { shelf: $("panel-shelf"), contact: $("panel-contact"), map: $("panel-map"), bshelf: $("panel-bshelf"), recipes: $("panel-recipes"), pennant: $("panel-pennant"), apple: $("panel-apple") },
     libShelf: $("lib-shelf"), libKicker: $("lib-kicker"), libTitle: $("lib-title"), libText: $("lib-text"), libPrev: $("lib-prev"), libNext: $("lib-next"),
     atlas: $("atlas"), atlasWrap: $("atlas-wrap"), atlasTip: $("atlas-tip"), placeTitle: $("place-title"), placeText: $("place-text"), placePrev: $("place-prev"), placeNext: $("place-next"),
-    bookKicker: $("book-kicker"), bookTitle: $("book-title"), bookText: $("book-text"), bookPrev: $("book-prev"), bookNext: $("book-next"), needle: $("needle"),
-    kicker: $("station-kicker"), title: $("station-title"), text: $("station-text"),
+    bookKicker: $("book-kicker"), bookTitle: $("book-title"), bookText: $("book-text"), bookPrev: $("book-prev"), bookNext: $("book-next"),
     themeColor: document.querySelector('meta[name="theme-color"]')
   };
 
@@ -2041,17 +2034,6 @@ function Room(root) {
   atlas.addEventListener("click", function (e) {
     var hit = nearest(e, 16);
     if (hit) { self.setState({ place: hit.country }); showTip(hit); }
-  });
-
-  // Receiver panel: station buttons.
-  this.stationEls = {};
-  var stations = $("stations");
-  Object.keys(STATIONS).forEach(function (k) {
-    var b = el("button", "pbtn station", STATIONS[k].label);
-    b.type = "button";
-    b.addEventListener("click", function () { self.setState({ station: k }); });
-    stations.appendChild(b);
-    self.stationEls[k] = b;
   });
 
   // Rolodex card rows.
@@ -3286,11 +3268,6 @@ Room.prototype.render = function () {
     }
     this.syncAtlasBar();
   }
-  if (!PANELS.radio) return; // the receiver's panel is parked; skip updating it
-  var st = STATIONS[s.station];
-  for (var key in this.stationEls) setAttr(this.stationEls[key], "aria-pressed", s.station === key ? "true" : "false");
-  d.needle.style.left = st.needle + "%";
-  setText(d.kicker, st.kicker); setText(d.title, st.title); setText(d.text, st.text);
 };
 
 // If the room can't start, drop the "js" class so the plain text version shows instead.
