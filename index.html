@@ -7,7 +7,7 @@
   <title>Ryan D. Chavez</title>
   <meta name="description" content="Ryan D. Chavez, a product person in New York. Product Manager at Conduit Financial.">
   <link rel="canonical" href="https://ryandchavez.com/">
-  <meta property="og:title" content="Ryan D. Chavez · The Living Room">
+  <meta property="og:title" content="Ryan D. Chavez · The Apartment">
   <meta property="og:description" content="Product person in New York.">
   <meta property="og:image" content="https://ryandchavez.com/og-door.png">
   <meta property="og:image:width" content="1200">
@@ -17,7 +17,7 @@
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ry_and_chavez">
-  <meta name="twitter:title" content="Ryan D. Chavez · The Living Room">
+  <meta name="twitter:title" content="Ryan D. Chavez · The Apartment">
   <meta name="twitter:description" content="Product person in New York.">
   <meta name="twitter:image" content="https://ryandchavez.com/og-door.png">
   <link rel="icon" href="/favicon.ico?v=2" sizes="any">
@@ -26,10 +26,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
   <link rel="manifest" href="/site.webmanifest?v=2">
   <meta name="theme-color" content="#1D251C">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
-  <link rel="stylesheet" href="room.css?v=61">
+  <link rel="preload" href="fonts/pixelify-sans-700-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/silkscreen-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css?v=2">
+  <link rel="stylesheet" href="room.css?v=62">
   <script>document.documentElement.classList.add("js");</script>
   <script type="application/ld+json">
   {
@@ -49,7 +49,7 @@
     ]
   }
   </script>
-  <script src="room.js?v=121" defer onerror="document.documentElement.classList.remove('js')"></script>
+  <script src="room.js?v=122" defer onerror="document.documentElement.classList.remove('js')"></script>
 </head>
 
 <body>
@@ -83,30 +83,6 @@
         <div class="book-nav">
           <button class="pbtn book-step" type="button" id="book-prev">← Previous</button>
           <button class="pbtn book-step" type="button" id="book-next">Next →</button>
-        </div>
-      </div>
-      <div class="more" aria-hidden="true"><span>▼ More</span></div>
-    </section>
-
-    <section class="panel" id="panel-radio" tabindex="-1" aria-label="Close-up: the stereo receiver" hidden>
-      <div class="panel-head">
-        <h2>The receiver · Now</h2>
-        <button class="pbtn back-btn" type="button" data-back>Back to the room</button>
-      </div>
-      <div class="panel-body radio-body">
-        <div class="receiver">
-          <div class="dial">
-            <div class="scale" aria-hidden="true">
-              <div class="needle" id="needle"></div>
-            </div>
-            <div class="dial-labels"><span>Before</span><span>Startups</span><span>Now</span></div>
-          </div>
-          <div class="stations" id="stations" role="group" aria-label="Tune the radio"></div>
-        </div>
-        <div class="station-out" aria-live="polite">
-          <span class="kicker" id="station-kicker"></span>
-          <p class="station-title" id="station-title"></p>
-          <p id="station-text"></p>
         </div>
       </div>
       <div class="more" aria-hidden="true"><span>▼ More</span></div>
@@ -262,6 +238,44 @@
 
     <h2>Now</h2>
     <p>I'm a Product Manager at Conduit Financial in New York, building an AI-native, multi-bank and stablecoin USD money-movement API for cross-border payments. Small team, shipping quickly.</p>
+
+    <h2>Side project</h2>
+    <p><a href="https://rozdzial.com">rozdzial.com</a></p>
+
+    <h2>Places I've been</h2>
+    <p>72 places.</p>
+    <ul>
+      <li><strong>USA</strong>: Arcadia, Los Angeles, San Diego, San Francisco, Oakland, Seattle, Las Vegas, Zion, Phoenix, Denver, Austin, St. Louis, Chicago, Nashville, Atlanta, Tampa, Orlando, The Keys, Pittsburgh, Washington, DC, Baltimore, Princeton, New York, New Haven, Burlington, Vermont, Ludlow, Vermont, Boston, Portland, Maine</li>
+      <li><strong>Hawaii</strong>: Kauai, Oahu, Maui</li>
+      <li><strong>Mexico</strong>: Baja, Parral, Mexico City</li>
+      <li><strong>Costa Rica</strong>: Papagayo</li>
+      <li><strong>Argentina</strong>: Buenos Aires</li>
+      <li><strong>Canada</strong>: Montreal</li>
+      <li><strong>Iceland</strong>: Reykjavik</li>
+      <li><strong>UK</strong>: London, York, Bath</li>
+      <li><strong>Ireland</strong>: Dublin, Galway</li>
+      <li><strong>Portugal</strong>: Lisbon, Porto</li>
+      <li><strong>France</strong>: Paris</li>
+      <li><strong>Belgium</strong>: Brussels</li>
+      <li><strong>Netherlands</strong>: Amsterdam, Maastricht</li>
+      <li><strong>Germany</strong>: Berlin</li>
+      <li><strong>Czechia</strong>: Prague</li>
+      <li><strong>Poland</strong>: Warsaw, Łódź, Gdańsk, Kraków, Zakopane</li>
+      <li><strong>Italy</strong>: Rome, Florence, Venice</li>
+      <li><strong>Uganda</strong>: Kampala</li>
+      <li><strong>Tanzania</strong>: Arusha, Zanzibar, Dar es Salaam</li>
+      <li><strong>India</strong>: Delhi, Goa</li>
+      <li><strong>Thailand</strong>: Bangkok, Chiang Mai</li>
+      <li><strong>Vietnam</strong>: Hanoi, Saigon</li>
+      <li><strong>Hong Kong</strong>: Hong Kong</li>
+      <li><strong>Philippines</strong>: Manila, Boracay</li>
+    </ul>
+
+    <h2>Bookshelf</h2>
+    <p>240 books: fiction (62), nonfiction (167), reference (11). Magazines: Jacobin, n+1, Electra.</p>
+
+    <h2>Kitchen</h2>
+    <p>A recipe I keep coming back to: <a href="https://www.bonappetit.com/recipe/mahogany-beef-stew-with-red-wine-and-hoisin-sauce">Mahogany Beef Stew with Red Wine and Hoisin Sauce</a> (Bon Appétit).</p>
 
     <h2>Contact</h2>
     <ul>
